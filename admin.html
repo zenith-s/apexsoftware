@@ -159,6 +159,7 @@
 
     <script>
         function fetchData() {
+            // Keyleri Çek
             fetch('api.php?action=get_keys')
                 .then(res => res.json())
                 .then(data => {
@@ -182,6 +183,7 @@
                     });
                 });
 
+            // Aktif Cihazları Çek (C++'dan gelenler buraya düşecek)
             fetch('api.php?action=get_clients')
                 .then(res => res.json())
                 .then(data => {
@@ -249,6 +251,7 @@
             fetch('api.php', { method: 'POST', body: formData }).then(() => fetchData());
         }
 
+        // Her 4 saniyede bir paneli ve cihazları otomatik yenile
         setInterval(fetchData, 4000);
         fetchData();
     </script>
