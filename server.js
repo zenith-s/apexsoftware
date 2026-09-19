@@ -8,21 +8,29 @@ app.use(express.json());
 
 const DB_FILE = path.join(__dirname, 'database.json');
 
-// Veritabanı dosyası yoksa oluştur
 if (!fs.existsSync(DB_FILE)) {
-    fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [], clients: [] }, null, 2));
+    fs.writeFileSync(DB_FILE, JSON.stringify({ keys: [], clients: [], logs: [] }, null, 2));
 }
 
-// Statik dosyaları sun (index.html ana dizinde olsun)
 app.use(express.static(__dirname));
 
-// --- C++'DAN GELEN İSTEKLER (api.php yerine bu çalışacak) ---
-app.all('/api.php', (req, res) => {
+// C++ ve Panel İsteklerini Karşılayan Ana Nokta
+app.all(['/api.php', '/api'], (req, res) => {
     const data = { ...req.query, ...req.body };
     const action = data.action;
     const db = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
 
-    // C++ istemci bildirimi (HWID gönderiyorsa)
+    // Gelen ham isteği loglara kaydet
+    const logEntry = {
+        time: new Date().toLocaleTimeString(),
+        ip: req.ip || req.connection.remoteAddress,
+        query: JSON.stringify(data)
+    };
+    db.logs = db.logs || [];
+    db.logs.unshift(logEntry);
+    if (db.logs.length > 50) db.logs.pop(); // Son 50 logu tut
+
+    // C++ İstemci Bildirimi (HWID gönderiyorsa)
     if (data.hwid && !action) {
         let client = db.clients.find(c => c.hwid === data.hwid);
         if (client) {
@@ -46,8 +54,8 @@ app.all('/api.php', (req, res) => {
         return res.send("SUCCESS");
     }
 
-    // Panel İşlemleri (GET / POST)
     if (action === 'get_keys') {
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
         return res.json(db.keys);
     }
     
@@ -58,7 +66,8 @@ app.all('/api.php', (req, res) => {
                 c.vgk_state = 'offline';
             }
         });
-        return res.json(db.clients);
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+        return res.json({ clients: db.clients, logs: db.logs });
     }
 
     if (action === 'generate') {
@@ -96,8 +105,9 @@ app.all('/api.php', (req, res) => {
         return res.json({ status: 'ok' });
     }
 
+    fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
     res.send({ status: 'active' });
 });
 
-const PORT = process.code?.env?.PORT || 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log(`Neon Server aktif, port: ${PORT}`));
