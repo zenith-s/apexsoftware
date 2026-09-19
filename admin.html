@@ -2,258 +2,284 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON SOFTWARE // ADMIN & COMMAND CENTER</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON SOFTWARE // Advanced Command Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        body {
-            background-color: #0b0f19;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
+        :root {
+            --bg-base: #06080f;
+            --bg-panel: #0d121f;
+            --bg-card: rgba(17, 24, 39, 0.7);
+            --accent-pink: #ff2a6d;
+            --accent-cyan: #05d9e8;
+            --accent-purple: #7b2cbf;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --border: rgba(255, 255, 255, 0.08);
+            --success: #10b981;
+            --danger: #ef4444;
         }
-        h1, h2 {
-            text-align: center;
-            text-shadow: 0 0 10px #00ffcc;
-            letter-spacing: 2px;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: #111827;
-            border: 1px solid #00ffcc;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-        }
-        .panel-box {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px dashed #00ffcc;
-            border-radius: 4px;
-        }
-        input[type="text"], select {
-            padding: 9px;
-            width: 250px;
-            background: #0b0f19;
-            border: 1px solid #00ffcc;
-            color: #fff;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 3px;
-            margin-right: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #1f2937;
-            padding: 10px;
-            text-align: left;
-            font-size: 13px;
-        }
-        th {
-            background-color: #1f2937;
-            color: #00ffcc;
-        }
-        tr:hover {
-            background-color: rgba(0, 255, 204, 0.05);
-        }
-        .badge-active { color: #10b981; font-weight: bold; }
-        .badge-waiting { color: #f59e0b; }
-        .badge-offline { color: #ef4444; }
-        button.action-btn {
-            background: #ef4444; color: white; border: none; padding: 5px 10px; cursor: pointer; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-radius: 3px;
-        }
-        button.open-btn {
-            background: #10b981; color: white; border: none; padding: 5px 10px; cursor: pointer; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-radius: 3px;
-        }
-        button.gen-btn {
-            background: #00ffcc; color: #0b0f19; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; font-family: 'Courier New', Courier, monospace; border-radius: 3px;
-        }
-        button.gen-btn:hover { background: #00cca3; }
-        .refresh-info {
-            text-align: right; font-size: 12px; color: #6b7280; margin-bottom: 10px;
-        }
-        .log-box {
-            background: #05070c;
-            border: 1px solid #1f2937;
-            padding: 10px;
-            height: 150px;
-            overflow-y: auto;
-            font-size: 12px;
-            color: #a7f3d0;
-        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+        body { background-color: var(--bg-base); color: var(--text-main); min-height: 100vh; padding: 30px 20px; background-image: radial-gradient(circle at 10% 10%, rgba(123, 44, 191, 0.08) 0%, transparent 40%), radial-gradient(circle at 90% 90%, rgba(5, 217, 232, 0.05) 0%, transparent 40%); }
+        
+        .container { max-width: 1440px; margin: 0 auto; }
+
+        /* Header */
+        header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); border: 1px solid var(--border); border-radius: 16px; padding: 20px 30px; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); backdrop-filter: blur(10px); }
+        .logo-area { display: flex; align-items: center; gap: 15px; }
+        .logo-icon { width: 45px; height: 45px; background: linear-gradient(135deg, var(--accent-pink), var(--accent-purple)); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white; box-shadow: 0 0 15px rgba(255,42,109,0.4); }
+        .logo-text h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; color: var(--text-main); }
+        .logo-text span { font-size: 11px; font-family: 'JetBrains Mono', monospace; color: var(--accent-cyan); letter-spacing: 2px; }
+        
+        .system-status { display: flex; align-items: center; gap: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.3); padding: 8px 16px; border-radius: 30px; font-size: 13px; font-weight: 600; color: var(--success); }
+        .pulse { width: 8px; height: 8px; background: var(--success); border-radius: 50%; box-shadow: 0 0 10px var(--success); animation: pulse 2s infinite; }
+
+        @keyframes pulse { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); } }
+
+        /* Stats Grid */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 14px; padding: 20px; display: flex; align-items: center; gap: 20px; backdrop-filter: blur(10px); }
+        .stat-icon { width: 50px; height: 50px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .stat-info span { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 1px; }
+        .stat-info h3 { font-size: 24px; font-weight: 700; margin-top: 2px; color: var(--text-main); }
+
+        /* Main Grid */
+        .main-grid { display: grid; grid-template-columns: 1fr; gap: 25px; }
+        @media(min-width: 1100px) { .main-grid { grid-template-columns: 1.2fr 0.8fr; } }
+
+        .card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 16px; padding: 25px; backdrop-filter: blur(10px); box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+        .card-header h2 { font-size: 16px; font-weight: 600; display: flex; align-items: center; gap: 10px; color: var(--text-main); }
+        .card-header h2 i { color: var(--accent-cyan); }
+
+        /* Buttons */
+        .btn { background: linear-gradient(135deg, var(--accent-cyan), #0077b6); color: #000; border: none; padding: 10px 18px; border-radius: 8px; font-weight: 600; cursor: pointer; transition: 0.2s; display: flex; align-items: center; gap: 8px; font-size: 13px; }
+        .btn:hover { opacity: 0.9; transform: translateY(-1px); box-shadow: 0 0 20px rgba(5, 217, 232, 0.4); }
+        .btn-danger { background: rgba(239, 68, 68, 0.15); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.3); padding: 6px 12px; border-radius: 6px; font-size: 12px; }
+        .btn-danger:hover { background: var(--danger); color: white; box-shadow: 0 0 10px rgba(239, 68, 68, 0.4); }
+
+        /* Tables */
+        .table-container { width: 100%; overflow-x: auto; max-height: 380px; overflow-y: auto; }
+        table { width: 100%; border-collapse: collapse; text-align: left; font-size: 13px; }
+        th { background: rgba(0,0,0,0.2); color: var(--text-muted); padding: 12px 15px; font-weight: 600; position: sticky; top: 0; backdrop-filter: blur(5px); }
+        td { padding: 12px 15px; border-bottom: 1px solid var(--border); color: #cbd5e1; }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        
+        .mono { font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .key-text { color: var(--accent-cyan); font-weight: 700; letter-spacing: 0.5px; }
+
+        /* Logs Console */
+        .logs-wrapper { background: #030408; border: 1px solid var(--border); border-radius: 10px; padding: 15px; height: 320px; overflow-y: auto; font-family: 'JetBrains Mono', monospace; font-size: 12px; }
+        .log-line { margin-bottom: 8px; padding-bottom: 6px; border-bottom: 1px dashed rgba(255,255,255,0.04); display: flex; gap: 12px; align-items: flex-start; }
+        .log-time { color: var(--text-muted); white-space: nowrap; }
+        .log-ip { color: var(--accent-purple); font-weight: bold; }
+        .log-msg { color: #10b981; word-break: break-all; }
+
+        .badge { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
+        .badge.online { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .badge.offline { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>⚡ NEON SOFTWARE // KEY YÖNETİMİ ⚡</h1>
-        <div class="panel-box">
-            <input type="text" id="note-input" placeholder="Key Notu (Örn: Ahmet)">
-            <select id="days-input">
-                <option value="1">1 Günlük</option>
-                <option value="7">7 Günlük</option>
-                <option value="30" selected>30 Günlük</option>
-                <option value="365">1 Yıllık</option>
-            </select>
-            <button class="gen-btn" onclick="generateKey()">+ Key Oluştur</button>
+<div class="container">
+    <!-- Header -->
+    <header>
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fa-solid fa-shield-halved"></i></div>
+            <div class="logo-text">
+                <h1>NEON COMMAND CENTER</h1>
+                <span>SECURE LICENSE & CLIENT MANAGER</span>
+            </div>
         </div>
+        <div class="system-status">
+            <div class="pulse"></div>
+            API & GATEWAY ACTIVE
+        </div>
+    </header>
 
-        <h2>Mevcut Key Listesi</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th>Not</th>
-                    <th>Kilitli HWID</th>
-                    <th>Süre / Durum</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="keys-table-body">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <div class="container">
-        <h1>⚡ COMMAND CENTER // AKTİF CİHAZLAR ⚡</h1>
-        <div class="refresh-info" id="status-timer">Durum: Güncelleniyor...</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Bilgisayar Adı</th>
-                    <th>HWID</th>
-                    <th>Target PID</th>
-                    <th>Durum</th>
-                    <th>Bağlantı</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="client-table-body">
-                <tr><td colspan="6" style="text-align: center;">Aktif cihaz bulunamadı.</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- C++'dan ve Dışarıdan Gelen Ham İstekleri Görme Ekranı -->
-    <div class="container">
-        <h1>⚡ GELEN HAM İSTEKLER (LIVE API LOGS) ⚡</h1>
-        <div class="log-box" id="log-box-content">
-            İstekler bekleniyor...
+    <!-- Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(5, 217, 232, 0.1); color: var(--accent-cyan);"><i class="fa-solid fa-key"></i></div>
+            <div class="stat-info">
+                <span>Toplam Lisans Key</span>
+                <h3 id="statKeysCount">0</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(16, 185, 129, 0.1); color: var(--success);"><i class="fa-solid fa-desktop"></i></div>
+            <div class="stat-info">
+                <span>Aktif Cihazlar</span>
+                <h3 id="statOnlineCount">0</h3>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="background: rgba(255, 42, 109, 0.1); color: var(--accent-pink);"><i class="fa-solid fa-wave-square"></i></div>
+            <div class="stat-info">
+                <span>Toplam İstek (Log)</span>
+                <h3 id="statLogsCount">0</h3>
+            </div>
         </div>
     </div>
 
-    <script>
-        function fetchData() {
-            fetch('/api.php?action=get_keys')
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById('keys-table-body');
-                    tbody.innerHTML = '';
-                    if (!Array.isArray(data) || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Kayıtlı key bulunamadı.</td></tr>';
-                        return;
-                    }
-                    data.forEach(k => {
-                        let row = document.createElement('tr');
-                        let statusText = k.expired ? '<span style="color:red">SÜRESİ BİTTİ</span>' : (k.expires_at > 0 ? 'Aktif (' + Math.ceil((k.expires_at - Date.now()/1000)/86400) + ' gün kaldı)' : k.duration_days + ' Günlük (Kullanılmadı)');
-                        row.innerHTML = `
-                            <td style="color:#00ffcc; font-weight:bold;">${k.key}</td>
-                            <td>${k.note}</td>
-                            <td style="font-size:11px; color:#9ca3af;">${k.hwid ? k.hwid : 'Boş (Kullanılmadı)'}</td>
-                            <td>${statusText}</td>
-                            <td><button class="action-btn" onclick="deleteKey('${k.key}')">Sil</button></td>
-                        `;
-                        tbody.appendChild(row);
-                    });
+    <!-- Main Content -->
+    <div class="main-grid">
+        <!-- Left Column: Keys & Clients -->
+        <div style="display: flex; flex-direction: column; gap: 25px;">
+            <!-- Keys Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-ticket"></i> Lisans Anahtarları</h2>
+                    <button class="btn" onclick="generateKey()"><i class="fa-solid fa-plus"></i> Yeni Key Üret</button>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Lisans Key</th>
+                                <th>Açıklama / Not</th>
+                                <th>Kilitli HWID</th>
+                                <th>Durum</th>
+                                <th style="text-align: right;">İşlem</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keysTable">
+                            <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Veriler yükleniyor...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Clients Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h2><i class="fa-solid fa-laptop-code"></i> Bağlı Cihazlar (HWID Havuzu)</h2>
+                </div>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Bilgisayar Adı</th>
+                                <th>Donanım Kimliği (HWID)</th>
+                                <th>Bağlantı Durumu</th>
+                            </tr>
+                        </thead>
+                        <tbody id="clientsTable">
+                            <tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Aktif cihaz bulunamadı.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Live Logs -->
+        <div class="card" style="display: flex; flex-direction: column;">
+            <div class="card-header">
+                <h2><i class="fa-solid fa-terminal"></i> Canlı API İstek Logları</h2>
+                <span class="mono" style="font-size: 11px; color: var(--text-muted);">Auto-refresh: 3s</span>
+            </div>
+            <div class="logs-wrapper" id="logsBox" style="flex-grow: 1;">
+                <div class="log-line">
+                    <span class="log-time">[--:--:--]</span>
+                    <span class="log-msg">Sistem dinleniyor...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function fetchData() {
+        try {
+            let res = await fetch('api.php?action=get_dashboard_data');
+            let data = await res.json();
+            
+            // İstatistikleri güncelle
+            document.getElementById('statKeysCount').innerText = data.keys ? data.keys.length : 0;
+            let onlineClients = data.clients ? data.clients.filter(c => c.online).length : 0;
+            document.getElementById('statOnlineCount').innerText = onlineClients;
+            document.getElementById('statLogsCount').innerText = data.logs ? data.logs.length : 0;
+
+            // Keyler tablosu
+            let keysHtml = '';
+            if(data.keys && data.keys.length > 0) {
+                data.keys.forEach(k => {
+                    let statusBadge = k.expired ? '<span class="badge" style="background:rgba(239,68,68,0.1);color:var(--danger)">Süresi Doldu</span>' : '<span class="badge" style="background:rgba(16,185,129,0.1);color:var(--success)">Aktif</span>';
+                    keysHtml += `<tr>
+                        <td class="key-text">${k.key}</td>
+                        <td>${k.note}</td>
+                        <td class="mono" style="color:var(--text-muted); font-size:11px;">${k.hwid || 'Atanmadı (Boş)'}</td>
+                        <td>${statusBadge}</td>
+                        <td style="text-align: right;"><button class="btn-danger" onclick="deleteKey('${k.key}')"><i class="fa-solid fa-trash"></i></button></td>
+                    </tr>`;
                 });
+            } else {
+                keysHtml = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">Henüz kayıtlı key bulunmuyor.</td></tr>`;
+            }
+            document.getElementById('keysTable').innerHTML = keysHtml;
 
-            fetch('/api.php?action=get_clients')
-                .then(res => res.json())
-                .then(resData => {
-                    const data = resData.clients || [];
-                    const logs = resData.logs || [];
-
-                    // Cihazları doldur
-                    const tbody = document.getElementById('client-table-body');
-                    tbody.innerHTML = '';
-                    if (!Array.isArray(data) || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aktif cihaz bulunamadı.</td></tr>';
-                    } else {
-                        data.forEach(client => {
-                            let row = document.createElement('tr');
-                            let stateBadge = client.vgk_state === 'active' ? '<span class="badge-active">OYUNDA</span>' : '<span class="badge-waiting">BEKLİYOR</span>';
-                            let onlineBadge = client.online ? '<span class="badge-active">ÇEVRİM İÇİ</span>' : '<span class="badge-offline">ÇEVRİM DIŞI</span>';
-                            let actionButton = client.banned 
-                                ? `<button class="open-btn" onclick="sendCommand('${client.hwid}', 'open')">Aç</button>` 
-                                : `<button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button>`;
-
-                            row.innerHTML = `
-                                <td>${client.pc_name}</td>
-                                <td style="font-size: 11px; color: #9ca3af;">${client.hwid}</td>
-                                <td>${client.pid > 0 ? client.pid : '-'}</td>
-                                <td>${stateBadge}</td>
-                                <td>${onlineBadge}</td>
-                                <td>${actionButton}</td>
-                            `;
-                            tbody.appendChild(row);
-                        });
-                    }
-
-                    // Ham logları ekrana bas
-                    const logBox = document.getElementById('log-box-content');
-                    if (logs.length > 0) {
-                        logBox.innerHTML = logs.map(l => `[${l.time}] - IP: ${l.ip} - İstek: ${l.query}`).join('<br>');
-                    } else {
-                        logBox.innerHTML = "Henüz gelen istek yok.";
-                    }
-
-                    document.getElementById('status-timer').innerText = "Son Güncelleme: " + new Date().toLocaleTimeString();
+            // Cihazlar tablosu
+            let clientsHtml = '';
+            if(data.clients && data.clients.length > 0) {
+                data.clients.forEach(c => {
+                    let status = c.online ? '<span class="badge online"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Çevrimiçi</span>' : '<span class="badge offline"><i class="fa-solid fa-circle" style="font-size:6px;"></i> Çevrimdışı</span>';
+                    clientsHtml += `<tr>
+                        <td style="font-weight:600;">${c.pc_name}</td>
+                        <td class="mono" style="color:var(--text-muted); font-size:11px;">${c.hwid}</td>
+                        <td>${status}</td>
+                    </tr>`;
                 });
-        }
+            } else {
+                clientsHtml = `<tr><td colspan="3" style="text-align: center; color: var(--text-muted);">Kayıtlı aktif cihaz yok.</td></tr>`;
+            }
+            document.getElementById('clientsTable').innerHTML = clientsHtml;
 
-        function generateKey() {
-            let note = document.getElementById('note-input').value;
-            let days = document.getElementById('days-input').value;
-            let formData = new URLSearchParams();
-            formData.append('action', 'generate');
-            formData.append('note', note);
-            formData.append('days', days);
-
-            fetch('/api.php', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(res => {
-                    alert("Key Oluşturuldu: " + res.key);
-                    document.getElementById('note-input').value = '';
-                    fetchData();
+            // Loglar konsolu
+            let logsHtml = '';
+            if(data.logs && data.logs.length > 0) {
+                data.logs.forEach(l => {
+                    logsHtml += `<div class="log-line">
+                        <span class="log-time">[${l.time}]</span>
+                        <span class="log-ip">${l.ip}</span>
+                        <span class="log-msg">${l.query}</span>
+                    </div>`;
                 });
-        }
+            } else {
+                logsHtml = `<div class="log-line"><span class="log-time">[${new Date().toLocaleTimeString()}]</span><span class="log-msg">Henüz gelen bir istek bulunmuyor.</span></div>`;
+            }
+            document.getElementById('logsBox').innerHTML = logsHtml;
 
-        function deleteKey(key) {
-            if (!confirm(key + " silinsin mi?")) return;
-            let formData = new URLSearchParams();
-            formData.append('action', 'delete_key');
-            formData.append('key', key);
-            fetch('/api.php', { method: 'POST', body: formData }).then(() => fetchData());
+        } catch (e) {
+            console.error("Panel veri çekme hatası:", e);
         }
+    }
 
-        function sendCommand(hwid, cmd) {
-            let msg = cmd === 'close' ? "Cihaz kapatılsın mı?" : "Cihazın banı kaldırılsın mı?";
-            if (!confirm(msg)) return;
-            let formData = new URLSearchParams();
-            formData.append('action', 'send_cmd');
-            formData.append('hwid', hwid);
-            formData.append('cmd', cmd);
-            fetch('/api.php', { method: 'POST', body: formData }).then(() => fetchData());
-        }
-
-        setInterval(fetchData, 4000);
+    async function generateKey() {
+        let note = prompt("Lisans anahtarı için bir açıklama (Not) girin:", "VIP Üye");
+        if(note === null) return;
+        await fetch(`api.php?action=generate&note=${encodeURIComponent(note)}&days=30`);
         fetchData();
-    </script>
+    }
+
+    async function deleteKey(key) {
+        if(!confirm(key + " lisansını silmek istediğinize emin misiniz?")) return;
+        await fetch(`api.php?action=delete_key&key=${encodeURIComponent(key)}`);
+        fetchData();
+    }
+
+    // Her 3 saniyede bir paneli yenile
+    setInterval(fetchData, 3000);
+    fetchData();
+</script>
+
 </body>
 </html>
