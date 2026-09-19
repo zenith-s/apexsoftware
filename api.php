@@ -1,207 +1,125 @@
 <?php
-header("Content-Type: application/json; charset=UTF-8");
 error_reporting(0);
+header('Content-Type: application/json; charset=utf-8');
 
-$dbFile = "clients_db.json";
-
-function loadDb() {
-    global $dbFile;
-    if (!file_exists($dbFile)) return ["keys" => [], "clients" => []];
-    $data = file_get_contents($dbFile);
-    $decoded = json_decode($data, true);
-    if (!isset($decoded['keys'])) $decoded['keys'] = [];
-    if (!isset($decoded['clients'])) $decoded['clients'] = [];
-    return $decoded;
+if (empty($_GET) && empty($_POST)) {
+    header("HTTP/1.1 403 Forbidden");
+    exit(json_encode(["status" => "error", "message" => "Access Denied"]));
 }
 
-function saveDb($data) {
-    global $dbFile;
-    file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT));
+$dbFile = 'database.json';
+if (!file_exists($dbFile)) {
+    file_put_contents($dbFile, json_encode(["keys" => [], "clients" => []]));
 }
 
-$action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
+$db = json_decode(file_get_contents($dbFile), true);
+$action = $_POST['action'] ?? $_GET['action'] ?? '';
 
-// 1. Yeni Key Oluşturma
+// Lisans Kontrolü
+if (isset($_GET['key']) && !isset($_GET['action'])) {
+    $inputKey = trim($_GET['key']);
+    $inputHwid = trim($_GET['hwid'] ?? '');
+
+    foreach ($db['keys'] as &$k) {
+        if ($k['key'] === $inputKey) {
+            if ($k['expires_at'] > 0 && time() > $k['expires_at']) {
+                echo "EXPIRED";
+                exit;
+            }
+            if (empty($k['hwid'])) {
+                $k['hwid'] = $inputHwid;
+                file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+            } else if ($k['hwid'] !== $inputHwid) {
+                echo "INVALID_HWID";
+                exit;
+            }
+            echo "SUCCESS|" . ($k['note'] ?: "VIP Kullanici");
+            exit;
+        }
+    }
+    echo "INVALID";
+    exit;
+}
+
+// Heartbeat Güncelleme
+if ($action === 'update') {
+    $key = $_POST['key'] ?? '';
+    $hwid = $_POST['hwid'] ?? '';
+    $pcName = $_POST['pc_name'] ?? 'Bilinmiyor';
+    $pid = intval($_POST['pid'] ?? 0);
+    $vgkState = $_POST['vgk_state'] ?? 'waiting';
+
+    $clientIndex = -1;
+    foreach ($db['clients'] as $index => $client) {
+        if ($client['hwid'] === $hwid) {
+            $clientIndex = $index;
+            break;
+        }
+    }
+
+    $banned = ($clientIndex !== -1) ? ($db['clients'][$clientIndex]['banned'] ?? false) : false;
+
+    $clientData = [
+        "hwid" => $hwid, "pc_name" => $pcName, "pid" => $pid,
+        "vgk_state" => $vgkState, "last_seen" => time(), "online" => true, "banned" => $banned
+    ];
+
+    if ($clientIndex !== -1) {
+        $db['clients'][$clientIndex] = $clientData;
+    } else {
+        $db['clients'][] = $clientData;
+    }
+
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(["status" => $banned ? "terminate" : "ok"]);
+    exit;
+}
+
+// Admin Panel Fonksiyonları
+if ($action === 'get_clients') {
+    $currentTime = time();
+    foreach ($db['clients'] as &$c) {
+        if (($currentTime - $c['last_seen']) > 10) $c['online'] = false;
+    }
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode($db['clients']);
+    exit;
+}
+
+if ($action === 'get_keys') {
+    echo json_encode($db['keys']);
+    exit;
+}
+
 if ($action === 'generate') {
-    $note = isset($_POST['note']) ? htmlspecialchars($_POST['note']) : 'Not yok';
-    $days = isset($_POST['days']) ? intval($_POST['days']) : 30;
-    
-    $db = loadDb();
+    $note = $_POST['note'] ?? '';
+    $days = intval($_POST['days'] ?? 30);
     $newKey = "NEON-" . strtoupper(substr(md5(mt_rand()), 0, 4) . "-" . substr(md5(mt_rand()), 0, 4) . "-" . substr(md5(mt_rand()), 0, 4));
     
-    $db['keys'][] = [
-        "key" => $newKey,
-        "note" => $note,
-        "hwid" => "",
-        "created_at" => time(),
-        "expires_at" => 0, // İlk girişte süre başlar veya gün seçimine göre ayarlanır
-        "duration_days" => $days,
-        "banned" => false
-    ];
-    
-    saveDb($db);
+    $db['keys'][] = ["key" => $newKey, "note" => $note, "duration_days" => $days, "expires_at" => 0, "hwid" => ""];
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
     echo json_encode(["status" => "success", "key" => $newKey]);
     exit;
 }
 
-// 2. Key Listesini ve Cihazları Getir
-if ($action === 'get_keys' || $action === 'get_clients') {
-    $db = loadDb();
-    $currentTime = time();
-    
-    // Süresi bitenleri kontrol et
-    foreach ($db['keys'] as &$k) {
-        if ($k['expires_at'] > 0 && $currentTime > $k['expires_at']) {
-            $k['expired'] = true;
-        } else {
-            $k['expired'] = false;
-        }
-    }
-    
-    if ($action === 'get_keys') {
-        echo json_encode($db['keys']);
-        exit;
-    }
-    
-    $activeClients = [];
-    foreach ($db['clients'] as $client) {
-        $client['online'] = ($currentTime - $client['last_seen']) <= 15;
-        $activeClients[] = $client;
-    }
-    echo json_encode($activeClients);
-    exit;
-}
-
-// 3. Key Silme
 if ($action === 'delete_key') {
-    $keyToDelete = isset($_POST['key']) ? $_POST['key'] : '';
-    $db = loadDb();
-    
-    $db['keys'] = array_values(array_filter($db['keys'], function($k) use ($keyToDelete) {
-        return $k['key'] !== $keyToDelete;
-    }));
-    
-    saveDb($db);
-    echo json_encode(["status" => "ok"]);
+    $targetKey = $_POST['key'] ?? '';
+    $db['keys'] = array_values(array_filter($db['keys'], fn($k) => $k['key'] !== $targetKey));
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(["status" => "success"]);
     exit;
 }
 
-// 4. C++ Loader Heartbeat / Durum
-if ($action === 'update') {
-    $key = isset($_POST['key']) ? trim($_POST['key']) : '';
-    $hwid = isset($_POST['hwid']) ? trim($_POST['hwid']) : '';
-    $pcName = isset($_POST['pc_name']) ? htmlspecialchars($_POST['pc_name']) : 'Unknown';
-    $pid = isset($_POST['pid']) ? intval($_POST['pid']) : 0;
-    $vgkState = isset($_POST['vgk_state']) ? htmlspecialchars($_POST['vgk_state']) : 'waiting';
-
-    $db = loadDb();
-    
-    foreach ($db['clients'] as $client) {
-        if ($client['hwid'] === $hwid && isset($client['banned']) && $client['banned'] === true) {
-            echo json_encode(["status" => "blocked", "cmd" => "terminate"]);
-            exit;
-        }
-    }
-
-    $found = false;
-    foreach ($db['clients'] as &$client) {
-        if ($client['hwid'] === $hwid) {
-            $client['pc_name'] = $pcName;
-            $client['pid'] = $pid;
-            $client['vgk_state'] = $vgkState;
-            $client['last_seen'] = time();
-            $found = true;
-            break;
-        }
-    }
-
-    if (!$found) {
-        $db['clients'][] = [
-            "key" => $key,
-            "hwid" => $hwid,
-            "pc_name" => $pcName,
-            "pid" => $pid,
-            "vgk_state" => $vgkState,
-            "last_seen" => time(),
-            "cmd" => "none",
-            "banned" => false
-        ];
-    }
-
-    saveDb($db);
-
-    $assignedCmd = "none";
-    foreach ($db['clients'] as $client) {
-        if ($client['hwid'] === $hwid) {
-            $assignedCmd = isset($client['cmd']) ? $client['cmd'] : "none";
-            break;
-        }
-    }
-
-    echo json_encode(["status" => "success", "cmd" => $assignedCmd]);
-    exit;
-}
-
-// 5. Panelden Kapat Komutu
 if ($action === 'send_cmd') {
-    $hwid = isset($_POST['hwid']) ? $_POST['hwid'] : '';
-    $command = isset($_POST['cmd']) ? $_POST['cmd'] : 'none';
-
-    $db = loadDb();
-    foreach ($db['clients'] as &$client) {
-        if ($client['hwid'] === $hwid) {
-            $client['cmd'] = $command;
-            if ($command === 'close') {
-                $client['banned'] = true;
-            }
-            break;
+    $hwid = $_POST['hwid'] ?? '';
+    $cmd = $_POST['cmd'] ?? '';
+    foreach ($db['clients'] as &$c) {
+        if ($c['hwid'] === $hwid) {
+            $c['banned'] = ($cmd === 'close');
         }
     }
-    saveDb($db);
-    echo json_encode(["status" => "ok"]);
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(["status" => "success"]);
     exit;
 }
-
-// 6. Loader İlk Lisans Doğrulama
-$key = isset($_REQUEST['key']) ? trim($_REQUEST['key']) : '';
-$hwid = isset($_REQUEST['hwid']) ? trim($_REQUEST['hwid']) : '';
-
-if (!empty($key) && $action === '') {
-    $db = loadDb();
-    $valid = false;
-    $noteFound = "";
-
-    foreach ($db['keys'] as &$item) {
-        if ($item['key'] === $key) {
-            $currentTime = time();
-            
-            // Süre bitmiş mi?
-            if ($item['expires_at'] > 0 && $currentTime > $item['expires_at']) {
-                echo "EXPIRED";
-                exit;
-            }
-
-            if (empty($item['hwid']) || $item['hwid'] === '') {
-                $item['hwid'] = $hwid;
-                $item['expires_at'] = time() + ($item['duration_days'] * 86400); // Süreyi başlat
-                saveDb($db);
-                $valid = true;
-                $noteFound = $item['note'];
-            } else if ($item['hwid'] === $hwid) {
-                $valid = true;
-                $noteFound = $item['note'];
-            }
-            break;
-        }
-    }
-
-    if ($valid) {
-        echo "SUCCESS|" . $noteFound;
-    } else {
-        echo "INVALID";
-    }
-    exit;
-}
-
-echo json_encode(["status" => "API is running."]);
 ?>
