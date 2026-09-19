@@ -2,31 +2,42 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEON SOFTWARE - Yönetim Paneli</title>
     <style>
-        body { background-color: #0b0f19; color: #38bdf8; font-family: monospace; margin: 0; padding: 40px; display: flex; justify-content: center; }
-        .panel-box { background: #111827; border: 2px solid #1e3a8a; border-radius: 12px; width: 900px; padding: 25px; box-shadow: 0 0 25px rgba(56, 189, 248, 0.15); }
-        h2 { color: #f43f5e; margin-top: 0; font-size: 20px; }
-        .info-bar { margin-bottom: 20px; font-size: 14px; color: #94a3b8; }
-        .info-bar span { color: #22c55e; font-weight: bold; }
-        .btn-group { margin-bottom: 25px; display: flex; gap: 10px; }
-        button { padding: 10px 18px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; color: white; }
-        .btn-green { background-color: #16a34a; }
-        .btn-red { background-color: #dc2626; }
-        .btn-blue { background-color: #2563eb; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: left; }
-        th, td { padding: 12px; border-bottom: 1px solid #1f2937; font-size: 13px; }
-        th { color: #38bdf8; }
-        td { color: #e2e8f0; }
-        .status-active { color: #22c55e; font-weight: bold; }
+        * { box-sizing: border-box; }
+        body { background-color: #07090e; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; display: flex; justify-content: center; }
+        .panel-container { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; width: 1050px; padding: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5), 0 0 25px rgba(56, 189, 248, 0.1); }
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; margin-bottom: 25px; }
+        h2 { color: #f43f5e; margin: 0; font-size: 22px; letter-spacing: 0.5px; font-family: monospace; }
+        .stats-badge { background: #1e293b; color: #38bdf8; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-family: monospace; border: 1px solid #334155; }
+        .stats-badge span { color: #22c55e; font-weight: bold; }
+        .btn-group { margin-bottom: 25px; display: flex; gap: 12px; }
+        button { padding: 11px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; font-size: 13px; transition: all 0.2s ease; }
+        button:hover { transform: translateY(-1px); opacity: 0.9; }
+        .btn-green { background-color: #16a34a; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3); }
+        .btn-red { background-color: #dc2626; box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3); }
+        .btn-blue { background-color: #2563eb; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
+        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid #1e293b; }
+        table { width: 100%; border-collapse: collapse; text-align: left; background: #0b0f19; }
+        th, td { padding: 14px 18px; font-size: 13px; border-bottom: 1px solid #1e293b; }
+        th { background: #111827; color: #38bdf8; font-family: monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        td { color: #cbd5e1; }
+        tr:last-child td { border-bottom: none; }
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: monospace; }
+        .pill-online { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
+        .pill-offline { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+        .empty-row { text-align: center; color: #64748b; padding: 30px; font-style: italic; }
     </style>
 </head>
 <body>
 
-<div class="panel-box">
-    <h2>NEON SOFTWARE</h2>
-    <div class="info-bar">
-        Canlı Cihaz Yönetimi | Aktif Cihaz Sayısı: <span id="deviceCount">0</span>
+<div class="panel-container">
+    <div class="header-flex">
+        <h2>NEON SOFTWARE // PANEL</h2>
+        <div class="stats-badge">
+            Aktif: <span id="activeCount">0</span> | Toplam Kayıtlı: <span id="totalCount">0</span>
+        </div>
     </div>
 
     <div class="btn-group">
@@ -35,19 +46,21 @@
         <button class="btn-blue">Tümüne Güncelleme Getir (.exe)</button>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Bilgisayar Adı (PC)</th>
-                <th>HWID</th>
-                <th>Sunucu Durumu</th>
-                <th>İşlem / Menü</th>
-            </tr>
-        </thead>
-        <tbody id="deviceTableBody">
-            <tr><td colspan="4" style="text-align: center; color: #64748b;">Bağlı cihaz aranıyor...</td></tr>
-        </tbody>
-    </table>
+    <div class="table-wrapper">
+        <table>
+            <thead>
+                <tr>
+                    <th>Bilgisayar Adı (PC)</th>
+                    <th>HWID Kimliği</th>
+                    <th>Sunucu Durumu</th>
+                    <th>İşlem / Aksiyon</th>
+                </tr>
+            </thead>
+            <tbody id="deviceTableBody">
+                <tr><td colspan="4" class="empty-row">Kayıtlı cihaz verileri yükleniyor...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -56,21 +69,27 @@
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    document.getElementById('deviceCount').innerText = data.count;
+                    document.getElementById('activeCount').innerText = data.active_count;
+                    document.getElementById('totalCount').innerText = data.total_count;
+                    
                     let tbody = document.getElementById('deviceTableBody');
                     tbody.innerHTML = '';
 
                     if (data.devices.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #64748b;">Aktif cihaz bulunmuyor.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Sistemde kayıtlı hiç cihaz bulunmuyor.</td></tr>';
                         return;
                     }
 
                     data.devices.forEach(dev => {
+                        let statusHtml = dev.is_online 
+                            ? `<span class="status-pill pill-online">● ÇEVRİM İÇİ (Aktif)</span>` 
+                            : `<span class="status-pill pill-offline">○ ÇEVRİM DIŞI (Kapalı)</span>`;
+
                         let row = `<tr>
-                            <td>${dev.pc_name}</td>
-                            <td>${dev.hwid}</td>
-                            <td><span class="status-active">Aktif (PID: ${dev.pid})</span></td>
-                            <td><button class="btn-red" style="padding: 5px 10px; font-size: 11px;">İşlem Yap</button></td>
+                            <td><strong style="color: #f1f5f9;">${dev.pc_name}</strong></td>
+                            <td style="font-family: monospace; color: #94a3b8;">${dev.hwid}</td>
+                            <td>${statusHtml}</td>
+                            <td><button class="btn-red" style="padding: 6px 12px; font-size: 11px;">Yönet</button></td>
                         </tr>`;
                         tbody.innerHTML += row;
                     });
@@ -79,7 +98,7 @@
             .catch(err => console.error('Veri çekme hatası:', err));
     }
 
-    // Her 3 saniyede bir cihaz listesini güncelle
+    // Her 3 saniyede bir otomatik yenile
     setInterval(fetchDevices, 3000);
     fetchDevices();
 </script>
