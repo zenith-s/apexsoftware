@@ -1,5 +1,5 @@
 <?php
-// NEON SOFTWARE RELEASE [v1.4]
+// NEON SOFTWARE RELEASE [v1.5]
 error_reporting(0);
 @ini_set('display_errors', 0);
 header("Access-Control-Allow-Origin: *");
