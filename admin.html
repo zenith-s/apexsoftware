@@ -2,325 +2,49 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON COMMAND CENTER - V3.0 Cyberpunk Manager</title>
+    <title>Neon Security System</title>
     <style>
-        :root {
-            --bg-main: #0a0c14;
-            --bg-panel: rgba(22, 27, 34, 0.85);
-            --bg-sub: #0d1117;
-            --border-color: #30363d;
-            --text-main: #ffffff;
-            --text-muted: #8b949e;
-            --neon-red: #ff3366;
-            --neon-blue: #58a6ff;
-            --neon-green: #3fb950;
-            --neon-purple: #a371f7;
-            --neon-orange: #d29922;
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-        body { background-color: var(--bg-main); color: var(--text-main); padding: 20px; background-image: radial-gradient(circle at 50% 0%, rgba(255, 51, 102, 0.08), transparent 40%); }
-
-        /* Üst Header */
-        .header { display: flex; justify-content: space-between; align-items: center; background: var(--bg-panel); backdrop-filter: blur(10px); padding: 20px 25px; border-radius: 12px; border: 1px solid var(--border-color); margin-bottom: 25px; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-        .header h1 { font-size: 22px; color: var(--neon-red); letter-spacing: 1px; display: flex; align-items: center; gap: 10px; text-shadow: 0 0 10px rgba(255,51,102,0.3); }
-        
-        .header-actions { display: flex; align-items: center; gap: 15px; }
-
-        /* Neon Butonlar */
-        .btn-neon { background: linear-gradient(135deg, #ff3366, #e60040); color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 13px; letter-spacing: 0.5px; transition: all 0.3s ease; box-shadow: 0 0 15px rgba(255, 51, 102, 0.4); display: flex; align-items: center; gap: 8px; }
-        .btn-neon:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 25px rgba(255, 51, 102, 0.8); }
-        .btn-neon:active { transform: translateY(0); }
-
-        .btn-sm { padding: 4px 8px; font-size: 11px; border-radius: 4px; border: 1px solid var(--border-color); background: #21262d; color: #fff; cursor: pointer; transition: 0.2s; }
-        .btn-sm:hover { background: var(--neon-blue); border-color: var(--neon-blue); }
-        .btn-sm-danger:hover { background: var(--neon-red); border-color: var(--neon-red); }
-
-        .status-badge { background: var(--neon-green); color: #fff; padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; box-shadow: 0 0 12px rgba(63, 185, 80, 0.4); animation: pulseGlow 2s infinite alternate; }
-
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 8px rgba(63, 185, 80, 0.3); }
-            100% { box-shadow: 0 0 18px rgba(63, 185, 80, 0.8); }
-        }
-
-        /* İstatistik Grid */
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 25px; }
-        .stat-card { background: var(--bg-panel); backdrop-filter: blur(8px); padding: 22px; border-radius: 12px; border: 1px solid var(--border-color); transition: 0.3s; }
-        .stat-card:hover { border-color: var(--neon-blue); transform: translateY(-3px); box-shadow: 0 5px 20px rgba(88, 166, 255, 0.15); }
-        .stat-card h3 { font-size: 13px; color: var(--text-muted); margin-bottom: 10px; }
-        .stat-card .value { font-size: 32px; font-weight: bold; color: var(--neon-blue); }
-
-        /* Ana Grid Layout */
-        .main-grid { display: grid; grid-template-columns: 2fr 1.2fr; gap: 25px; }
-        .panel { background: var(--bg-panel); backdrop-filter: blur(10px); border: 1px solid var(--border-color); border-radius: 12px; padding: 22px; min-height: 550px; display: flex; flex-direction: column; }
-        .panel h2 { font-size: 16px; margin-bottom: 18px; color: #c9d1d9; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center; }
-
-        /* Tablo Stilleri */
-        .table-container { flex: 1; overflow-y: auto; max-height: 480px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 5px; }
-        th, td { text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border-color); font-size: 13px; }
-        th { color: var(--text-muted); font-weight: 600; position: sticky; top: 0; background: #161b22; z-index: 2; }
-        tr { transition: background 0.2s; }
-        tr:hover { background: rgba(255, 255, 255, 0.03); }
-
-        .badge-success { color: var(--neon-green); background: rgba(63, 185, 80, 0.15); padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; }
-        .badge-danger { color: var(--neon-red); background: rgba(255, 51, 102, 0.15); padding: 4px 10px; border-radius: 6px; font-weight: bold; font-size: 11px; }
-
-        /* Log Konsolu (700 Satır Kapasiteli) */
-        .log-filter select { background: var(--bg-sub); color: var(--text-main); border: 1px solid var(--border-color); padding: 8px 12px; border-radius: 6px; width: 100%; margin-bottom: 12px; font-size: 13px; outline: none; }
-        .log-box { background: var(--bg-sub); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; height: 440px; overflow-y: auto; font-family: 'Consolas', monospace; font-size: 12px; color: #7ee787; line-height: 1.6; }
-        .log-item { border-bottom: 1px solid rgba(48, 54, 61, 0.4); padding: 5px 0; animation: fadeIn 0.3s ease; }
-        .log-SUCCESS { color: var(--neon-green); }
-        .log-INVALID_KEY { color: var(--neon-orange); }
-        .log-BANNED { color: var(--neon-red); font-weight: bold; }
-
-        /* Modal (Açılır Animasyonlu Pencere) */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.75); backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center; z-index: 999; opacity: 0; visibility: hidden; transition: all 0.3s ease; }
-        .modal-overlay.active { opacity: 1; visibility: visible; }
-        
-        .modal-card { background: #161b22; border: 1px solid var(--neon-red); border-radius: 14px; width: 450px; padding: 25px; box-shadow: 0 0 30px rgba(255, 51, 102, 0.3); transform: scale(0.8) translateY(-20px); transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); }
-
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .modal-header h3 { color: var(--neon-red); font-size: 18px; }
-        .close-btn { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; transition: 0.2s; }
-        .close-btn:hover { color: #fff; }
-
-        .form-group { margin-bottom: 15px; }
-        .form-group label { display: block; font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-        .form-group input, .form-group select { width: 100%; background: var(--bg-sub); border: 1px solid var(--border-color); color: #fff; padding: 10px; border-radius: 6px; outline: none; font-size: 13px; }
-        .form-group input:focus, .form-group select:focus { border-color: var(--neon-blue); }
-
-        /* Toast Bildirim */
-        .toast { position: fixed; bottom: 30px; right: 30px; background: var(--neon-blue); color: #fff; padding: 12px 20px; border-radius: 8px; font-weight: bold; font-size: 13px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); transform: translateY(100px); opacity: 0; transition: all 0.3s ease; z-index: 1000; }
-        .toast.show { transform: translateY(0); opacity: 1; }
-
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+        body { background-color: #0a0a0a; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .card { background: #141414; border: 1px solid #262626; padding: 35px; border-radius: 10px; width: 380px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); text-align: center; }
+        h2 { color: #dc143c; margin-bottom: 5px; letter-spacing: 1.5px; }
+        p { color: #777; font-size: 12px; margin-bottom: 25px; }
+        input { width: 100%; padding: 12px; margin-bottom: 15px; background: #1f1f1f; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; text-align: center; font-weight: bold; }
+        button { width: 100%; padding: 12px; background: #dc143c; border: none; color: white; font-weight: bold; border-radius: 5px; cursor: pointer; transition: 0.2s; }
+        button:hover { background: #b01030; }
+        .result { margin-top: 20px; font-size: 13px; font-weight: 500; }
     </style>
 </head>
 <body>
-
-    <!-- Header -->
-    <div class="header">
-        <h1>🛡️ NEON COMMAND CENTER <span style="font-size:12px; color:var(--text-muted);">v3.0 Enterprise Engine</span></h1>
-        <div class="header-actions">
-            <button class="btn-neon" onclick="openModal()">➕ Yeni Key Üret</button>
-            <div class="status-badge" id="gatewayStatus">🟢 API ACTIVE</div>
-        </div>
+    <div class="card">
+        <h2>NEON SECURITY</h2>
+        <p>License & Authentication Panel</p>
+        <input type="text" id="keyInput" placeholder="NEON-XXXX-XXXX-XXXX">
+        <button onclick="verifyKey()">DÖNÜŞÜ KONTROL ET</button>
+        <div class="result" id="res"></div>
     </div>
-
-    <!-- İstatistikler -->
-    <div class="stats-grid">
-        <div class="stat-card">
-            <h3>TOPLAM LİSANS KEY</h3>
-            <div class="value" id="toplamKey">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>AKTİF CİHAZLAR (LOADER AÇIK)</h3>
-            <div class="value" id="aktifCihazlar" style="color: var(--neon-green);">0</div>
-        </div>
-        <div class="stat-card">
-            <h3>CANLI LOG SIRA (MAX 700)</h3>
-            <div class="value" id="toplamIstek" style="color: var(--neon-orange);">0</div>
-        </div>
-    </div>
-
-    <!-- Main Grid -->
-    <div class="main-grid">
-        
-        <!-- Lisans Anahtarları ve Cihazlar Tablosu -->
-        <div class="panel">
-            <h2>
-                <span>🔑 Lisans Anahtarları ve Kilitli Cihazlar</span>
-                <span style="font-size:12px; font-weight:normal; color:var(--text-muted);" id="keyCountSub">Yükleniyor...</span>
-            </h2>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Lisans Key</th>
-                            <th>Açıklama / Not</th>
-                            <th>Süre</th>
-                            <th>Kilitli HWID</th>
-                            <th>İşlem</th>
-                        </tr>
-                    </thead>
-                    <tbody id="keyTablosu">
-                        <tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:30px;">Veriler çekiliyor...</td></tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 700 Satırlık Canlı Log Konsolu -->
-        <div class="panel">
-            <h2>📊 Canlı API İstek Logları</h2>
-            <div class="log-filter">
-                <select id="logKategori" onchange="verileriCek()">
-                    <option value="ALL">🔍 Tüm Kategoriler (Canlı Akış)</option>
-                    <option value="SUCCESS">🟢 Başarılı Girişler</option>
-                    <option value="INVALID_KEY">🟠 Geçersiz Key Denemeleri</option>
-                    <option value="BANNED">🔴 Banlı Denemeler</option>
-                </select>
-            </div>
-            <div class="log-box" id="logKonsol">
-                [Sistem] Sunucu bekleniyor...
-            </div>
-        </div>
-
-    </div>
-
-    <!-- Key Üretme Animasyonlu Modal Pop-up -->
-    <div class="modal-overlay" id="keyModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>⚡ Yeni Lisans Key Üret</h3>
-                <button class="close-btn" onclick="closeModal()">✕</button>
-            </div>
-            <form id="generateForm" onsubmit="generateKeys(event)">
-                <div class="form-group">
-                    <label>Lisans Süresi</label>
-                    <select id="keyDuration">
-                        <option value="1">1 Günlük Test</option>
-                        <option value="7">7 Günlük Haftalık</option>
-                        <option value="30" selected>30 Günlük Aylık</option>
-                        <option value="365">365 Günlük Yıllık</option>
-                        <option value="LIFETIME">∞ Sınırsız (Lifetime)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Üretilecek Key Adedi (Max 50)</label>
-                    <input type="number" id="keyCount" value="1" min="1" max="50">
-                </div>
-                <div class="form-group">
-                    <label>Müşteri / Kullanıcı Notu</label>
-                    <input type="text" id="keyNote" placeholder="Örn: Ahmet - Discord Müşterisi">
-                </div>
-                <button type="submit" class="btn-neon" style="width:100%; justify-content:center; margin-top:10px;">🚀 KEYLERİ OLUŞTUR VE KAYDET</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Toast Bildirim -->
-    <div class="toast" id="toast">Key panoya kopyalandı!</div>
-
-<script>
-    let globalLogs = [];
-
-    function openModal() { document.getElementById('keyModal').classList.add('active'); }
-    function closeModal() { document.getElementById('keyModal').classList.remove('active'); }
-
-    function showToast(text) {
-        let t = document.getElementById('toast');
-        t.innerText = text;
-        t.classList.add('show');
-        setTimeout(() => t.classList.remove('show'), 3000);
-    }
-
-    function copyToClipboard(str) {
-        navigator.clipboard.writeText(str);
-        showToast("📋 " + str + " panoya kopyalandı!");
-    }
-
-    function verileriCek() {
-        fetch('api.php?action=get_data')
-            .then(r => r.json())
-            .then(data => {
-                globalLogs = data.logs || [];
-                
-                document.getElementById('toplamKey').innerText = data.total_keys || 0;
-                document.getElementById('toplamIstek').innerText = globalLogs.length;
-                document.getElementById('keyCountSub').innerText = (data.keys ? data.keys.length : 0) + " Kayıtlı Key";
-
-                // 1. Key Tablosunu Doldur
-                let keyHTML = "";
-                if(!data.keys || data.keys.length === 0) {
-                    keyHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-muted); padding:20px;">Henüz key üretilmedi. üstteki butondan üretebilirsin.</td></tr>`;
-                } else {
-                    data.keys.forEach(k => {
-                        let isLocked = k.hwid !== "KİLİTLENMEDİ";
-                        let hwidBadge = isLocked ? `<span class="badge-danger" style="font-family:monospace;">${k.hwid.substring(0, 12)}...</span>` : `<span class="badge-success">SERBEST</span>`;
-                        
-                        keyHTML += `
-                            <tr>
-                                <td style="font-family:monospace; font-weight:bold; color:var(--neon-blue); cursor:pointer;" onclick="copyToClipboard('${k.key}')" title="Kopyalamak için tıkla">
-                                    ${k.key} 📋
-                                </td>
-                                <td style="color:var(--text-muted);">${k.note}</td>
-                                <td><span class="badge-success">${k.duration}</span></td>
-                                <td>${hwidBadge}</td>
-                                <td>
-                                    ${isLocked ? `<button class="btn-sm" onclick="resetHwid('${k.key}')">🔓 HWID Sıfırla</button>` : ''}
-                                    <button class="btn-sm btn-sm-danger" onclick="deleteKey('${k.key}')">🗑️ Sil</button>
-                                </td>
-                            </tr>
-                        `;
-                    });
-                }
-                document.getElementById('keyTablosu').innerHTML = keyHTML;
-
-                // 2. 700 Satırlık Log Konsolunu Doldur
-                let secilenKategori = document.getElementById("logKategori").value;
-                let filtrelenmis = globalLogs.filter(log => secilenKategori === "ALL" || log.type === secilenKategori);
-                let logHTML = "";
-
-                if(filtrelenmis.length === 0) {
-                    logHTML = `<div style="color:var(--text-muted);">Bu kategoride log kaydı yok.</div>`;
-                } else {
-                    filtrelenmis.forEach(l => {
-                        logHTML += `<div class="log-item log-${l.type}">[${l.time}] [${l.type}] IP: ${l.ip} | Key: ${l.key} | ${l.text}</div>`;
-                    });
-                }
-                document.getElementById('logKonsol').innerHTML = logHTML;
-            });
-    }
-
-    function generateKeys(e) {
-        e.preventDefault();
-        let formData = new FormData();
-        formData.append('action', 'generate_key');
-        formData.append('duration', document.getElementById('keyDuration').value);
-        formData.append('count', document.getElementById('keyCount').value);
-        formData.append('note', document.getElementById('keyNote').value);
-
-        fetch('api.php', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(res => {
-                closeModal();
-                showToast("⚡ " + res.generated_keys.length + " Adet Key Başarıyla Üretildi!");
-                verileriCek();
-            });
-    }
-
-    function resetHwid(key) {
-        let formData = new FormData();
-        formData.append('action', 'reset_hwid');
-        formData.append('key', key);
-        fetch('api.php', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(() => {
-                showToast("🔓 HWID Kilidi Sıfırlandı!");
-                verileriCek();
-            });
-    }
-
-    function deleteKey(key) {
-        if(!confirm(key + " lisansını silmek istediğine emin misin?")) return;
-        let formData = new FormData();
-        formData.append('action', 'delete_key');
-        formData.append('key', key);
-        fetch('api.php', { method: 'POST', body: formData })
-            .then(r => r.json())
-            .then(() => {
-                showToast("🗑️ Key Silindi!");
-                verileriCek();
-            });
-    }
-
-    setInterval(verileriCek, 2000);
-    verileriCek();
-</script>
-
+    <script>
+        function verifyKey() {
+            const key = document.getElementById('keyInput').value;
+            const res = document.getElementById('res');
+            if(!key) { res.style.color = '#ff4444'; res.innerText = "Lütfen bir key girin!"; return; }
+            res.style.color = '#f1c40f';
+            res.innerText = "Sunucu ile bağlantı kuruluyor...";
+            
+            fetch(`api.php?action=verify&key=${key}&hwid=WEB-TEST&pc_name=BROWSER`)
+                .then(r => r.text())
+                .then(data => {
+                    if(data.startsWith("SUCCESS")) {
+                        res.style.color = '#2ecc71';
+                        res.innerText = "Lisans Aktif! Kalan Süre: " + data.split('|')[1];
+                    } else {
+                        res.style.color = '#e74c3c';
+                        res.innerText = "Hata: " + data;
+                    }
+                }).catch(() => {
+                    res.style.color = '#e74c3c';
+                    res.innerText = "Sunucu uykuda veya bağlantı hatası!";
+                });
+        }
+    </script>
 </body>
 </html>
