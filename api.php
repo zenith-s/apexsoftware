@@ -1,74 +1,116 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
-$logFile = 'sys_logs.json'; // Logları tutacağımız dosya tabanlı veritabanı simülasyonu (MySQL de kullanabilirsin)
+$dataFile = 'sys_database.json';
 
-$action = $_GET['action'] ?? '';
+function verileriOku() {
+    global $dataFile;
+    if (!file_exists($dataFile)) {
+        return ["keys" => [], "logs" => [], "devices" => []];
+    }
+    return json_decode(file_get_contents($dataFile), true) ?: ["keys" => [], "logs" => [], "devices" => []];
+}
 
-// 1. Arayüz için logları ve aktif cihazları JSON olarak döndür
+function verileriKaydet($data) {
+    global $dataFile;
+    file_put_contents($dataFile, json_encode($data, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT));
+}
+
+$action = $_GET['action'] ?? ($_POST['action'] ?? '');
+
+// 1. Arayüz için tüm verileri getirme
 if ($action === 'get_data') {
-    if (file_exists($logFile)) {
-        $data = json_decode(file_get_contents($logFile), true);
-    } else {
-        $data = ["logs" => [], "devices" => []];
-    }
-    echo json_encode($data);
+    $db = verileriOku();
+    echo json_encode([
+        "status" => "success",
+        "total_keys" => count($db["keys"]),
+        "keys" => $db["keys"],
+        "logs" => array_slice($db["logs"], 0, 700), // Max 700 satır
+        "devices" => $db["devices"]
+    ]);
     exit;
 }
 
-// 2. Loader'dan gelen doğrulama ve HWID / Key istekleri
-if ($action === 'verify') {
-    $key    = $_GET['key'] ?? '';
-    $hwid   = $_GET['hwid'] ?? '';
-    $pcname = $_GET['pc_name'] ?? 'Bilinmeyen PC';
-    $ip     = $_SERVER['REMOTE_ADDR'];
-    $time   = date('H:i:s');
-
-    $kategori = "SUCCESS";
-    $mesaj = "";
-
-    if (empty($key)) {
-        $kategori = "INVALID_KEY";
-        $mesaj = "Boş key denemesi yapıldı.";
-        echo "EMPTY_KEY";
-    } elseif ($key === "BANLI-KEY" || $hwid === "BANLI-HWID") {
-        $kategori = "BANNED";
-        $mesaj = "Banlı HWID veya Key ile erişim engellendi!";
-        echo "BANNED";
-    } elseif ($key !== "NEON-VIP-2026") {
-        $kategori = "INVALID_KEY";
-        $mesaj = "Geçersiz key girildi: " . $key;
-        echo "INVALID_KEY";
-    } else {
-        $kategori = "SUCCESS";
-        $mesaj = "Key ve HWID başarıyla onaylandı.";
-        echo "SUCCESS";
-    }
-
-    // Logu kaydet
-    logEkle($time, $ip, $pcname, $hwid, $key, $kategori, $mesaj);
-    exit;
-}
-
-function logEkle($time, $ip, $pcname, $hwid, $key, $kategori, $mesaj) {
-    global $logFile;
-    $currentData = file_exists($logFile) ? json_decode(file_get_contents($logFile), true) : ["logs" => [], "devices" => []];
+// 2. YENİ KEY ÜRETME İŞLEMİ
+if ($action === 'generate_key') {
+    $db = verileriOku();
     
-    // Yeni logu en başa ekle (En fazla 700 satır/kayıt tutulsun)
-    array_unshift($currentData["logs"], [
-        "time" => $time,
-        "ip" => $ip,
-        "pc" => $pcname,
-        "hwid" => $hwid,
-        "key" => $key,
-        "type" => $kategori,
-        "text" => $mesaj
+    $duration = $_POST['duration'] ?? '30'; // Gün
+    $count    = max(1, min(50, intval($_POST['count'] ?? 1))); // 1-50 arası
+    $note     = $_POST['note'] ?? 'Özel Lisans';
+    
+    $generatedKeys = [];
+
+    for ($i = 0; $i < $count; $i++) {
+        $randomCode = "NEON-" . strtoupper(bin2hex(random_bytes(2))) . "-" . strtoupper(bin2hex(random_bytes(2))) . "-" . strtoupper(bin2hex(random_bytes(2)));
+        
+        $newKey = [
+            "key" => $randomCode,
+            "note" => $note,
+            "duration" => $duration == "LIFETIME" ? "Sınırsız" : $duration . " Gün",
+            "hwid" => "KİLİTLENMEDİ",
+            "status" => "AKTİF",
+            "created_at" => date('Y-m-d H:i:s')
+        ];
+
+        array_unshift($db["keys"], $newKey);
+        $generatedKeys[] = $randomCode;
+    }
+
+    // Log ekle
+    array_unshift($db["logs"], [
+        "time" => date('H:i:s'),
+        "ip" => $_SERVER['REMOTE_ADDR'],
+        "pc" => "ADMIN-PANEL",
+        "hwid" => "-",
+        "key" => implode(", ", $generatedKeys),
+        "type" => "SUCCESS",
+        "text" => "$count adet yeni key oluşturuldu ($note)."
     ]);
 
-    if (count($currentData["logs"]) > 700) {
-        array_pop($currentData["logs"]); // 700'den fazlasını uçur
+    verileriKaydet($db);
+    echo json_encode(["status" => "success", "generated_keys" => $generatedKeys]);
+    exit;
+}
+
+// 3. KEY HWID SIFIRLAMA
+if ($action === 'reset_hwid') {
+    $db = verileriOku();
+    $targetKey = $_POST['key'] ?? '';
+
+    foreach ($db["keys"] as &$k) {
+        if ($k['key'] === $targetKey) {
+            $k['hwid'] = "KİLİTLENMEDİ";
+            break;
+        }
     }
 
-    file_put_contents($logFile, json_encode($currentData, JSON_UNESCAPED_UNICODE));
+    array_unshift($db["logs"], [
+        "time" => date('H:i:s'),
+        "ip" => $_SERVER['REMOTE_ADDR'],
+        "pc" => "ADMIN-PANEL",
+        "hwid" => "-",
+        "key" => $targetKey,
+        "type" => "SUCCESS",
+        "text" => "HWID kilidi yönetici tarafından sıfırlandı."
+    ]);
+
+    verileriKaydet($db);
+    echo json_encode(["status" => "success"]);
+    exit;
+}
+
+// 4. KEY SİLME
+if ($action === 'delete_key') {
+    $db = verileriOku();
+    $targetKey = $_POST['key'] ?? '';
+
+    $db["keys"] = array_values(array_filter($db["keys"], function($k) use ($targetKey) {
+        return $k['key'] !== $targetKey;
+    }));
+
+    verileriKaydet($db);
+    echo json_encode(["status" => "success"]);
+    exit;
 }
 ?>
