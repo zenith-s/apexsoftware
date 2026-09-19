@@ -1,140 +1,139 @@
 <?php
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
+header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
+
 $db_file = __DIR__ . '/database.json';
 
-// Veritabanı yoksa oluştur
+// Veritabanı yoksa ilk kurulumu yap
 if (!file_exists($db_file)) {
-    file_put_contents($db_file, json_encode(["keys" => [], "clients" => [], "logs" => []], JSON_PRETTY_PRINT));
+    $initial_data = [
+        "keys" => [],
+        "devices" => [],
+        "logs" => [
+            ["time" => date("H:i:s"), "message" => "Sistem başarıyla başlatıldı."]
+        ]
+    ];
+    file_put_contents($db_file, json_encode($initial_data, JSON_PRETTY_PRINT));
 }
 
-$db = json_decode(file_get_contents($db_file), true);
-
-// Parametreleri al (GET veya POST)
+$data = json_decode(file_get_contents($db_file), true);
 $action = $_GET['action'] ?? $_POST['action'] ?? '';
 $client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Bilinmeyen IP';
 
-// Gelen tüm ham istekleri logla
-$raw_input = array_merge($_GET, $_POST);
-if (!empty($raw_input)) {
-    array_unshift($db['logs'], [
-        "time" => date("H:i:s"),
-        "ip" => $client_ip,
-        "query" => json_encode($raw_input, JSON_UNESCAPED_UNICODE)
-    ]);
-    if (count($db['logs']) > 100) array_pop($db['logs']);
+// 1. Panel için verileri çekme isteği
+if ($action === 'get_data') {
+    echo json_encode($data, JSON_UNESCAPED_UNICODE);
+    exit;
 }
 
-// 1. C++ İstemci Lisans Doğrulama ve Cihaz Kaydı
+// 2. Panelden yeni key üretme isteği
+if ($action === 'generate_key' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $new_key = "NEON-" . strtoupper(bin2hex(random_bytes(4))) . "-" . strtoupper(bin2hex(random_bytes(4)));
+    
+    array_unshift($data['keys'], [
+        "license_key" => $new_key,
+        "note" => "Admin Paneli Üretimi",
+        "hwid" => null,
+        "status" => "Aktif"
+    ]);
+
+    array_unshift($data['logs'], [
+        "time" => date("H:i:s"),
+        "message" => "[Panel] Yeni key üretildi: " . $new_key
+    ]);
+
+    file_put_contents($db_file, json_encode($data, JSON_PRETTY_PRINT));
+    echo json_encode(["success" => true, "key" => $new_key]);
+    exit;
+}
+
+// 3. C++ İstemci (Client) Tarafından Gelen Lisans ve Crack / Doğrulama İstekleri
 if ($action === 'verify') {
     $key_val = $_GET['key'] ?? $_POST['key'] ?? '';
     $hwid = $_GET['hwid'] ?? $_POST['hwid'] ?? '';
     $pc_name = $_GET['pc_name'] ?? $_POST['pc_name'] ?? 'Bilinmeyen PC';
 
-    $found = false;
-    foreach ($db['keys'] as &$k) {
-        if ($k['key'] === $key_val) {
-            $found = true;
-            if ($k['expired']) {
-                file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
-                echo "EXPIRED";
-                exit;
-            }
-            if (!empty($k['hwid']) && $k['hwid'] !== $hwid) {
-                file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
-                echo "HWID_MISMATCH";
-                exit;
-            }
-            if (empty($k['hwid'])) {
-                $k['hwid'] = $hwid;
-            }
+    $found_key = null;
+    foreach ($data['keys'] as &$k) {
+        if ($k['license_key'] === $key_val) {
+            $found_key = &$k;
             break;
         }
     }
     unset($k);
 
-    if (!$found) {
-        file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    // Key sistemde yoksa (Geçersiz Key / Crack girişimi)
+    if (!$found_key) {
+        array_unshift($data['logs'], [
+            "time" => date("H:i:s"),
+            "message" => "[RED] Geçersiz Key Girişi | IP: {$client_ip} | Key: {$key_val}"
+        ]);
+        file_put_contents($db_file, json_encode($data, JSON_PRETTY_PRINT));
         echo "INVALID_KEY";
         exit;
     }
 
-    // Aktif cihazları güncelle / ekle
-    $client_exists = false;
-    foreach ($db['clients'] as &$c) {
-        if ($c['hwid'] === $hwid) {
-            $c['pc_name'] = $pc_name;
-            $c['online'] = true;
-            $c['last_seen'] = time();
-            $client_exists = true;
+    // Key süresi dolmuş veya banlıysa
+    if ($found_key['status'] !== 'Aktif') {
+        array_unshift($data['logs'], [
+            "time" => date("H:i:s"),
+            "message" => "[UYARI] Pasif/Süresi Dolan Key Denemesi | IP: {$client_ip} | Key: {$key_val}"
+        ]);
+        file_put_contents($db_file, json_encode($data, JSON_PRETTY_PRINT));
+        echo "EXPIRED";
+        exit;
+    }
+
+    // HWID Uyuşmazlığı kontrolü (Başka PC'de deneniyorsa)
+    if (!empty($found_key['hwid']) && $found_key['hwid'] !== $hwid) {
+        array_unshift($data['logs'], [
+            "time" => date("H:i:s"),
+            "message" => "[GÜVENLİK] HWID Uyuşmazlığı (Başka PC denemesi) | IP: {$client_ip} | Key: {$key_val}"
+        ]);
+        file_put_contents($db_file, json_encode($data, JSON_PRETTY_PRINT));
+        echo "HWID_MISMATCH";
+        exit;
+    }
+
+    // İlk defa giriliyorsa HWID'yi bu key'e sabitle
+    if (empty($found_key['hwid'])) {
+        $found_key['hwid'] = $hwid;
+    }
+
+    // Cihazı aktif cihazlar listesine ekle veya güncelle
+    $device_found = false;
+    foreach ($data['devices'] as &$dev) {
+        if ($dev['hwid'] === $hwid) {
+            $dev['pc_name'] = $pc_name;
+            $dev['online'] = true;
+            $dev['last_seen'] = time();
+            $device_found = true;
             break;
         }
     }
-    unset($c);
+    unset($dev);
 
-    if (!$client_exists) {
-        $db['clients'][] = [
+    if (!$device_found) {
+        $data['devices'][] = [
             "pc_name" => $pc_name,
             "hwid" => $hwid,
             "online" => true,
-            "banned" => false,
             "last_seen" => time()
         ];
     }
 
-    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    // Başarılı giriş logu
+    array_unshift($data['logs'], [
+        "time" => date("H:i:s"),
+        "message" => "[BAŞARILI] Cihaz Giriş Yaptı: {$pc_name} | IP: {$client_ip}"
+    ]);
+
+    file_put_contents($db_file, json_encode($data, JSON_PRETTY_PRINT));
     echo "SUCCESS";
     exit;
 }
 
-// 2. Panelden Key Üretme
-if ($action === 'generate') {
-    $note = $_GET['note'] ?? $_POST['note'] ?? 'VIP Kullanıcı';
-    $days = intval($_GET['days'] ?? $_POST['days'] ?? 30);
-    $new_key = 'NEON-' . strtoupper(substr(md5(mt_rand()), 0, 4)) . '-' . strtoupper(substr(md5(mt_rand()), 0, 4));
-    
-    $db['keys'][] = [
-        "key" => $new_key,
-        "note" => $note,
-        "hwid" => "",
-        "duration_days" => $days,
-        "expired" => false
-    ];
-    
-    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
-    echo json_encode(["status" => "ok", "key" => $new_key]);
-    exit;
-}
-
-// 3. Key Silme
-if ($action === 'delete_key') {
-    $target_key = $_GET['key'] ?? $_POST['key'] ?? '';
-    $db['keys'] = array_values(array_filter($db['keys'], function($k) use ($target_key) {
-        return $k['key'] !== $target_key;
-    }));
-    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
-    echo json_encode(["status" => "ok"]);
-    exit;
-}
-
-// 4. Panel Veri Senkronizasyonu (Aktif Cihazlar, Keyler, Loglar)
-if ($action === 'get_dashboard_data') {
-    $current_time = time();
-    foreach ($db['clients'] as &$c) {
-        // 25 saniye boyunca sinyal gelmediyse çevrimdışı yap
-        if (($current_time - ($c['last_seen'] ?? 0)) > 25) {
-            $c['online'] = false;
-        }
-    }
-    unset($c);
-    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
-    
-    echo json_encode([
-        "keys" => $db['keys'],
-        "clients" => $db['clients'],
-        "logs" => $db['logs']
-    ], JSON_UNESCAPED_UNICODE);
-    exit;
-}
-
-echo json_encode(["status" => "active"]);
-?>
+// Bilinmeyen istekler
+echo json_encode(["success" => false, "error" => "Geçersiz işlem"]);
