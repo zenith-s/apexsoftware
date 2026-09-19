@@ -1,89 +1,84 @@
 <?php
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
 header("Content-Type: application/json; charset=UTF-8");
-
-$dataFile = "devices.json";
+$file = 'devices.json';
 
 // Dosya yoksa oluştur
-if (!file_exists($dataFile)) {
-    file_put_contents($dataFile, json_encode([]));
+if (!file_exists($file)) {
+    file_put_contents($file, json_encode([]));
 }
 
-$data = json_decode(file_get_contents($dataFile), true);
-$action = $_GET['action'] ?? '';
-
-// C++ Tarafından gelen ping / durum güncelleme
-if ($action == 'ping') {
-    $pcName = $_POST['pc_name'] ?? 'Bilinmeyen PC';
-    $hwid = $_POST['hwid'] ?? '';
-    
-    if (empty($hwid)) {
-        echo json_encode(["status" => "error", "message" => "HWID gerekli"]);
-        exit;
-    }
-
-    // Global sistem ana şalter durumu (Tüm pcler için genel komut)
-    $globalStateFile = "global_state.txt";
-    $globalState = file_exists($globalStateFile) ? trim(file_get_contents($globalStateFile)) : "1"; // 1: Açık, 0: Kapalı
-
-    // Kayıtlı cihazları güncelle
-    $found = false;
-    foreach ($data as &$device) {
-        if ($device['hwid'] == $hwid) {
-            $device['pc_name'] = $pcName;
-            $device['last_seen'] = time();
-            $found = true;
-            // Eğer cihaza özel bir komut yoksa global durumu al
-            $command = isset($device['command']) ? $device['command'] : $globalState;
-        }
-    }
-    unset($device);
-
-    if (!$found) {
-        $data[] = [
-            "hwid" => $hwid,
-            "pc_name" => $pcName,
-            "last_seen" => time(),
-            "command" => "1" // Varsayılan açık
-        ];
-        $command = $globalState;
-    }
-
-    file_put_contents($dataFile, json_encode($data));
-    echo json_encode(["status" => "success", "command" => $command]);
-    exit;
+$devices = json_decode(file_get_contents($file), true);
+if (!is_array($devices)) {
+    $devices = [];
 }
 
-// Panelden cihaz listesini çekme
-if ($action == 'get_devices') {
-    // 30 saniyeden uzun süredir ping atmayanları online listeden düşürebilirsin
-    echo json_encode($data);
-    exit;
-}
+$action = isset($_GET['action']) ? $_GET['action'] : '';
 
-// Panelden komut gönderme (Tekli veya Toplu)
-if ($action == 'set_command') {
-    $hwid = $_POST['hwid'] ?? 'all';
-    $command = $_POST['command'] ?? '1'; // 1: Açık, 0: Kapalı
+// 1. C++ Tarafından Ping Geldiğinde
+if ($action === 'ping') {
+    $hwid = isset($_POST['hwid']) ? $_POST['hwid'] : '';
+    $pc_name = isset($_POST['pc_name']) ? $_POST['pc_name'] : '';
 
-    if ($hwid == 'all') {
-        file_put_contents("global_state.txt", $command);
-        foreach ($data as &$device) {
-            $device['command'] = $command;
-        }
-        unset($device);
-    } else {
-        foreach ($data as &$device) {
-            if ($device['hwid'] == $hwid) {
-                $device['command'] = $command;
+    if (!empty($hwid)) {
+        $found = false;
+        foreach ($devices as &$dev) {
+            if ($dev['hwid'] === $hwid) {
+                $dev['pc_name'] = !empty($pc_name) ? $pc_name : $dev['pc_name'];
+                $dev['last_seen'] = time();
+                $found = true;
+                break;
             }
         }
-        unset($device);
+        if (!$found) {
+            // Yeni cihaz ekle (Varsayılan komut: 1 yani açık)
+            $devices[] = [
+                'hwid' => $hwid,
+                'pc_name' => !empty($pc_name) ? $pc_name : 'Bilinmeyen PC',
+                'command' => '1',
+                'last_seen' => time()
+            ];
+        }
+        file_put_contents($file, json_encode($devices));
     }
 
-    file_put_contents($dataFile, json_encode($data));
-    echo json_encode(["status" => "success"]);
+    // Cihazın komutunu bul ve dön
+    $current_command = "1";
+    foreach ($devices as $dev) {
+        if ($dev['hwid'] === (isset($_POST['hwid']) ? $_POST['hwid'] : '')) {
+            $current_command = $dev['command'];
+            break;
+        }
+    }
+
+    echo json_encode(["status" => "success", "command" => $current_command]);
+    exit;
+}
+
+// 2. Panel İçin Cihazları Listeleme
+if ($action === 'get_devices') {
+    echo json_encode($devices);
+    exit;
+}
+
+// 3. Panelden Komut Değiştirme (Aç / Kapat)
+if ($action === 'set_command') {
+    $hwid = isset($_POST['hwid']) ? $_POST['hwid'] : '';
+    $cmd = isset($_POST['command']) ? $_POST['command'] : '1';
+
+    if ($hwid === 'all') {
+        foreach ($devices as &$dev) {
+            $dev['command'] = $cmd;
+        }
+    } else {
+        foreach ($devices as &$dev) {
+            if ($dev['hwid'] === $hwid) {
+                $dev['command'] = $cmd;
+                break;
+            }
+        }
+    }
+    file_put_contents($file, json_encode($devices));
+    echo json_encode(["status" => "updated"]);
     exit;
 }
 ?>
