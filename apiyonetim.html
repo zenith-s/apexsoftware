@@ -1,141 +1,288 @@
-<!-- NEON SOFTWARE RELEASE [v1.5] -->
+<!-- NEON SOFTWARE RELEASE [v2.0 - Ultimate Cyberpunk Panel] -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON SOFTWARE - Yönetim Paneli</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON SOFTWARE // COMMAND CENTER</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Plus+Jakarta+Sans:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
-        * { box-sizing: border-box; transition: all 0.25s ease; }
-        body { background-color: #05070a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; display: flex; justify-content: center; overflow-x: hidden; }
-        
-        .panel-container { 
-            background: rgba(15, 23, 42, 0.75); 
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(244, 63, 94, 0.2); 
-            border-radius: 20px; 
-            width: 1050px; 
-            padding: 35px; 
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(244, 63, 94, 0.05);
-            animation: fadeIn 0.8s ease-out;
+        :root {
+            --bg-deep: #030712;
+            --surface: #0f172a;
+            --surface-glass: rgba(15, 23, 42, 0.75);
+            --primary: #f43f5e;
+            --primary-glow: rgba(244, 63, 94, 0.35);
+            --accent: #38bdf8;
+            --success: #22c55e;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: rgba(255, 255, 255, 0.08);
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(15px); }
-            to { opacity: 1; transform: translateY(0); }
+        * { box-sizing: border-box; margin: 0; padding: 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        body { 
+            background-color: var(--bg-deep); 
+            color: var(--text-main); 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(244, 63, 94, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(56, 189, 248, 0.06) 0%, transparent 40%);
         }
 
-        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(30, 41, 59, 0.8); padding-bottom: 20px; margin-bottom: 25px; }
-        
-        h2 { 
-            color: #f43f5e; 
-            margin: 0; 
-            font-size: 24px; 
-            font-family: monospace; 
+        .dashboard-wrapper {
+            width: 100%;
+            max-width: 1200px;
+            background: var(--surface-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7), 0 0 40px var(--primary-glow);
+            animation: panelEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes panelEntrance {
+            from { opacity: 0; transform: translateY(30px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Top Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 24px;
+            margin-bottom: 30px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .brand-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, var(--primary), #e11d48);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 0 20px var(--primary-glow);
+        }
+
+        .brand-info h1 {
+            font-size: 22px;
+            font-weight: 800;
+            font-family: 'JetBrains Mono', monospace;
             letter-spacing: 1px;
-            text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+            background: linear-gradient(to right, #fff, var(--text-muted));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
-        .stats-badge { 
-            background: rgba(30, 41, 59, 0.6); 
-            color: #38bdf8; 
-            padding: 8px 16px; 
-            border-radius: 30px; 
-            font-size: 13px; 
-            font-family: monospace; 
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05);
+        .brand-info span {
+            font-size: 12px;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        .stats-badge span { color: #22c55e; font-weight: bold; text-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
 
-        .btn-group { margin-bottom: 25px; display: flex; gap: 12px; }
-        
-        button { 
-            padding: 12px 22px; 
-            border: none; 
-            border-radius: 10px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            color: white; 
-            font-size: 13px; 
-            position: relative;
+        .stats-cluster {
+            display: flex;
+            gap: 15px;
+        }
+
+        .stat-card {
+            background: rgba(2, 6, 23, 0.6);
+            border: 1px solid var(--border);
+            padding: 10px 20px;
+            border-radius: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--text-muted);
+        }
+
+        .stat-card b {
+            color: var(--accent);
+            font-size: 14px;
+        }
+
+        .stat-card b.online {
+            color: var(--success);
+            text-shadow: 0 0 10px rgba(34, 197, 94, 0.4);
+        }
+
+        /* Action Controls */
+        .action-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .btn:hover { transform: translateY(-2px); filter: brightness(1.15); box-shadow: 0 8px 20px rgba(0,0,0,0.4); }
+        .btn:active { transform: translateY(1px); }
+
+        .btn-green { background: linear-gradient(135deg, #16a34a, #15803d); }
+        .btn-red { background: linear-gradient(135deg, #dc2626, #991b1b); }
+        .btn-blue { background: linear-gradient(135deg, #2563eb, #1e40af); }
+
+        /* Table Design */
+        .table-container {
+            background: rgba(2, 6, 23, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 16px;
             overflow: hidden;
         }
-        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); filter: brightness(1.1); }
-        button:active { transform: translateY(1px); }
 
-        .btn-green { background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); }
-        .btn-red { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); }
-        .btn-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
-
-        .table-wrapper { 
-            overflow-x: auto; 
-            border-radius: 12px; 
-            border: 1px solid rgba(30, 41, 59, 0.8); 
-            background: rgba(11, 15, 25, 0.6);
-        }
-        
-        table { width: 100%; border-collapse: collapse; text-align: left; }
-        th, td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid rgba(30, 41, 59, 0.5); }
-        th { background: rgba(17, 24, 39, 0.9); color: #38bdf8; font-family: monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
-
-        tr { animation: rowAppear 0.4s ease-out; }
-        @keyframes rowAppear {
-            from { opacity: 0; transform: translateX(-10px); }
-            to { opacity: 1; transform: translateX(0); }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
         }
 
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; font-family: monospace; }
-        .pill-online { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); box-shadow: 0 0 10px rgba(34, 197, 94, 0.1); animation: pulseGlow 2s infinite; }
-        .pill-offline { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
+        th {
+            background: rgba(15, 23, 42, 0.8);
+            padding: 18px 24px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+        }
+
+        td {
+            padding: 18px 24px;
+            font-size: 14px;
+            border-bottom: 1px solid var(--border);
+            color: var(--text-main);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: rgba(255, 255, 255, 0.02); }
+
+        .pc-name { font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .hwid-text { font-family: 'JetBrains Mono', monospace; color: var(--text-muted); font-size: 12px; }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .badge-online {
+            background: rgba(34, 197, 94, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.15);
+            animation: pulseGlow 2s infinite;
+        }
+
+        .badge-offline {
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
 
         @keyframes pulseGlow {
             0% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); }
-            50% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+            50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.5); }
             100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); }
         }
 
-        .empty-row { text-align: center; color: #64748b; padding: 40px; font-style: italic; }
+        .empty-state {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+            font-style: italic;
+        }
+
+        .btn-action-sm {
+            padding: 6px 14px;
+            font-size: 11px;
+            border-radius: 8px;
+        }
     </style>
 </head>
 <body>
 
-<div class="panel-container">
-    <div class="header-flex">
-        <h2>NEON SOFTWARE // PANEL</h2>
-        <div class="stats-badge">Aktif: <span id="activeCount">0</span> | Toplam: <span id="totalCount">0</span></div>
+<div class="dashboard-wrapper">
+    <!-- Header -->
+    <div class="header">
+        <div class="brand">
+            <div class="brand-icon">⚡</div>
+            <div class="brand-info">
+                <h1>NEON SOFTWARE</h1>
+                <span>Command & Control</span>
+            </div>
+        </div>
+        <div class="stats-cluster">
+            <div class="stat-card">AKTİF: <b id="activeCount" class="online">0</b></div>
+            <div class="stat-card">TOPLAM: <b id="totalCount">0</b></div>
+        </div>
     </div>
 
-    <div class="btn-group">
-        <button class="btn-green" onclick="sendGlobalCommand('start')">Tüm PC'lerde Sistemi Aç</button>
-        <button class="btn-red" onclick="sendGlobalCommand('close')">Tüm PC'lerde Loader'ı Kapat</button>
-        <button class="btn-blue" onclick="alert('Güncelleme paketi hazır!')">Tümüne Güncelleme Getir (.exe)</button>
+    <!-- Controls -->
+    <div class="action-bar">
+        <button class="btn btn-green" onclick="sendGlobalCommand('start')">🚀 Tüm Sistemleri Başlat</button>
+        <button class="btn btn-red" onclick="sendGlobalCommand('close')">🛑 Tüm Loader'ları Kapat</button>
+        <button class="btn btn-blue" onclick="alert('Güncelleme paketi tüm istemcilere dağıtılmak üzere kuyruğa eklendi.')">📦 Güncelleme Gönder (.exe)</button>
     </div>
 
-    <div class="table-wrapper">
+    <!-- Table -->
+    <div class="table-container">
         <table>
             <thead>
                 <tr>
-                    <th>Bilgisayar Adı (PC)</th>
+                    <th>Bilgisayar Adı</th>
                     <th>HWID Kimliği</th>
-                    <th>Sunucu Durumu</th>
-                    <th>İşlem / Aksiyon</th>
+                    <th>Sistem Durumu</th>
+                    <th>Aksiyonlar</th>
                 </tr>
             </thead>
             <tbody id="deviceTableBody">
-                <tr><td colspan="4" class="empty-row">Sinyaller bekleniyor...</td></tr>
+                <tr><td colspan="4" class="empty-state">Ağdan sinyal bekleniyor... Lütfen loader'ı çalıştırın.</td></tr>
             </tbody>
         </table>
     </div>
 </div>
 
 <script>
-    function getApiUrl(actionParam) {
-        let endpoint = atob('YXBpLnBocA==');
-        return `${endpoint}?${actionParam}`;
-    }
-
     function fetchDevices() {
-        fetch(getApiUrl('action=get_devices'))
+        fetch('api.php?action=get_devices')
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -147,20 +294,20 @@
                     let newHtml = '';
 
                     if (data.devices.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Kayıtlı cihaz yok.</td></tr>';
+                        tbody.innerHTML = '<tr><td colspan="4" class="empty-state">Kayıtlı aktif cihaz bulunmuyor.</td></tr>';
                         return;
                     }
 
                     data.devices.forEach(dev => {
                         let statusHtml = dev.is_online 
-                            ? `<span class="status-pill pill-online">● ÇEVRİM İÇİ</span>` 
-                            : `<span class="status-pill pill-offline">○ ÇEVRİM DIŞI</span>`;
+                            ? `<span class="status-badge badge-online">● ÇEVRİM İÇİ</span>` 
+                            : `<span class="status-badge badge-offline">○ ÇEVRİM DIŞI</span>`;
 
                         newHtml += `<tr>
-                            <td><strong>${dev.pc_name}</strong></td>
-                            <td style="font-family: monospace; color: #94a3b8;">${dev.hwid}</td>
+                            <td class="pc-name">💻 ${dev.pc_name}</td>
+                            <td class="hwid-text">${dev.hwid}</td>
                             <td>${statusHtml}</td>
-                            <td><button class="btn-red" style="padding: 6px 12px; font-size: 11px;" onclick="sendTargetCommand('${dev.hwid}', 'close')">Kapat</button></td>
+                            <td><button class="btn btn-red btn-action-sm" onclick="sendTargetCommand('${dev.hwid}', 'close')">Kapat</button></td>
                         </tr>`;
                     });
 
@@ -168,19 +315,20 @@
                         tbody.innerHTML = newHtml;
                     }
                 }
-            });
+            }).catch(err => console.error("Veri çekme hatası:", err));
     }
 
     function sendGlobalCommand(cmd) {
-        fetch(getApiUrl(`action=send_command&hwid=all&cmd=${cmd}`))
-            .then(() => alert("Toplu komut başarıyla kuyruğa eklendi!"));
+        fetch(`api.php?action=send_command&hwid=all&cmd=${cmd}`)
+            .then(() => alert("Toplu komut başarıyla ağdaki cihazlara iletildi!"));
     }
 
     function sendTargetCommand(hwid, cmd) {
-        fetch(getApiUrl(`action=send_command&hwid=${hwid}&cmd=${cmd}`))
-            .then(() => alert("Cihaza kapatma komutu iletildi!"));
+        fetch(`api.php?action=send_command&hwid=${hwid}&cmd=${cmd}`)
+            .then(() => alert("Seçilen cihaza kapatma sinyali gönderildi!"));
     }
 
+    // Her 2.5 saniyede bir paneli otomatik güncelle
     setInterval(fetchDevices, 2500);
     fetchDevices();
 </script>
