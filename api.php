@@ -1,4 +1,5 @@
 <?php
+// NEON SOFTWARE RELEASE [v1.3]
 error_reporting(0);
 @ini_set('display_errors', 0);
 header("Access-Control-Allow-Origin: *");
@@ -32,10 +33,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dev['vgk_state'] = $vgk_state;
             $dev['last_seen'] = time();
             
-            // Eğer bu cihaza bekleyen bir komut atandıysa al ve temizle
             if (!empty($dev['pending_command'])) {
                 $assignedCommand = $dev['pending_command'];
-                $dev['pending_command'] = "none"; // Komut iletildi, sıfırla
+                $dev['pending_command'] = "none";
             }
             $found = true;
             break;
@@ -68,7 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Panelden Cihazlara Komut Gönderme (GET / POST)
+// Panelden Cihazlara Komut Gönderme
 if ($action === 'send_command') {
     $targetHwid = isset($_GET['hwid']) ? trim($_GET['hwid']) : '';
     $command    = isset($_GET['cmd']) ? trim($_GET['cmd']) : 'none';
@@ -87,7 +87,7 @@ if ($action === 'send_command') {
     exit();
 }
 
-// Yönetim Paneli İçin Cihaz Listeleme (GET)
+// Yönetim Paneli İçin Cihaz Listeleme
 if ($action === 'get_devices') {
     $devices = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
     if (!is_array($devices)) $devices = [];
