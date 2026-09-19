@@ -75,6 +75,17 @@
             border-radius: 3px;
         }
         button.action-btn:hover { background: #dc2626; }
+        button.open-btn {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            font-weight: bold;
+            border-radius: 3px;
+        }
+        button.open-btn:hover { background: #059669; }
         button.gen-btn {
             background: #00ffcc;
             color: #0b0f19;
@@ -148,7 +159,6 @@
 
     <script>
         function fetchData() {
-            // Keyleri Çek
             fetch('api.php?action=get_keys')
                 .then(res => res.json())
                 .then(data => {
@@ -172,7 +182,6 @@
                     });
                 });
 
-            // Aktif Cihazları Çek
             fetch('api.php?action=get_clients')
                 .then(res => res.json())
                 .then(data => {
@@ -186,13 +195,18 @@
                         let row = document.createElement('tr');
                         let stateBadge = client.vgk_state === 'active' ? '<span class="badge-active">OYUNDA</span>' : '<span class="badge-waiting">BEKLİYOR</span>';
                         let onlineBadge = client.online ? '<span class="badge-active">ÇEVRİM İÇİ</span>' : '<span class="badge-offline">ÇEVRİM DIŞI</span>';
+                        
+                        let actionButton = client.banned 
+                            ? `<button class="open-btn" onclick="sendCommand('${client.hwid}', 'open')">Aç</button>` 
+                            : `<button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button>`;
+
                         row.innerHTML = `
                             <td>${client.pc_name}</td>
                             <td style="font-size: 11px; color: #9ca3af;">${client.hwid}</td>
                             <td>${client.pid > 0 ? client.pid : '-'}</td>
                             <td>${stateBadge}</td>
                             <td>${onlineBadge}</td>
-                            <td><button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button></td>
+                            <td>${actionButton}</td>
                         `;
                         tbody.appendChild(row);
                     });
@@ -226,7 +240,8 @@
         }
 
         function sendCommand(hwid, cmd) {
-            if (!confirm("Cihaz kapatılsın mı?")) return;
+            let msg = cmd === 'close' ? "Cihaz kapatılsın mı?" : "Cihazın banı kaldırılsın mı (Tekrar açılsın mı)?";
+            if (!confirm(msg)) return;
             let formData = new FormData();
             formData.append('action', 'send_cmd');
             formData.append('hwid', hwid);
