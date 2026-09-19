@@ -1,256 +1,140 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>NEON SOFTWARE // ADMIN & COMMAND CENTER</title>
-    <style>
-        body {
-            background-color: #0b0f19;
-            color: #00ffcc;
-            font-family: 'Courier New', Courier, monospace;
-            margin: 0;
-            padding: 20px;
-        }
-        h1, h2 {
-            text-align: center;
-            text-shadow: 0 0 10px #00ffcc;
-            letter-spacing: 2px;
-        }
-        .container {
-            max-width: 1100px;
-            margin: 0 auto;
-            background: #111827;
-            border: 1px solid #00ffcc;
-            box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
-            padding: 20px;
-            border-radius: 5px;
-            margin-bottom: 25px;
-        }
-        .panel-box {
-            text-align: center;
-            margin-bottom: 20px;
-            padding: 15px;
-            border: 1px dashed #00ffcc;
-            border-radius: 4px;
-        }
-        input[type="text"], select {
-            padding: 9px;
-            width: 250px;
-            background: #0b0f19;
-            border: 1px solid #00ffcc;
-            color: #fff;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 3px;
-            margin-right: 10px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
-        th, td {
-            border: 1px solid #1f2937;
-            padding: 10px;
-            text-align: left;
-            font-size: 13px;
-        }
-        th {
-            background-color: #1f2937;
-            color: #00ffcc;
-        }
-        tr:hover {
-            background-color: rgba(0, 255, 204, 0.05);
-        }
-        .badge-active { color: #10b981; font-weight: bold; }
-        .badge-waiting { color: #f59e0b; }
-        .badge-offline { color: #ef4444; }
-        button.action-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            border-radius: 3px;
-        }
-        button.action-btn:hover { background: #dc2626; }
-        button.open-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            border-radius: 3px;
-        }
-        button.open-btn:hover { background: #059669; }
-        button.gen-btn {
-            background: #00ffcc;
-            color: #0b0f19;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 3px;
-        }
-        button.gen-btn:hover { background: #00cca3; }
-        .refresh-info {
-            text-align: right;
-            font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
+<?php
+header("Content-Type: application/json; charset=UTF-8");
+$db_file = __DIR__ . '/database.json';
 
-    <div class="container">
-        <h1>⚡ NEON SOFTWARE // KEY YÖNETİMİ ⚡</h1>
-        <div class="panel-box">
-            <input type="text" id="note-input" placeholder="Key Notu (Örn: Ahmet)">
-            <select id="days-input">
-                <option value="1">1 Günlük</option>
-                <option value="7">7 Günlük</option>
-                <option value="30" selected>30 Günlük</option>
-                <option value="365">1 Yıllık</option>
-            </select>
-            <button class="gen-btn" onclick="generateKey()">+ Key Oluştur</button>
-        </div>
+// Veritabanı yoksa oluştur
+if (!file_exists($db_file)) {
+    file_put_contents($db_file, json_encode(["keys" => [], "clients" => [], "logs" => []], JSON_PRETTY_PRINT));
+}
 
-        <h2>Mevcut Key Listesi</h2>
-        <table>
-            <thead>
-                <tr>
-                    <th>Key</th>
-                    <th>Not</th>
-                    <th>Kilitli HWID</th>
-                    <th>Süre / Durum</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="keys-table-body">
-                <tr><td colspan="5" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
-    </div>
+$db = json_decode(file_get_contents($db_file), true);
 
-    <div class="container">
-        <h1>⚡ COMMAND CENTER // AKTİF CİHAZLAR ⚡</h1>
-        <div class="refresh-info" id="status-timer">Durum: Güncelleniyor...</div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Bilgisayar Adı</th>
-                    <th>HWID</th>
-                    <th>Target PID</th>
-                    <th>Durum</th>
-                    <th>Bağlantı</th>
-                    <th>İşlem</th>
-                </tr>
-            </thead>
-            <tbody id="client-table-body">
-                <tr><td colspan="6" style="text-align: center;">Yükleniyor...</td></tr>
-            </tbody>
-        </table>
-    </div>
+// Parametreleri al (GET veya POST)
+$action = $_GET['action'] ?? $_POST['action'] ?? '';
+$client_ip = $_SERVER['HTTP_X_FORWARDED_FOR'] ?? $_SERVER['REMOTE_ADDR'] ?? 'Bilinmeyen IP';
 
-    <script>
-        function fetchData() {
-            fetch('api.php?action=get_keys')
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById('keys-table-body');
-                    tbody.innerHTML = '';
-                    if (!Array.isArray(data) || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">Kayıtlı key bulunamadı.</td></tr>';
-                        return;
-                    }
-                    data.forEach(k => {
-                        let row = document.createElement('tr');
-                        let statusText = k.expired ? '<span style="color:red">SÜRESİ BİTTİ</span>' : (k.expires_at > 0 ? 'Aktif (' + Math.ceil((k.expires_at - Date.now()/1000)/86400) + ' gün kaldı)' : k.duration_days + ' Günlük (Kullanılmadı)');
-                        row.innerHTML = `
-                            <td style="color:#00ffcc; font-weight:bold;">${k.key}</td>
-                            <td>${k.note}</td>
-                            <td style="font-size:11px; color:#9ca3af;">${k.hwid ? k.hwid : 'Boş (Kullanılmadı)'}</td>
-                            <td>${statusText}</td>
-                            <td><button class="action-btn" onclick="deleteKey('${k.key}')">Sil</button></td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                });
+// Gelen tüm ham istekleri logla
+$raw_input = array_merge($_GET, $_POST);
+if (!empty($raw_input)) {
+    array_unshift($db['logs'], [
+        "time" => date("H:i:s"),
+        "ip" => $client_ip,
+        "query" => json_encode($raw_input, JSON_UNESCAPED_UNICODE)
+    ]);
+    if (count($db['logs']) > 100) array_pop($db['logs']);
+}
 
-            fetch('api.php?action=get_clients')
-                .then(res => res.json())
-                .then(data => {
-                    const tbody = document.getElementById('client-table-body');
-                    tbody.innerHTML = '';
-                    if (!Array.isArray(data) || data.length === 0) {
-                        tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aktif cihaz bulunamadı.</td></tr>';
-                        return;
-                    }
-                    data.forEach(client => {
-                        let row = document.createElement('tr');
-                        let stateBadge = client.vgk_state === 'active' ? '<span class="badge-active">OYUNDA</span>' : '<span class="badge-waiting">BEKLİYOR</span>';
-                        let onlineBadge = client.online ? '<span class="badge-active">ÇEVRİM İÇİ</span>' : '<span class="badge-offline">ÇEVRİM DIŞI</span>';
-                        
-                        let actionButton = client.banned 
-                            ? `<button class="open-btn" onclick="sendCommand('${client.hwid}', 'open')">Aç</button>` 
-                            : `<button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button>`;
+// 1. C++ İstemci Lisans Doğrulama ve Cihaz Kaydı
+if ($action === 'verify') {
+    $key_val = $_GET['key'] ?? $_POST['key'] ?? '';
+    $hwid = $_GET['hwid'] ?? $_POST['hwid'] ?? '';
+    $pc_name = $_GET['pc_name'] ?? $_POST['pc_name'] ?? 'Bilinmeyen PC';
 
-                        row.innerHTML = `
-                            <td>${client.pc_name}</td>
-                            <td style="font-size: 11px; color: #9ca3af;">${client.hwid}</td>
-                            <td>${client.pid > 0 ? client.pid : '-'}</td>
-                            <td>${stateBadge}</td>
-                            <td>${onlineBadge}</td>
-                            <td>${actionButton}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                    document.getElementById('status-timer').innerText = "Son Güncelleme: " + new Date().toLocaleTimeString();
-                });
+    $found = false;
+    foreach ($db['keys'] as &$k) {
+        if ($k['key'] === $key_val) {
+            $found = true;
+            if ($k['expired']) {
+                file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+                echo "EXPIRED";
+                exit;
+            }
+            if (!empty($k['hwid']) && $k['hwid'] !== $hwid) {
+                file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+                echo "HWID_MISMATCH";
+                exit;
+            }
+            if (empty($k['hwid'])) {
+                $k['hwid'] = $hwid;
+            }
+            break;
         }
+    }
+    unset($k);
 
-        function generateKey() {
-            let note = document.getElementById('note-input').value;
-            let days = document.getElementById('days-input').value;
-            let formData = new FormData();
-            formData.append('action', 'generate');
-            formData.append('note', note);
-            formData.append('days', days);
+    if (!$found) {
+        file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+        echo "INVALID_KEY";
+        exit;
+    }
 
-            fetch('api.php', { method: 'POST', body: formData })
-                .then(res => res.json())
-                .then(res => {
-                    alert("Key Oluşturuldu: " + res.key);
-                    document.getElementById('note-input').value = '';
-                    fetchData();
-                });
+    // Aktif cihazları güncelle / ekle
+    $client_exists = false;
+    foreach ($db['clients'] as &$c) {
+        if ($c['hwid'] === $hwid) {
+            $c['pc_name'] = $pc_name;
+            $c['online'] = true;
+            $c['last_seen'] = time();
+            $client_exists = true;
+            break;
         }
+    }
+    unset($c);
 
-        function deleteKey(key) {
-            if (!confirm(key + " silinsin mi?")) return;
-            let formData = new FormData();
-            formData.append('action', 'delete_key');
-            formData.append('key', key);
-            fetch('api.php', { method: 'POST', body: formData }).then(() => fetchData());
+    if (!$client_exists) {
+        $db['clients'][] = [
+            "pc_name" => $pc_name,
+            "hwid" => $hwid,
+            "online" => true,
+            "banned" => false,
+            "last_seen" => time()
+        ];
+    }
+
+    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    echo "SUCCESS";
+    exit;
+}
+
+// 2. Panelden Key Üretme
+if ($action === 'generate') {
+    $note = $_GET['note'] ?? $_POST['note'] ?? 'VIP Kullanıcı';
+    $days = intval($_GET['days'] ?? $_POST['days'] ?? 30);
+    $new_key = 'NEON-' . strtoupper(substr(md5(mt_rand()), 0, 4)) . '-' . strtoupper(substr(md5(mt_rand()), 0, 4));
+    
+    $db['keys'][] = [
+        "key" => $new_key,
+        "note" => $note,
+        "hwid" => "",
+        "duration_days" => $days,
+        "expired" => false
+    ];
+    
+    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(["status" => "ok", "key" => $new_key]);
+    exit;
+}
+
+// 3. Key Silme
+if ($action === 'delete_key') {
+    $target_key = $_GET['key'] ?? $_POST['key'] ?? '';
+    $db['keys'] = array_values(array_filter($db['keys'], function($k) use ($target_key) {
+        return $k['key'] !== $target_key;
+    }));
+    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(["status" => "ok"]);
+    exit;
+}
+
+// 4. Panel Veri Senkronizasyonu (Aktif Cihazlar, Keyler, Loglar)
+if ($action === 'get_dashboard_data') {
+    $current_time = time();
+    foreach ($db['clients'] as &$c) {
+        // 25 saniye boyunca sinyal gelmediyse çevrimdışı yap
+        if (($current_time - ($c['last_seen'] ?? 0)) > 25) {
+            $c['online'] = false;
         }
+    }
+    unset($c);
+    file_put_contents($db_file, json_encode($db, JSON_PRETTY_PRINT));
+    
+    echo json_encode([
+        "keys" => $db['keys'],
+        "clients" => $db['clients'],
+        "logs" => $db['logs']
+    ], JSON_UNESCAPED_UNICODE);
+    exit;
+}
 
-        function sendCommand(hwid, cmd) {
-            let msg = cmd === 'close' ? "Cihaz kapatılsın mı?" : "Cihazın banı kaldırılsın mı (Tekrar açılsın mı)?";
-            if (!confirm(msg)) return;
-            let formData = new FormData();
-            formData.append('action', 'send_cmd');
-            formData.append('hwid', hwid);
-            formData.append('cmd', cmd);
-            fetch('api.php', { method: 'POST', body: formData }).then(() => fetchData());
-        }
-
-        setInterval(fetchData, 4000);
-        fetchData();
-    </script>
-</body>
-</html>
+echo json_encode(["status" => "active"]);
+?>
