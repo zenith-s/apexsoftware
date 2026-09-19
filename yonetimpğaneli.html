@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>NEON SOFTWARE - Yönetim Paneli</title>
+    <style>
+        body { background: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; padding: 20px; }
+        h2 { color: #38bdf8; }
+        .container { max-width: 800px; margin: auto; background: #1e293b; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
+        th { background: #0f172a; }
+        button { background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0369a1; }
+        .btn-danger { background: #dc2626; }
+        .btn-danger:hover { background: #b91c1c; }
+        .status-on { color: #4ade80; font-weight: bold; }
+        .status-off { color: #f87171; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>NEON SOFTWARE - Canlı Cihaz Yönetimi</h2>
+    <p>Aktif Cihaz Sayısı: <span id="device-count">0</span></p>
+    
+    <div style="margin-bottom: 15px;">
+        <button onclick="setCommand('all', '1')">Tüm PC'lerde Sistemi Aç</button>
+        <button class="btn-danger" onclick="setCommand('all', '0')">Tüm PC'lerde Servisi Kapat</button>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Seç</th>
+                <th>Bilgisayar Adı (PC)</th>
+                <th>HWID</th>
+                <th>Sunucu Durumu</th>
+                <th>İşlem</th>
+            </tr>
+        </thead>
+        <tbody id="device-list">
+            <!-- Veriler JS ile doldurulacak -->
+        </tbody>
+    </table>
+</div>
+
+<script>
+async function fetchDevices() {
+    try {
+        let response = await fetch('api.php?action=get_devices');
+        let devices = await response.json();
+        
+        let tbody = document.getElementById('device-list');
+        tbody.innerHTML = '';
+        document.getElementById('device-count').innerText = devices.length;
+
+        devices.forEach(dev => {
+            let isOnline = (Math.floor(Date.now() / 1000) - dev.last_seen) < 30; // Son 30 saniye içinde ping attıysa
+            let stateText = dev.command == '1' ? '<span class="status-on">SİSTEM AÇIK</span>' : '<span class="status-off">SERVER KAPALI</span>';
+            
+            let tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><input type="radio" name="selected_pc" value="${dev.hwid}" id="pc_${dev.hwid}"></td>
+                <td>${dev.pc_name}</td>
+                <td><small>${dev.hwid.substring(0, 10)}...</small></td>
+                <td>${stateText} ${isOnline ? '(Bağlı)' : '(Çevrimdışı)'}</td>
+                <td>
+                    <button onclick="setCommand('${dev.hwid}', '1')">Aç</button>
+                    <button class="btn-danger" onclick="setCommand('${dev.hwid}', '0')">Kapat</button>
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    } catch (e) {
+        console.error("Veri alınamadı", e);
+    }
+}
+
+async function setCommand(hwid, cmd) {
+    let formData = new URLSearchParams();
+    formData.append('hwid', hwid);
+    formData.append('command', cmd);
+
+    await fetch('api.php?action=set_command', {
+        method: 'POST',
+        body: formData
+    });
+    fetchDevices();
+}
+
+// Her 3 saniyede bir listeyi güncelle
+setInterval(fetchDevices, 3000);
+fetchDevices();
+</script>
+
+</body>
+</html>
