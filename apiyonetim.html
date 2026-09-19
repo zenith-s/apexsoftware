@@ -2,37 +2,156 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON SOFTWARE - Yönetim Paneli</title>
+    <title>NEON SOFTWARE - Canlı Cihaz Yönetimi</title>
     <style>
-        body { background: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; padding: 20px; }
-        h2 { color: #38bdf8; }
-        .container { max-width: 800px; margin: auto; background: #1e293b; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; border-bottom: 1px solid #334155; text-align: left; }
-        th { background: #0f172a; }
-        button { background: #0284c7; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; }
-        button:hover { background: #0369a1; }
-        .btn-danger { background: #dc2626; }
-        .btn-danger:hover { background: #b91c1c; }
-        .status-on { color: #4ade80; font-weight: bold; }
-        .status-off { color: #f87171; font-weight: bold; }
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            background-color: #05050a;
+            background-image: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #05050a 100%);
+            color: #e2e8f0;
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 850px;
+            background: rgba(22, 27, 34, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(88, 166, 255, 0.2);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 0 30px rgba(0, 243, 255, 0.1);
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        h2 {
+            color: #00f3ff;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
+        }
+
+        .counter {
+            font-size: 15px;
+            color: #8b949e;
+            margin-bottom: 25px;
+        }
+
+        .counter span {
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .actions {
+            margin-bottom: 25px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            margin: 0 5px;
+        }
+
+        .btn-green {
+            background: linear-gradient(135deg, #238636, #2ea043);
+            color: white;
+        }
+
+        .btn-green:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(46, 160, 67, 0.5);
+        }
+
+        .btn-red {
+            background: linear-gradient(135deg, #da3633, #f85149);
+            color: white;
+        }
+
+        .btn-red:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 15px rgba(248, 81, 73, 0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: center;
+        }
+
+        th {
+            background: rgba(33, 38, 45, 0.9);
+            color: #00f3ff;
+            font-weight: 600;
+            border-bottom: 2px solid #30363d;
+        }
+
+        tr {
+            transition: background 0.3s ease;
+            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+        }
+
+        tr:hover {
+            background: rgba(0, 243, 255, 0.05);
+        }
+
+        .status-aktif {
+            color: #3fb950;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(63, 185, 80, 0.4);
+            animation: pulse 1.5s infinite;
+        }
+
+        .status-kapali {
+            color: #f85149;
+            font-weight: 700;
+            text-shadow: 0 0 8px rgba(248, 81, 73, 0.4);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.8; }
+            50% { opacity: 1; text-shadow: 0 0 15px rgba(63, 185, 80, 0.8); }
+            100% { opacity: 0.8; }
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>NEON SOFTWARE - Canlı Cihaz Yönetimi</h2>
-    <p>Aktif Cihaz Sayısı: <span id="device-count">0</span></p>
+    <h2>NEON SOFTWARE</h2>
+    <div class="counter">Canlı Cihaz Yönetimi | Aktif Cihaz Sayısı: <span id="device-count">0</span></div>
     
-    <div style="margin-bottom: 15px;">
-        <button onclick="setCommand('all', '1')">Tüm PC'lerde Sistemi Aç</button>
-        <button class="btn-danger" onclick="setCommand('all', '0')">Tüm PC'lerde Servisi Kapat</button>
+    <div class="actions">
+        <button class="btn-green" onclick="setCommand('all', '1')">Tüm PC'lerde Sistemi Aç</button>
+        <button class="btn-red" onclick="setCommand('all', '0')">Tüm PC'lerde Servisi Kapat</button>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Seç</th>
                 <th>Bilgisayar Adı (PC)</th>
                 <th>HWID</th>
                 <th>Sunucu Durumu</th>
@@ -40,57 +159,59 @@
             </tr>
         </thead>
         <tbody id="device-list">
-            <!-- Veriler JS ile doldurulacak -->
+            <tr><td colspan="4" style="color: #8b949e;">Sunucu bağlantısı bekleniyor...</td></tr>
         </tbody>
     </table>
 </div>
 
 <script>
-async function fetchDevices() {
-    try {
-        let response = await fetch('api.php?action=get_devices');
-        let devices = await response.json();
-        
-        let tbody = document.getElementById('device-list');
-        tbody.innerHTML = '';
-        document.getElementById('device-count').innerText = devices.length;
-
-        devices.forEach(dev => {
-            let isOnline = (Math.floor(Date.now() / 1000) - dev.last_seen) < 30; // Son 30 saniye içinde ping attıysa
-            let stateText = dev.command == '1' ? '<span class="status-on">SİSTEM AÇIK</span>' : '<span class="status-off">SERVER KAPALI</span>';
+function fetchDevices() {
+    fetch('api.php?action=get_devices')
+        .then(response => response.json())
+        .then(data => {
+            const tbody = document.getElementById('device-list');
+            const countSpan = document.getElementById('device-count');
+            tbody.innerHTML = '';
             
-            let tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td><input type="radio" name="selected_pc" value="${dev.hwid}" id="pc_${dev.hwid}"></td>
-                <td>${dev.pc_name}</td>
-                <td><small>${dev.hwid.substring(0, 10)}...</small></td>
-                <td>${stateText} ${isOnline ? '(Bağlı)' : '(Çevrimdışı)'}</td>
-                <td>
-                    <button onclick="setCommand('${dev.hwid}', '1')">Aç</button>
-                    <button class="btn-danger" onclick="setCommand('${dev.hwid}', '0')">Kapat</button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-        });
-    } catch (e) {
-        console.error("Veri alınamadı", e);
-    }
+            if (!data || data.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="4" style="color: #8b949e;">Bağlı aktif cihaz bulunmuyor.</td></tr>';
+                countSpan.innerText = '0';
+                return;
+            }
+
+            countSpan.innerText = data.length;
+            data.forEach(dev => {
+                let statusText = dev.command === '1' ? '<span class="status-aktif">AKTİF</span>' : '<span class="status-kapali">KAPALI</span>';
+                let actionBtn = dev.command === '1' 
+                    ? `<button class="btn-red" onclick="setCommand('${dev.hwid}', '0')">Kapat</button>` 
+                    : `<button class="btn-green" onclick="setCommand('${dev.hwid}', '1')">Aç</button>`;
+
+                let tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${dev.pc_name}</td>
+                    <td><code style="color: #00f3ff;">${dev.hwid}</code></td>
+                    <td>${statusText}</td>
+                    <td>${actionBtn}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }).catch(err => console.error("Veri çekme hatası:", err));
 }
 
-async function setCommand(hwid, cmd) {
+function setCommand(hwid, command) {
     let formData = new URLSearchParams();
     formData.append('hwid', hwid);
-    formData.append('command', cmd);
+    formData.append('command', command);
 
-    await fetch('api.php?action=set_command', {
+    fetch('api.php?action=set_command', {
         method: 'POST',
         body: formData
+    }).then(() => {
+        fetchDevices();
     });
-    fetchDevices();
 }
 
-// Her 3 saniyede bir listeyi güncelle
-setInterval(fetchDevices, 3000);
+setInterval(fetchDevices, 2000);
 fetchDevices();
 </script>
 
