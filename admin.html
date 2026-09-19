@@ -2,7 +2,7 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON SOFTWARE // ADMIN PANEL</title>
+    <title>NEON SOFTWARE // ADMIN & COMMAND CENTER</title>
     <style>
         body {
             background-color: #0b0f19;
@@ -24,11 +24,28 @@
             box-shadow: 0 0 15px rgba(0, 255, 204, 0.2);
             padding: 20px;
             border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .panel-box {
+            text-align: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px dashed #00ffcc;
+            border-radius: 4px;
+        }
+        input[type="text"] {
+            padding: 9px;
+            width: 280px;
+            background: #0b0f19;
+            border: 1px solid #00ffcc;
+            color: #fff;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 3px;
         }
         table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 20px;
+            margin-top: 10px;
         }
         th, td {
             border: 1px solid #1f2937;
@@ -52,7 +69,7 @@
         .badge-offline {
             color: #ef4444;
         }
-        button {
+        button.action-btn {
             background: #ef4444;
             color: white;
             border: none;
@@ -62,8 +79,22 @@
             font-weight: bold;
             border-radius: 3px;
         }
-        button:hover {
+        button.action-btn:hover {
             background: #dc2626;
+        }
+        button.gen-btn {
+            background: #00ffcc;
+            color: #0b0f19;
+            border: none;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-family: 'Courier New', Courier, monospace;
+            border-radius: 3px;
+            margin-left: 10px;
+        }
+        button.gen-btn:hover {
+            background: #00cca3;
         }
         .refresh-info {
             text-align: right;
@@ -77,6 +108,13 @@
 
     <div class="container">
         <h1>⚡ NEON SOFTWARE // COMMAND CENTER ⚡</h1>
+        
+        <!-- Key Oluşturma Alanı -->
+        <div class="panel-box">
+            <input type="text" id="note-input" placeholder="Key Notu (Örn: Ahmet için)">
+            <button class="gen-btn" onclick="generateKey()">+ Yeni Key Oluştur</button>
+        </div>
+
         <div class="refresh-info" id="status-timer">Durum: Güncelleniyor...</div>
 
         <table>
@@ -126,13 +164,28 @@
                             <td>${client.pid > 0 ? client.pid : '-'}</td>
                             <td>${stateBadge}</td>
                             <td>${onlineBadge}</td>
-                            <td><button onclick="sendCommand('${client.hwid}', 'close')">Kapat / Close</button></td>
+                            <td><button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat / Close</button></td>
                         `;
                         tbody.appendChild(row);
                     });
                     document.getElementById('status-timer').innerText = "Son Güncelleme: " + new Date().toLocaleTimeString();
                 })
                 .catch(err => console.error('Veri çekme hatası:', err));
+        }
+
+        function generateKey() {
+            let note = document.getElementById('note-input').value;
+            let formData = new FormData();
+            formData.append('action', 'generate');
+            formData.append('note', note);
+
+            fetch('api.php', { method: 'POST', body: formData })
+                .then(res => res.json())
+                .then(res => {
+                    alert("Yeni Key Oluşturuldu: " + res.key);
+                    document.getElementById('note-input').value = '';
+                })
+                .catch(err => alert("Key oluşturulamadı!"));
         }
 
         function sendCommand(hwid, cmd) {
