@@ -20,8 +20,8 @@
         }
 
         .container {
-            width: 850px;
-            background: rgba(22, 27, 34, 0.7);
+            width: 900px;
+            background: rgba(22, 27, 34, 0.75);
             backdrop-filter: blur(12px);
             border: 1px solid rgba(88, 166, 255, 0.2);
             padding: 30px;
@@ -35,107 +35,39 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        h2 {
-            color: #00f3ff;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 5px;
-            text-shadow: 0 0 10px rgba(0, 243, 255, 0.5);
-        }
-
-        .counter {
-            font-size: 15px;
-            color: #8b949e;
-            margin-bottom: 25px;
-        }
-
-        .counter span {
-            color: #3fb950;
-            font-weight: bold;
-        }
-
-        .actions {
-            margin-bottom: 25px;
-        }
+        h2 { color: #00f3ff; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 5px; text-shadow: 0 0 10px rgba(0, 243, 255, 0.5); }
+        .counter { font-size: 15px; color: #8b949e; margin-bottom: 25px; }
+        .counter span { color: #3fb950; font-weight: bold; }
+        .actions { margin-bottom: 25px; }
 
         button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            font-family: 'Poppins', sans-serif;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            margin: 0 5px;
+            padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-family: 'Poppins', sans-serif;
+            transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 0 5px;
         }
+        .btn-green { background: linear-gradient(135deg, #238636, #2ea043); color: white; }
+        .btn-red { background: linear-gradient(135deg, #da3633, #f85149); color: white; }
+        .btn-green:hover, .btn-red:hover { transform: translateY(-2px); }
 
-        .btn-green {
-            background: linear-gradient(135deg, #238636, #2ea043);
-            color: white;
-        }
+        table { width: 100%; border-collapse: collapse; overflow: visible; border-radius: 10px; }
+        th, td { padding: 15px; text-align: center; position: relative; }
+        th { background: rgba(33, 38, 45, 0.9); color: #00f3ff; font-weight: 600; border-bottom: 2px solid #30363d; }
+        tr { transition: background 0.3s ease; border-bottom: 1px solid rgba(48, 54, 61, 0.5); }
+        tr:hover { background: rgba(0, 243, 255, 0.05); }
 
-        .btn-green:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(46, 160, 67, 0.5);
-        }
+        .status-aktif { color: #3fb950; font-weight: 700; text-shadow: 0 0 8px rgba(63, 185, 80, 0.4); }
+        .status-kapali { color: #f85149; font-weight: 700; text-shadow: 0 0 8px rgba(248, 81, 73, 0.4); }
 
-        .btn-red {
-            background: linear-gradient(135deg, #da3633, #f85149);
-            color: white;
+        /* Üç Nokta Menü Stili */
+        .dropdown { position: display: inline-block; }
+        .dropbtn { background: #21262d; color: #c9d1d9; padding: 6px 12px; border-radius: 6px; cursor: pointer; border: 1px solid #30363d; font-size: 16px; }
+        .dropbtn:hover { background: #30363d; color: #00f3ff; }
+        .dropdown-content {
+            display: none; position: absolute; right: 20px; top: 50px; background: #161b22; min-width: 180px;
+            box-shadow: 0px 8px 16px rgba(0,0,0,0.4); border: 1px solid #30363d; border-radius: 8px; z-index: 10; text-align: left;
         }
-
-        .btn-red:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 0 15px rgba(248, 81, 73, 0.5);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            overflow: hidden;
-            border-radius: 10px;
-        }
-
-        th, td {
-            padding: 15px;
-            text-align: center;
-        }
-
-        th {
-            background: rgba(33, 38, 45, 0.9);
-            color: #00f3ff;
-            font-weight: 600;
-            border-bottom: 2px solid #30363d;
-        }
-
-        tr {
-            transition: background 0.3s ease;
-            border-bottom: 1px solid rgba(48, 54, 61, 0.5);
-        }
-
-        tr:hover {
-            background: rgba(0, 243, 255, 0.05);
-        }
-
-        .status-aktif {
-            color: #3fb950;
-            font-weight: 700;
-            text-shadow: 0 0 8px rgba(63, 185, 80, 0.4);
-            animation: pulse 1.5s infinite;
-        }
-
-        .status-kapali {
-            color: #f85149;
-            font-weight: 700;
-            text-shadow: 0 0 8px rgba(248, 81, 73, 0.4);
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.8; }
-            50% { opacity: 1; text-shadow: 0 0 15px rgba(63, 185, 80, 0.8); }
-            100% { opacity: 0.8; }
-        }
+        .dropdown-content a { color: #c9d1d9; padding: 10px 15px; text-decoration: none; display: block; font-size: 13px; }
+        .dropdown-content a:hover { background: #1f6feb; color: white; border-radius: 6px; }
+        .show { display: block; }
     </style>
 </head>
 <body>
@@ -147,6 +79,8 @@
     <div class="actions">
         <button class="btn-green" onclick="setCommand('all', '1')">Tüm PC'lerde Sistemi Aç</button>
         <button class="btn-red" onclick="setCommand('all', '0')">Tüm PC'lerde Servisi Kapat</button>
+        <input type="file" id="global-update-file" style="display:none" onchange="uploadUpdate('all')">
+        <button class="btn-green" onclick="document.getElementById('global-update-file').click()">Tümüne Güncelleme Getir (.exe)</button>
     </div>
 
     <table>
@@ -155,7 +89,7 @@
                 <th>Bilgisayar Adı (PC)</th>
                 <th>HWID</th>
                 <th>Sunucu Durumu</th>
-                <th>İşlem</th>
+                <th>İşlem / Menü</th>
             </tr>
         </thead>
         <tbody id="device-list">
@@ -180,35 +114,77 @@ function fetchDevices() {
             }
 
             countSpan.innerText = data.length;
-            data.forEach(dev => {
+            data.forEach((dev, index) => {
                 let statusText = dev.command === '1' ? '<span class="status-aktif">AKTİF</span>' : '<span class="status-kapali">KAPALI</span>';
                 let actionBtn = dev.command === '1' 
-                    ? `<button class="btn-red" onclick="setCommand('${dev.hwid}', '0')">Kapat</button>` 
-                    : `<button class="btn-green" onclick="setCommand('${dev.hwid}', '1')">Aç</button>`;
+                    ? `<button class="btn-red" onclick="setCommand('${dev.hwid}', '0')" style="padding:5px 10px; font-size:12px;">Kapat</button>` 
+                    : `<button class="btn-green" onclick="setCommand('${dev.hwid}', '1')" style="padding:5px 10px; font-size:12px;">Aç</button>`;
 
                 let tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>${dev.pc_name}</td>
                     <td><code style="color: #00f3ff;">${dev.hwid}</code></td>
                     <td>${statusText}</td>
-                    <td>${actionBtn}</td>
+                    <td>
+                        ${actionBtn}
+                        <div class="dropdown" style="display:inline-block; margin-left:5px;">
+                            <button class="dropbtn" onclick="toggleMenu(${index})">⋮</button>
+                            <div id="myDropdown-${index}" class="dropdown-content">
+                                <a href="#" onclick="triggerFileInput('${dev.hwid}')">🔄 Güncelleme Getir (.exe)</a>
+                            </div>
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
         }).catch(err => console.error("Veri çekme hatası:", err));
 }
 
+let targetUpdateHwid = '';
+function triggerFileInput(hwid) {
+    targetUpdateHwid = hwid;
+    let input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.exe';
+    input.onchange = e => {
+        let file = e.target.files[0];
+        if (file) { uploadFileToServer(targetUpdateHwid, file); }
+    };
+    input.click();
+}
+
+function uploadFileToServer(hwid, file) {
+    let formData = new FormData();
+    formData.append('hwid', hwid);
+    formData.append('update_file', file);
+
+    fetch('api.php?action=push_update', {
+        method: 'POST',
+        body: formData
+    }).then(res => res.json()).then(data => {
+        alert(data.message);
+        fetchDevices();
+    });
+}
+
+function toggleMenu(index) {
+    document.querySelectorAll('.dropdown-content').forEach((el, idx) => {
+        if(idx !== index) el.classList.remove('show');
+    });
+    document.getElementById(`myDropdown-${index}`).classList.toggle('show');
+}
+
+window.onclick = function(event) {
+    if (!event.target.matches('.dropbtn')) {
+        document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+    }
+}
+
 function setCommand(hwid, command) {
     let formData = new URLSearchParams();
     formData.append('hwid', hwid);
     formData.append('command', command);
-
-    fetch('api.php?action=set_command', {
-        method: 'POST',
-        body: formData
-    }).then(() => {
-        fetchDevices();
-    });
+    fetch('api.php?action=set_command', { method: 'POST', body: formData }).then(() => fetchDevices());
 }
 
 setInterval(fetchDevices, 2000);
