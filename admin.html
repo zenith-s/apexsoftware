@@ -65,43 +65,26 @@
         .badge-waiting { color: #f59e0b; }
         .badge-offline { color: #ef4444; }
         button.action-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            border-radius: 3px;
+            background: #ef4444; color: white; border: none; padding: 5px 10px; cursor: pointer; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-radius: 3px;
         }
-        button.action-btn:hover { background: #dc2626; }
         button.open-btn {
-            background: #10b981;
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            font-weight: bold;
-            border-radius: 3px;
+            background: #10b981; color: white; border: none; padding: 5px 10px; cursor: pointer; font-family: 'Courier New', Courier, monospace; font-weight: bold; border-radius: 3px;
         }
-        button.open-btn:hover { background: #059669; }
         button.gen-btn {
-            background: #00ffcc;
-            color: #0b0f19;
-            border: none;
-            padding: 10px 20px;
-            font-weight: bold;
-            cursor: pointer;
-            font-family: 'Courier New', Courier, monospace;
-            border-radius: 3px;
+            background: #00ffcc; color: #0b0f19; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; font-family: 'Courier New', Courier, monospace; border-radius: 3px;
         }
         button.gen-btn:hover { background: #00cca3; }
         .refresh-info {
-            text-align: right;
+            text-align: right; font-size: 12px; color: #6b7280; margin-bottom: 10px;
+        }
+        .log-box {
+            background: #05070c;
+            border: 1px solid #1f2937;
+            padding: 10px;
+            height: 150px;
+            overflow-y: auto;
             font-size: 12px;
-            color: #6b7280;
-            margin-bottom: 10px;
+            color: #a7f3d0;
         }
     </style>
 </head>
@@ -152,15 +135,22 @@
                 </tr>
             </thead>
             <tbody id="client-table-body">
-                <tr><td colspan="6" style="text-align: center;">Yükleniyor...</td></tr>
+                <tr><td colspan="6" style="text-align: center;">Aktif cihaz bulunamadı.</td></tr>
             </tbody>
         </table>
     </div>
 
+    <!-- C++'dan ve Dışarıdan Gelen Ham İstekleri Görme Ekranı -->
+    <div class="container">
+        <h1>⚡ GELEN HAM İSTEKLER (LIVE API LOGS) ⚡</h1>
+        <div class="log-box" id="log-box-content">
+            İstekler bekleniyor...
+        </div>
+    </div>
+
     <script>
         function fetchData() {
-            // Keyleri Çek
-            fetch('api.php?action=get_keys')
+            fetch('/api.php?action=get_keys')
                 .then(res => res.json())
                 .then(data => {
                     const tbody = document.getElementById('keys-table-body');
@@ -183,35 +173,46 @@
                     });
                 });
 
-            // Aktif Cihazları Çek (C++'dan gelenler buraya düşecek)
-            fetch('api.php?action=get_clients')
+            fetch('/api.php?action=get_clients')
                 .then(res => res.json())
-                .then(data => {
+                .then(resData => {
+                    const data = resData.clients || [];
+                    const logs = resData.logs || [];
+
+                    // Cihazları doldur
                     const tbody = document.getElementById('client-table-body');
                     tbody.innerHTML = '';
                     if (!Array.isArray(data) || data.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Aktif cihaz bulunamadı.</td></tr>';
-                        return;
-                    }
-                    data.forEach(client => {
-                        let row = document.createElement('tr');
-                        let stateBadge = client.vgk_state === 'active' ? '<span class="badge-active">OYUNDA</span>' : '<span class="badge-waiting">BEKLİYOR</span>';
-                        let onlineBadge = client.online ? '<span class="badge-active">ÇEVRİM İÇİ</span>' : '<span class="badge-offline">ÇEVRİM DIŞI</span>';
-                        
-                        let actionButton = client.banned 
-                            ? `<button class="open-btn" onclick="sendCommand('${client.hwid}', 'open')">Aç</button>` 
-                            : `<button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button>`;
+                    } else {
+                        data.forEach(client => {
+                            let row = document.createElement('tr');
+                            let stateBadge = client.vgk_state === 'active' ? '<span class="badge-active">OYUNDA</span>' : '<span class="badge-waiting">BEKLİYOR</span>';
+                            let onlineBadge = client.online ? '<span class="badge-active">ÇEVRİM İÇİ</span>' : '<span class="badge-offline">ÇEVRİM DIŞI</span>';
+                            let actionButton = client.banned 
+                                ? `<button class="open-btn" onclick="sendCommand('${client.hwid}', 'open')">Aç</button>` 
+                                : `<button class="action-btn" onclick="sendCommand('${client.hwid}', 'close')">Kapat</button>`;
 
-                        row.innerHTML = `
-                            <td>${client.pc_name}</td>
-                            <td style="font-size: 11px; color: #9ca3af;">${client.hwid}</td>
-                            <td>${client.pid > 0 ? client.pid : '-'}</td>
-                            <td>${stateBadge}</td>
-                            <td>${onlineBadge}</td>
-                            <td>${actionButton}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
+                            row.innerHTML = `
+                                <td>${client.pc_name}</td>
+                                <td style="font-size: 11px; color: #9ca3af;">${client.hwid}</td>
+                                <td>${client.pid > 0 ? client.pid : '-'}</td>
+                                <td>${stateBadge}</td>
+                                <td>${onlineBadge}</td>
+                                <td>${actionButton}</td>
+                            `;
+                            tbody.appendChild(row);
+                        });
+                    }
+
+                    // Ham logları ekrana bas
+                    const logBox = document.getElementById('log-box-content');
+                    if (logs.length > 0) {
+                        logBox.innerHTML = logs.map(l => `[${l.time}] - IP: ${l.ip} - İstek: ${l.query}`).join('<br>');
+                    } else {
+                        logBox.innerHTML = "Henüz gelen istek yok.";
+                    }
+
                     document.getElementById('status-timer').innerText = "Son Güncelleme: " + new Date().toLocaleTimeString();
                 });
         }
@@ -219,12 +220,12 @@
         function generateKey() {
             let note = document.getElementById('note-input').value;
             let days = document.getElementById('days-input').value;
-            let formData = new FormData();
+            let formData = new URLSearchParams();
             formData.append('action', 'generate');
             formData.append('note', note);
             formData.append('days', days);
 
-            fetch('api.php', { method: 'POST', body: formData })
+            fetch('/api.php', { method: 'POST', body: formData })
                 .then(res => res.json())
                 .then(res => {
                     alert("Key Oluşturuldu: " + res.key);
@@ -235,23 +236,22 @@
 
         function deleteKey(key) {
             if (!confirm(key + " silinsin mi?")) return;
-            let formData = new FormData();
+            let formData = new URLSearchParams();
             formData.append('action', 'delete_key');
             formData.append('key', key);
-            fetch('api.php', { method: 'POST', body: formData }).then(() => fetchData());
+            fetch('/api.php', { method: 'POST', body: formData }).then(() => fetchData());
         }
 
         function sendCommand(hwid, cmd) {
-            let msg = cmd === 'close' ? "Cihaz kapatılsın mı?" : "Cihazın banı kaldırılsın mı (Tekrar açılsın mı)?";
+            let msg = cmd === 'close' ? "Cihaz kapatılsın mı?" : "Cihazın banı kaldırılsın mı?";
             if (!confirm(msg)) return;
-            let formData = new FormData();
+            let formData = new URLSearchParams();
             formData.append('action', 'send_cmd');
             formData.append('hwid', hwid);
             formData.append('cmd', cmd);
-            fetch('api.php', { method: 'POST', body: formData }).then(() => fetchData());
+            fetch('/api.php', { method: 'POST', body: formData }).then(() => fetchData());
         }
 
-        // Her 4 saniyede bir paneli ve cihazları otomatik yenile
         setInterval(fetchData, 4000);
         fetchData();
     </script>
