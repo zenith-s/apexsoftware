@@ -1,69 +1,74 @@
 <?php
 header("Content-Type: application/json; charset=utf-8");
 
-// Veritabanı bağlantı ayarları (Render veya kendi sunucun)
-$host = "localhost";
-$db   = "neon_db";
-$user = "root";
-$pass = "";
-
-try {
-    $pdo = new PDO("mysql:host=$host;dbname=$db;charset=utf8mb4", $user, $pass);
-} catch (\PDOException $e) {
-    // Veritabanı yoksa JSON tabanlı veya dosya tabanlı loglama simülasyonu
-}
+$logFile = 'sys_logs.json'; // Logları tutacağımız dosya tabanlı veritabanı simülasyonu (MySQL de kullanabilirsin)
 
 $action = $_GET['action'] ?? '';
 
-// İstekleri listeleme (HTML paneli için)
-if ($action === 'get_logs') {
-    // Veritabanından logları ve aktif cihazları JSON olarak döndür
-    // Örnek yapı:
-    echo json_encode([
-        "status" => "success",
-        "logs" => [
-            ["time" => "19:08:12", "type" => "SUCCESS", "text" => "IP: 192.168.1.15 - Key: NEON-VIP-2026 - HWID: NEON-9A8B7C onaylandı."],
-            ["time" => "19:05:40", "type" => "INVALID_KEY", "text" => "IP: 88.230.xx.xx - Hatalı key denemesi: 'YANLISKEY'"],
-            ["time" => "19:01:10", "type" => "BANNED", "text" => "IP: 46.196.xx.xx - Banlı HWID sisteme girmeye çalıştı!"]
-        ]
-    ]);
+// 1. Arayüz için logları ve aktif cihazları JSON olarak döndür
+if ($action === 'get_data') {
+    if (file_exists($logFile)) {
+        $data = json_decode(file_get_contents($logFile), true);
+    } else {
+        $data = ["logs" => [], "devices" => []];
+    }
+    echo json_encode($data);
     exit;
 }
 
-// C++ Loader'dan gelen doğrulama isteği
+// 2. Loader'dan gelen doğrulama ve HWID / Key istekleri
 if ($action === 'verify') {
     $key    = $_GET['key'] ?? '';
     $hwid   = $_GET['hwid'] ?? '';
     $pcname = $_GET['pc_name'] ?? 'Bilinmeyen PC';
     $ip     = $_SERVER['REMOTE_ADDR'];
+    $time   = date('H:i:s');
+
+    $kategori = "SUCCESS";
+    $mesaj = "";
 
     if (empty($key)) {
-        loglariKaydet($ip, $pcname, $hwid, $key, "INVALID_KEY", "Boş key denemesi");
-        echo "INVALID_KEY";
-        exit;
-    }
-
-    // Ban kontrolü
-    if ($key === "BANLI-KEY" || $hwid === "BANLI-HWID") {
-        loglariKaydet($ip, $pcname, $hwid, $key, "BANNED", "Banlı kullanıcı giriş denemesi");
+        $kategori = "INVALID_KEY";
+        $mesaj = "Boş key denemesi yapıldı.";
+        echo "EMPTY_KEY";
+    } elseif ($key === "BANLI-KEY" || $hwid === "BANLI-HWID") {
+        $kategori = "BANNED";
+        $mesaj = "Banlı HWID veya Key ile erişim engellendi!";
         echo "BANNED";
-        exit;
-    }
-
-    // Geçersiz key kontrolü
-    if ($key !== "NEON-VIP-2026") {
-        loglariKaydet($ip, $pcname, $hwid, $key, "INVALID_KEY", "Geçersiz key denemesi: " . $key);
+    } elseif ($key !== "NEON-VIP-2026") {
+        $kategori = "INVALID_KEY";
+        $mesaj = "Geçersiz key girildi: " . $key;
         echo "INVALID_KEY";
-        exit;
+    } else {
+        $kategori = "SUCCESS";
+        $mesaj = "Key ve HWID başarıyla onaylandı.";
+        echo "SUCCESS";
     }
 
-    // Başarılı giriş
-    loglariKaydet($ip, $pcname, $hwid, $key, "SUCCESS", "Başarılı giriş yapıldı.");
-    echo "SUCCESS";
+    // Logu kaydet
+    logEkle($time, $ip, $pcname, $hwid, $key, $kategori, $mesaj);
     exit;
 }
 
-function loglariKaydet($ip, $pcname, $hwid, $key, $kategori, $detay) {
-    // Gelen istekleri veritabanına kategori (SUCCESS, INVALID_KEY, HWID_MISMATCH, BANNED) olarak kaydeder.
+function logEkle($time, $ip, $pcname, $hwid, $key, $kategori, $mesaj) {
+    global $logFile;
+    $currentData = file_exists($logFile) ? json_decode(file_get_contents($logFile), true) : ["logs" => [], "devices" => []];
+    
+    // Yeni logu en başa ekle (En fazla 700 satır/kayıt tutulsun)
+    array_unshift($currentData["logs"], [
+        "time" => $time,
+        "ip" => $ip,
+        "pc" => $pcname,
+        "hwid" => $hwid,
+        "key" => $key,
+        "type" => $kategori,
+        "text" => $mesaj
+    ]);
+
+    if (count($currentData["logs"]) > 700) {
+        array_pop($currentData["logs"]); // 700'den fazlasını uçur
+    }
+
+    file_put_contents($logFile, json_encode($currentData, JSON_UNESCAPED_UNICODE));
 }
 ?>
