@@ -2,7 +2,6 @@
 header("Content-Type: application/json; charset=UTF-8");
 error_reporting(0);
 
-// Verilerin tutulduğu basit bir JSON veritabanı dosyası
 $dbFile = "clients_db.json";
 
 function loadDb() {
@@ -19,7 +18,7 @@ function saveDb($data) {
 
 $action = isset($_REQUEST['action']) ? $_REQUEST['action'] : '';
 
-// --- C++ LOADER TARAFINDAN ÇAĞRILAN KISIM (Heartbeat & Update) ---
+// --- C++ LOADER TARAFINDAN ÇAĞRILAN KISIM ---
 if ($action === 'update') {
     $hwid = isset($_POST['hwid']) ? preg_replace('/[^a-zA-Z0-9_-]/', '', $_POST['hwid']) : '';
     $pcName = isset($_POST['pc_name']) ? htmlspecialchars($_POST['pc_name']) : 'Unknown';
@@ -32,21 +31,28 @@ if ($action === 'update') {
     }
 
     $db = loadDb();
-    $found = false;
+    
+    // 1. Önce bu HWID banlanmış/engellenmiş mi kontrol et
+    foreach ($db as $client) {
+        if ($client['hwid'] === $hwid && isset($client['banned']) && $client['banned'] === true) {
+            // Engellenen cihaza kalıcı kapatma komutu gönder
+            echo json_encode(["status" => "blocked", "cmd" => "terminate"]);
+            exit;
+        }
+    }
 
+    $found = false;
     foreach ($db as &$client) {
         if ($client['hwid'] === $hwid) {
             $client['pc_name'] = $pcName;
             $client['pid'] = $pid;
             $client['vgk_state'] = $vgkState;
             $client['last_seen'] = time();
-            // Eğer panelden bu cihaza özel bir komut atanmadıysa boş bırakma
             $found = true;
             break;
         }
     }
 
-    // Yeni cihaz ise kaydet
     if (!$found) {
         $db[] = [
             "hwid" => $hwid,
@@ -54,18 +60,18 @@ if ($action === 'update') {
             "pid" => $pid,
             "vgk_state" => $vgkState,
             "last_seen" => time(),
-            "cmd" => "none"
+            "cmd" => "none",
+            "banned" => false
         ];
     }
 
     saveDb($db);
 
-    // İlgili cihaza panelden komut gönderilmiş mi kontrol et
+    // Komut kontrolü
     $assignedCmd = "none";
     foreach ($db as $client) {
         if ($client['hwid'] === $hwid) {
             $assignedCmd = isset($client['cmd']) ? $client['cmd'] : "none";
-            // Komut bir kez okunduktan sonra sıfırlanabilir veya tutulabilir
             break;
         }
     }
@@ -76,14 +82,12 @@ if ($action === 'update') {
 
 // --- WEB PANEL TARAFINDAN ÇAĞRILAN KISIMLAR ---
 
-// Cihazları Listeleme
 if ($action === 'get_clients') {
     $db = loadDb();
     $activeClients = [];
     $currentTime = time();
 
     foreach ($db as $client) {
-        // 25 saniye içinde sinyal gönderdiyse çevrim içi say
         $client['online'] = ($currentTime - $client['last_seen']) <= 25;
         $activeClients[] = $client;
     }
@@ -92,7 +96,7 @@ if ($action === 'get_clients') {
     exit;
 }
 
-// Panele Özel Komut Gönderme (Örn: Close / Ban)
+// Kapat komutu verildiğinde hem close atar hem de cihazı kalıcı olarak engeller (banned = true)
 if ($action === 'send_cmd') {
     $hwid = isset($_POST['hwid']) ? $_POST['hwid'] : '';
     $command = isset($_POST['cmd']) ? $_POST['cmd'] : 'none';
@@ -101,6 +105,9 @@ if ($action === 'send_cmd') {
     foreach ($db as &$client) {
         if ($client['hwid'] === $hwid) {
             $client['cmd'] = $command;
+            if ($command === 'close') {
+                $client['banned'] = true; // Sunucu artık bu PC'nin isteklerini reddedecek
+            }
             break;
         }
     }
