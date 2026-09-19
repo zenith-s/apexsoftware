@@ -1,31 +1,100 @@
-<!-- NEON SOFTWARE RELEASE [v1.3] -->
+<!-- NEON SOFTWARE RELEASE [v1.4] -->
 <!DOCTYPE html>
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
     <title>NEON SOFTWARE - Yönetim Paneli</title>
     <style>
-        * { box-sizing: border-box; }
-        body { background-color: #07090e; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; display: flex; justify-content: center; }
-        .panel-container { background: #0f172a; border: 1px solid #1e293b; border-radius: 16px; width: 1050px; padding: 30px; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5); }
-        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #1e293b; padding-bottom: 20px; margin-bottom: 25px; }
-        h2 { color: #f43f5e; margin: 0; font-size: 22px; font-family: monospace; }
-        .stats-badge { background: #1e293b; color: #38bdf8; padding: 6px 14px; border-radius: 20px; font-size: 13px; font-family: monospace; border: 1px solid #334155; }
-        .stats-badge span { color: #22c55e; font-weight: bold; }
+        * { box-sizing: border-box; transition: all 0.25s ease; }
+        body { background-color: #05070a; color: #e2e8f0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 40px; display: flex; justify-content: center; overflow-x: hidden; }
+        
+        .panel-container { 
+            background: rgba(15, 23, 42, 0.75); 
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(244, 63, 94, 0.2); 
+            border-radius: 20px; 
+            width: 1050px; 
+            padding: 35px; 
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(244, 63, 94, 0.05);
+            animation: fadeIn 0.8s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .header-flex { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(30, 41, 59, 0.8); padding-bottom: 20px; margin-bottom: 25px; }
+        
+        h2 { 
+            color: #f43f5e; 
+            margin: 0; 
+            font-size: 24px; 
+            font-family: monospace; 
+            letter-spacing: 1px;
+            text-shadow: 0 0 10px rgba(244, 63, 94, 0.4);
+        }
+
+        .stats-badge { 
+            background: rgba(30, 41, 59, 0.6); 
+            color: #38bdf8; 
+            padding: 8px 16px; 
+            border-radius: 30px; 
+            font-size: 13px; 
+            font-family: monospace; 
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: inset 0 0 10px rgba(56, 189, 248, 0.05);
+        }
+        .stats-badge span { color: #22c55e; font-weight: bold; text-shadow: 0 0 8px rgba(34, 197, 94, 0.5); }
+
         .btn-group { margin-bottom: 25px; display: flex; gap: 12px; }
-        button { padding: 11px 20px; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; color: white; font-size: 13px; transition: 0.2s; }
-        button:hover { opacity: 0.85; transform: translateY(-1px); }
-        .btn-green { background-color: #16a34a; }
-        .btn-red { background-color: #dc2626; }
-        .btn-blue { background-color: #2563eb; }
-        .table-wrapper { overflow-x: auto; border-radius: 10px; border: 1px solid #1e293b; }
-        table { width: 100%; border-collapse: collapse; text-align: left; background: #0b0f19; }
-        th, td { padding: 14px 18px; font-size: 13px; border-bottom: 1px solid #1e293b; }
-        th { background: #111827; color: #38bdf8; font-family: monospace; text-transform: uppercase; font-size: 11px; }
-        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; font-family: monospace; }
-        .pill-online { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.3); }
-        .pill-offline { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.3); }
-        .empty-row { text-align: center; color: #64748b; padding: 30px; font-style: italic; }
+        
+        button { 
+            padding: 12px 22px; 
+            border: none; 
+            border-radius: 10px; 
+            font-weight: 600; 
+            cursor: pointer; 
+            color: white; 
+            font-size: 13px; 
+            position: relative;
+            overflow: hidden;
+        }
+        button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.3); filter: brightness(1.1); }
+        button:active { transform: translateY(1px); }
+
+        .btn-green { background: linear-gradient(135deg, #16a34a, #15803d); box-shadow: 0 4px 15px rgba(22, 163, 74, 0.3); }
+        .btn-red { background: linear-gradient(135deg, #dc2626, #b91c1c); box-shadow: 0 4px 15px rgba(220, 38, 38, 0.3); }
+        .btn-blue { background: linear-gradient(135deg, #2563eb, #1d4ed8); box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+
+        .table-wrapper { 
+            overflow-x: auto; 
+            border-radius: 12px; 
+            border: 1px solid rgba(30, 41, 59, 0.8); 
+            background: rgba(11, 15, 25, 0.6);
+        }
+        
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 16px 20px; font-size: 13px; border-bottom: 1px solid rgba(30, 41, 59, 0.5); }
+        th { background: rgba(17, 24, 39, 0.9); color: #38bdf8; font-family: monospace; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+
+        tr { animation: rowAppear 0.4s ease-out; }
+        @keyframes rowAppear {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .status-pill { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 20px; font-size: 11px; font-weight: bold; font-family: monospace; }
+        .pill-online { background: rgba(34, 197, 94, 0.15); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.4); box-shadow: 0 0 10px rgba(34, 197, 94, 0.1); animation: pulseGlow 2s infinite; }
+        .pill-offline { background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.4); }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(34, 197, 94, 0.6); }
+            100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.2); }
+        }
+
+        .empty-row { text-align: center; color: #64748b; padding: 40px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -53,7 +122,7 @@
                 </tr>
             </thead>
             <tbody id="deviceTableBody">
-                <tr><td colspan="4" class="empty-row">Veriler yükleniyor...</td></tr>
+                <tr><td colspan="4" class="empty-row">Sinyaller bekleniyor...</td></tr>
             </tbody>
         </table>
     </div>
@@ -61,7 +130,7 @@
 
 <script>
     function getApiUrl(actionParam) {
-        let endpoint = atob('YXBpLnBocA=='); // api.php (Base64)
+        let endpoint = atob('YXBpLnBocA==');
         return `${endpoint}?${actionParam}`;
     }
 
@@ -74,7 +143,8 @@
                     document.getElementById('totalCount').innerText = data.total_count;
                     
                     let tbody = document.getElementById('deviceTableBody');
-                    tbody.innerHTML = '';
+                    let currentHtml = tbody.innerHTML;
+                    let newHtml = '';
 
                     if (data.devices.length === 0) {
                         tbody.innerHTML = '<tr><td colspan="4" class="empty-row">Kayıtlı cihaz yok.</td></tr>';
@@ -86,28 +156,32 @@
                             ? `<span class="status-pill pill-online">● ÇEVRİM İÇİ</span>` 
                             : `<span class="status-pill pill-offline">○ ÇEVRİM DIŞI</span>`;
 
-                        tbody.innerHTML += `<tr>
+                        newHtml += `<tr>
                             <td><strong>${dev.pc_name}</strong></td>
                             <td style="font-family: monospace; color: #94a3b8;">${dev.hwid}</td>
                             <td>${statusHtml}</td>
-                            <td><button class="btn-red" style="padding: 5px 10px; font-size: 11px;" onclick="sendTargetCommand('${dev.hwid}', 'close')">Kapat</button></td>
+                            <td><button class="btn-red" style="padding: 6px 12px; font-size: 11px;" onclick="sendTargetCommand('${dev.hwid}', 'close')">Kapat</button></td>
                         </tr>`;
                     });
+
+                    if (currentHtml !== newHtml) {
+                        tbody.innerHTML = newHtml;
+                    }
                 }
             });
     }
 
     function sendGlobalCommand(cmd) {
         fetch(getApiUrl(`action=send_command&hwid=all&cmd=${cmd}`))
-            .then(() => alert("Toplu komut gönderildi!"));
+            .then(() => alert("Toplu komut başarıyla kuyruğa eklendi!"));
     }
 
     function sendTargetCommand(hwid, cmd) {
         fetch(getApiUrl(`action=send_command&hwid=${hwid}&cmd=${cmd}`))
-            .then(() => alert("Komut cihaza iletildi!"));
+            .then(() => alert("Cihaza kapatma komutu iletildi!"));
     }
 
-    setInterval(fetchDevices, 3000);
+    setInterval(fetchDevices, 2500);
     fetchDevices();
 </script>
 
