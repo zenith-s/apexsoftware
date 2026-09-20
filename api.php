@@ -1,90 +1,101 @@
 <?php
-header('Content-Type: application/json');
-$dbFile = 'keys.json';
+header("Content-Type: application/json; charset=utf-8");
+header("Access-Control-Allow-Origin: *");
 
-// Varsayılan veritabanı ve NEONBEST anahtarı
-if (!file_exists($dbFile)) {
-    $initial = [
-        ['key' => 'NEONBEST', 'duration' => 3600, 'duration_text' => '1 Saat', 'hwid' => null, 'first_used' => null]
+$dataFile = 'keys.json';
+
+// İlk çalışmada örnek keyleri oluşturan dosya yapısı
+if (!file_exists($dataFile)) {
+    $defaultKeys = [
+        "NEONBEST"      => ["expiry" => "1 Saat", "hwid" => ""],
+        "NEON-2925D974" => ["expiry" => "1 Dakika", "hwid" => ""]
     ];
-    file_put_contents($dbFile, json_encode($initial, JSON_PRETTY_PRINT));
+    file_put_contents($dataFile, json_encode($defaultKeys, JSON_PRETTY_PRINT));
 }
 
-$data = json_decode(file_get_contents($dbFile), true);
-$action = $_POST['action'] ?? $_GET['action'] ?? '';
+$keys = json_decode(file_get_contents($dataFile), true);
 
-// C++ Loader'dan gelen kontrol isteği
+$action    = $_GET['action'] ?? '';
+$key       = $_GET['key'] ?? '';
+$hwid      = $_GET['hwid'] ?? '';
+$pcname    = $_GET['pc_name'] ?? '';
+$admin_key = $_GET['admin_key'] ?? $_POST['admin_key'] ?? '';
+
+// 1. Ping İşlemi (Sunucuyu uyandırmak için)
+if ($action === 'ping') {
+    header("Content-Type: text/plain");
+    echo "PONG";
+    exit;
+}
+
+// 2. Loader'dan Gelen Doğrulama (Verify) İstekleri
 if ($action === 'verify') {
-    $inputKey = $_POST['key'] ?? '';
-    $inputHwid = $_POST['hwid'] ?? '';
-    
-    foreach ($data as &$item) {
-        if ($item['key'] === $inputKey) {
-            // Süre başladıysa bitiş kontrolü yap
-            if ($item['first_used'] !== null) {
-                $elapsed = time() - $item['first_used'];
-                if ($elapsed > $item['duration']) {
-                    echo json_encode(['status' => 'expired', 'message' => 'Keyinizin süresi bitti!']);
-                    exit;
-                }
-            }
-
-            // HWID Eşleştirme
-            if ($item['hwid'] === null) {
-                $item['hwid'] = $inputHwid;
-                $item['first_used'] = time(); // İlk kullanımda süre başlar
-                file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT));
-            } else if ($item['hwid'] !== $inputHwid) {
-                echo json_encode(['status' => 'hwid_mismatch', 'message' => 'Bu key başka bir cihaza bağlı!']);
-                exit;
-            }
-
-            $remaining = $item['first_used'] ? ($item['duration'] - (time() - $item['first_used'])) : $item['duration'];
-            echo json_encode(['status' => 'success', 'remaining' => $remaining]);
-            exit;
-        }
+    header("Content-Type: text/plain");
+    if (empty($key)) {
+        echo json_encode(["status" => "invalid", "message" => "Key boş olamaz!"]);
+        exit;
     }
-    echo json_encode(['status' => 'invalid', 'message' => 'Geçersiz key!']);
-    exit;
-}
 
-// Admin Paneli için Verileri Listeleme
-if ($action === 'get_data') {
-    echo json_encode($data);
-    exit;
-}
-
-// Admin Paneli için Yeni Key Üretme
-if ($action === 'create') {
-    $durationSec = intval($_POST['duration_sec'] ?? 60);
-    $durationText = $_POST['duration_text'] ?? '1 Dakika';
-    $newKey = 'NEON-' . strtoupper(substr(md5(mt_rand()), 0, 8));
-    
-    $data[] = [
-        'key' => $newKey,
-        'duration' => $durationSec,
-        'duration_text' => $durationText,
-        'hwid' => null,
-        'first_used' => null
-    ];
-    file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT));
-    echo json_encode(['status' => 'success', 'key' => $newKey]);
-    exit;
-}
-
-// HWID Sıfırlama
-if ($action === 'reset_hwid') {
-    $targetKey = $_POST['key'] ?? '';
-    foreach ($data as &$item) {
-        if ($item['key'] === $targetKey) {
-            $item['hwid'] = null;
-            $item['first_used'] = null;
-            file_put_contents($dbFile, json_encode($data, JSON_PRETTY_PRINT));
-            echo json_encode(['status' => 'success']);
-            exit;
-        }
+    // Özel Admin Key Kontrolü (Loader'da girilirse)
+    if ($key === "NEONBEST31") {
+        echo "SUCCESS|Sınırsız (Admin)";
+        exit;
     }
-    echo json_encode(['status' => 'error']);
+
+    if (array_key_exists($key, $keys)) {
+        // HWID boşsa cihaza kilitle
+        if (empty($keys[$key]['hwid'])) {
+            $keys[$key]['hwid'] = $hwid;
+            file_put_contents($dataFile, json_encode($keys, JSON_PRETTY_PRINT));
+        }
+
+        // HWID eşleşmesi kontrolü
+        if ($keys[$key]['hwid'] === $hwid) {
+            echo "SUCCESS|" . $keys[$key]['expiry'];
+        } else {
+            echo json_encode(["status" => "invalid", "message" => "Bu key başka bir cihaza (HWID) kilitlenmiş!"]);
+        }
+    } else {
+        echo json_encode(["status" => "invalid", "message" => "Geçersiz key!"]);
+    }
     exit;
 }
+
+// 3. Admin Paneli İşlemleri (Sadece 'NEONBEST31' anahtarı ile çalışır)
+if ($admin_key === "NEONBEST31") {
+    if ($action === 'get_keys') {
+        echo json_encode(["status" => "success", "keys" => $keys]);
+        exit;
+    }
+    
+    if ($action === 'reset_hwid') {
+        $target_key = $_GET['target_key'] ?? '';
+        if (isset($keys[$target_key])) {
+            $keys[$target_key]['hwid'] = ""; // HWID kilidini kaldır (Boşta yap)
+            file_put_contents($dataFile, json_encode($keys, JSON_PRETTY_PRINT));
+            echo json_encode(["status" => "success", "message" => "HWID başarıyla sıfırlandı!"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Key bulunamadı!"]);
+        }
+        exit;
+    }
+
+    if ($action === 'add_key') {
+        $new_key = $_GET['new_key'] ?? '';
+        $duration = $_GET['duration'] ?? '1 Gün';
+        if (!empty($new_key)) {
+            $keys[$new_key] = ["expiry" => $duration, "hwid" => ""];
+            file_put_contents($dataFile, json_encode($keys, JSON_PRETTY_PRINT));
+            echo json_encode(["status" => "success", "message" => "Yeni key eklendi!"]);
+        } else {
+            echo json_encode(["status" => "error", "message" => "Key adı boş olamaz!"]);
+        }
+        exit;
+    }
+} else if (!empty($admin_key)) {
+    echo json_encode(["status" => "error", "message" => "Geçersiz Admin Anahtarı!"]);
+    exit;
+}
+
+echo json_encode(["status" => "error", "message" => "Geçersiz istek."]);
 ?>
