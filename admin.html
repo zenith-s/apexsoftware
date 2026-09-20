@@ -1,101 +1,142 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<title>NEON SOFTWARE // ADMIN PANEL</title>
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap');
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: #020408; color: #fff; font-family: 'Orbitron', sans-serif; padding: 30px; }
-.panel { background: rgba(6, 10, 18, 0.94); border: 1px solid rgba(0,246,255,0.2); padding: 25px; margin-bottom: 20px; }
-h2 { color: #00f6ff; font-size: 14px; margin-bottom: 15px; letter-spacing: 2px; }
-.form-row { display: flex; gap: 15px; align-items: flex-end; }
-.input-group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
-label { font-size: 8px; color: #72828c; }
-select, input { height: 40px; background: #000; border: 1px solid #1a3c44; color: #00f6ff; padding: 0 10px; font-family: 'JetBrains Mono'; }
-button { height: 40px; padding: 0 20px; background: rgba(0,246,255,0.15); border: 1px solid #00f6ff; color: #fff; cursor: pointer; font-family: inherit; font-size: 9px; letter-spacing: 2px; }
-button:hover { background: rgba(0,246,255,0.3); }
-table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono'; font-size: 11px; margin-top: 10px; }
-th { text-align: left; padding: 10px; background: rgba(0,246,255,0.05); color: #00f6ff; border-bottom: 1px solid rgba(0,246,255,0.2); }
-td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a8b8c2; }
-.action { color: #ff3158; cursor: pointer; text-decoration: underline; }
-</style>
+    <meta charset="UTF-8">
+    <title>Neon Security - Admin Paneli</title>
+    <style>
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; }
+        h2 { color: #58a6ff; text-align: center; }
+        .login-box, .panel-box { margin-top: 20px; }
+        input, select { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 8px 12px; border-radius: 4px; margin-right: 10px; }
+        button { background: #238636; color: #white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ea043; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }
+        th { color: #58a6ff; }
+        .btn-reset { color: #f85149; background: none; border: none; cursor: pointer; font-weight: bold; }
+        .btn-reset:hover { text-decoration: underline; }
+        .hidden { display: none; }
+        .msg { margin-top: 10px; font-size: 14px; color: #3fb950; }
+    </style>
 </head>
 <body>
 
-<div class="panel">
-    <h2>YENİ LİSANS ÜRET (1 DK / 30 DK / 1 SAAT)</h2>
-    <div class="form-row">
-        <div class="input-group">
-            <label>SÜRE SEÇ</label>
-            <select id="durationSelect">
-                <option value="60|1 Dakika">1 Dakika (Test)</option>
-                <option value="1800|30 Dakika">30 Dakika</option>
-                <option value="3600|1 Saat" selected>1 Saat</option>
-                <option value="86400|24 Saat">24 Saat</option>
+<div class="container">
+    <h2>NEON SECURITY - ADMIN PANEL</h2>
+
+    <!-- Giriş Ekranı -->
+    <div id="loginSection" class="login-box">
+        <p>Lütfen Yönetici Anahtarını Girin:</p>
+        <input type="password" id="adminKeyInput" placeholder="Admin Key (NEONBEST31)">
+        <button onclick="girisYap()">Giriş Yap</button>
+        <p id="loginError" style="color: #f85149;"></p>
+    </div>
+
+    <!-- Yönetim Paneli -->
+    <div id="panelSection" class="panel-box hidden">
+        <div style="margin-bottom: 20px; background: #21262d; padding: 15px; border-radius: 6px;">
+            <h3>Yeni Lisans Key Ekle</h3>
+            <input type="text" id="newKey" placeholder="Key (Örn: NEON-ABC123)">
+            <select id="newDuration">
+                <option value="1 Dakika">1 Dakika</option>
+                <option value="1 Saat">1 Saat</option>
+                <option value="30 Gün">30 Gün</option>
+                <option value="Sınırsız">Sınırsız</option>
             </select>
+            <button onclick="keyEkle()">Ekle</button>
         </div>
-        <button onclick="createKey()">KEY OLUŞTUR</button>
+
+        <h3>Kayıtlı Lisanslar</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>LİSANS ANAHTARI</th>
+                    <th>SÜRE</th>
+                    <th>BAĞLI HWID</th>
+                    <th>İŞLEM</th>
+                </tr>
+            </thead>
+            <tbody id="keyList">
+                <!-- Dinamik doldurulacak -->
+            </tbody>
+        </table>
     </div>
 </div>
 
-<div class="panel">
-    <h2>AKTİF LİSTELER VE HWID KONTROLÜ</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>LİSANS ANAHTARI</th>
-                <th>SÜRE</th>
-                <th>BAĞLI HWID</th>
-                <th>İŞLEM</th>
-            </tr>
-        </thead>
-        <tbody id="keyTable"></tbody>
-    </table>
-</div>
-
 <script>
-async function loadKeys() {
-    let res = await fetch('api.php?action=get_data');
-    let data = await res.json();
-    let tbody = document.getElementById('keyTable');
-    tbody.innerHTML = '';
-    data.forEach(item => {
-        tbody.innerHTML += `
-            <tr>
-                <td style="color: #00f6ff; font-weight:bold;">${item.key}</td>
-                <td>${item.duration_text}</td>
-                <td>${item.hwid || '<span style="color:#555">Boşta</span>'}</td>
-                <td><span class="action" onclick="resetHwid('${item.key}')">HWID Sıfırla</span></td>
-            </tr>`;
-    });
-}
+    let adminKey = "";
 
-async function createKey() {
-    let val = document.getElementById('durationSelect').value.split('|');
-    let formData = new URLSearchParams();
-    formData.append('action', 'create');
-    formData.append('duration_sec', val[0]);
-    formData.append('duration_text', val[1]);
-
-    let res = await fetch('api.php', { method: 'POST', body: formData });
-    let result = await res.json();
-    if(result.status === 'success') {
-        alert('Oluşturulan Key: ' + result.key);
-        loadKeys();
+    function girisYap() {
+        adminKey = document.getElementById('adminKeyInput').value;
+        fetch(`api.php?action=get_keys&admin_key=${adminKey}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    document.getElementById('loginSection').classList.add('hidden');
+                    document.getElementById('panelSection').classList.remove('hidden');
+                    tabloyuGuncelle(data.keys);
+                } else {
+                    document.getElementById('loginError').innerText = "Geçersiz Admin Anahtarı!";
+                }
+            })
+            .catch(err => {
+                document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
+            });
     }
-}
 
-async function resetHwid(key) {
-    let formData = new URLSearchParams();
-    formData.append('action', 'reset_hwid');
-    formData.append('key', key);
-    await fetch('api.php', { method: 'POST', body: formData });
-    loadKeys();
-}
+    function verileriGetir() {
+        fetch(`api.php?action=get_keys&admin_key=${adminKey}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    tabloyuGuncelle(data.keys);
+                }
+            });
+    }
 
-loadKeys();
-setInterval(loadKeys, 5000); // 5 saniyede bir otomatik yenile
+    function tabloyuGuncelle(keys) {
+        const tbody = document.getElementById('keyList');
+        tbody.innerHTML = "";
+        for (const [key, info] of Object.entries(keys)) {
+            let hwidText = info.hwid ? info.hwid : '<span style="color: #8b949e;">Boşta</span>';
+            let row = `<tr>
+                <td style="color: #58a6ff; font-weight: bold;">${key}</td>
+                <td>${info.expiry}</td>
+                <td>${hwidText}</td>
+                <td><button class="btn-reset" onclick="hwidSifirla('${key}')">HWID Sıfırla</button></td>
+            </tr>`;
+            tbody.innerHTML += row;
+        }
+    }
+
+    function hwidSifirla(targetKey) {
+        if (confirm(`${targetKey} için HWID sıfırlansın mı?`)) {
+            fetch(`api.php?action=reset_hwid&admin_key=${adminKey}&target_key=${targetKey}`)
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message);
+                    verileriGetir();
+                });
+        }
+    }
+
+    function keyEkle() {
+        const newKey = document.getElementById('newKey').value;
+        const duration = document.getElementById('newDuration').value;
+        if (!newKey) {
+            alert("Lütfen bir key girin!");
+            return;
+        }
+        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${newKey}&duration=${duration}`)
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('newKey').value = "";
+                verileriGetir();
+            });
+    }
 </script>
+
 </body>
 </html>
