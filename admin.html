@@ -19,6 +19,8 @@
         
         button { width: 100%; padding: 10px; background: #f43f5e; border: none; color: white; font-weight: bold; border-radius: 6px; cursor: pointer; margin-top: 15px; transition: 0.2s; font-size: 12px; }
         button:hover { background: #e11d48; }
+        .auto-btn { background: #0284c7; margin-top: 8px; }
+        .auto-btn:hover { background: #0369a1; }
         
         .result { margin-top: 10px; font-size: 11px; text-align: center; font-weight: bold; min-height: 15px; }
         
@@ -44,8 +46,9 @@
             <!-- Sol: Key Ekleme -->
             <div class="card">
                 <h3>Yeni Lisans Oluştur</h3>
-                <label>Key Değeri:</label>
+                <label>Key Değeri (Boş bırakırsanız otomatik üretilir):</label>
                 <input type="text" id="newKey" placeholder="Örn: NEON-PRO-9999">
+                <button type="button" class="auto-btn" onclick="generateRandomKey()">Rastgele NEON Key Üret</button>
                 
                 <label>Süre:</label>
                 <select id="keyExpiry">
@@ -92,6 +95,12 @@
     </div>
 
     <script>
+        function generateRandomKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+            let part = () => Array.from({length: 4}, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+            document.getElementById('newKey').value = `NEON-${part()}-${part()}-${part()}-${part()}`;
+        }
+
         function loadData() {
             // Keyleri Yükle
             fetch('api.php?action=list')
@@ -138,17 +147,22 @@
             const expiry = document.getElementById('keyExpiry').value;
             const res = document.getElementById('res');
 
-            if(!key) { res.style.color = '#ef4444'; res.innerText = "Key boş olamaz!"; return; }
+            let url = `api.php?action=create&expiry=${encodeURIComponent(expiry)}`;
+            if(key) {
+                url += `&key=${encodeURIComponent(key)}`;
+            }
 
-            fetch(`api.php?action=create&key=${encodeURIComponent(key)}&expiry=${encodeURIComponent(expiry)}`)
+            fetch(url)
                 .then(r => r.text())
                 .then(data => {
-                    if(data.trim() === "SUCCESS") {
-                        res.style.color = '#34d399'; res.innerText = "Başarıyla oluşturuldu!";
+                    if(data.startsWith("SUCCESS")) {
+                        res.style.color = '#34d399'; 
+                        res.innerText = "Başarıyla oluşturuldu!";
                         document.getElementById('newKey').value = '';
                         loadData();
                     } else {
-                        res.style.color = '#ef4444'; res.innerText = "Hata: " + data;
+                        res.style.color = '#ef4444'; 
+                        res.innerText = "Hata: " + data;
                     }
                 });
         }
