@@ -2,33 +2,197 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Security - Gelişmiş Admin Dashboard</title>
+    <title>Neon Security - Pro Dashboard</title>
     <style>
-        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes pulseGlow {
+            0% { box-shadow: 0 0 5px rgba(88, 166, 255, 0.2); }
+            50% { box-shadow: 0 0 20px rgba(88, 166, 255, 0.5); }
+            100% { box-shadow: 0 0 5px rgba(88, 166, 255, 0.2); }
+        }
+
+        @keyframes logIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        body { 
+            background-color: #0d1117; 
+            color: #c9d1d9; 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            animation: fadeIn 0.6s ease-out;
+        }
+
         .container { max-width: 1200px; margin: 0 auto; }
-        header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 15px 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
-        h2 { color: #58a6ff; margin: 0; }
-        .login-box { max-width: 400px; margin: 100px auto; background: #161b22; padding: 30px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
-        input, select { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 10px; border-radius: 4px; margin-right: 10px; width: calc(100% - 24px); margin-bottom: 10px; }
-        .login-box input { width: 80%; }
-        button { background: #238636; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        button:hover { background: #2ea043; }
-        .btn-danger { background: #da3633; }
-        .btn-danger:hover { background: #f85149; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
-        .stat-card { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
-        .stat-card h3 { margin: 0; color: #8b949e; font-size: 14px; }
-        .stat-card p { margin: 10px 0 0 0; color: #58a6ff; font-size: 24px; font-weight: bold; }
+
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: rgba(22, 27, 34, 0.8); 
+            backdrop-filter: blur(10px);
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            border: 1px solid #30363d; 
+            margin-bottom: 20px; 
+            animation: fadeIn 0.4s ease-out;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+
+        h2 { color: #58a6ff; margin: 0; text-shadow: 0 0 10px rgba(88,166,255,0.3); }
+
+        .login-box { 
+            max-width: 400px; 
+            margin: 80px auto; 
+            background: #161b22; 
+            padding: 35px; 
+            border-radius: 12px; 
+            border: 1px solid #30363d; 
+            text-align: center; 
+            animation: logIn 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+        }
+
+        input, select { 
+            background: #0d1117; 
+            border: 1px solid #30363d; 
+            color: #fff; 
+            padding: 12px; 
+            border-radius: 6px; 
+            margin-bottom: 15px; 
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: #58a6ff;
+            outline: none;
+            box-shadow: 0 0 10px rgba(88, 166, 255, 0.4);
+        }
+
+        button { 
+            background: #238636; 
+            color: #fff; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(35, 134, 54, 0.3);
+        }
+
+        button:hover { 
+            background: #2ea043; 
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(46, 160, 67, 0.5);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        .btn-danger { 
+            background: #da3633; 
+            box-shadow: 0 4px 12px rgba(218, 54, 51, 0.3);
+        }
+        .btn-danger:hover { 
+            background: #f85149; 
+            box-shadow: 0 6px 16px rgba(248, 81, 73, 0.5);
+        }
+
+        .stats-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
+            margin-bottom: 20px; 
+        }
+
+        .stat-card { 
+            background: #161b22; 
+            padding: 20px; 
+            border-radius: 12px; 
+            border: 1px solid #30363d; 
+            text-align: center; 
+            transition: all 0.3s ease;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: #58a6ff;
+            animation: pulseGlow 2s infinite;
+        }
+
+        .stat-card h3 { margin: 0; color: #8b949e; font-size: 13px; letter-spacing: 1px; }
+        .stat-card p { margin: 10px 0 0 0; color: #58a6ff; font-size: 28px; font-weight: bold; }
+
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .panel-box { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
+
+        .panel-box { 
+            background: #161b22; 
+            padding: 22px; 
+            border-radius: 12px; 
+            border: 1px solid #30363d; 
+            margin-bottom: 20px; 
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            animation: fadeIn 0.6s ease-out;
+        }
+
         table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
-        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
-        th { color: #58a6ff; }
-        .log-terminal { background: #010409; color: #7ee787; font-family: monospace; padding: 15px; border-radius: 6px; height: 350px; overflow-y: auto; border: 1px solid #30363d; font-size: 12px; }
-        .log-item { margin-bottom: 5px; border-bottom: 1px dashed #21262d; padding-bottom: 4px; }
-        .btn-reset { color: #f85149; background: none; border: none; cursor: pointer; font-weight: bold; }
-        .btn-del { color: #da3633; background: none; border: none; cursor: pointer; font-weight: bold; margin-left: 10px; }
-        .hidden { display: none; }
+        
+        th, td { 
+            padding: 12px; 
+            text-align: left; 
+            border-bottom: 1px solid #30363d; 
+            transition: background 0.2s ease;
+        }
+
+        tr { transition: all 0.2s ease; }
+        tr:hover td { background: rgba(88, 166, 255, 0.03); }
+
+        th { color: #58a6ff; font-weight: 600; }
+
+        .log-terminal { 
+            background: #010409; 
+            color: #7ee787; 
+            font-family: 'Courier New', Courier, monospace; 
+            padding: 15px; 
+            border-radius: 8px; 
+            height: 350px; 
+            overflow-y: auto; 
+            border: 1px solid #30363d; 
+            font-size: 12px; 
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .log-item { 
+            margin-bottom: 6px; 
+            border-bottom: 1px dashed #161b22; 
+            padding-bottom: 6px; 
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .btn-reset { color: #f85149; background: none; border: none; cursor: pointer; font-weight: bold; transition: opacity 0.2s; }
+        .btn-reset:hover { opacity: 0.7; text-decoration: underline; }
+
+        .btn-del { color: #da3633; background: none; border: none; cursor: pointer; font-weight: bold; margin-left: 10px; transition: opacity 0.2s; }
+        .btn-del:hover { opacity: 0.7; text-decoration: underline; }
+
+        .hidden { display: none !important; }
+
+        /* Özel Kaydırma Çubuğu (Scrollbar) */
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #0d1117; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #30363d; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #58a6ff; }
     </style>
 </head>
 <body>
@@ -38,18 +202,17 @@
     <!-- Giriş Ekranı -->
     <div id="loginSection" class="login-box">
         <h2>NEON SECURITY</h2>
-        <p style="color: #8b949e; margin-bottom: 20px;">Yönetici Paneline Giriş Yapın</p>
+        <p style="color: #8b949e; margin-bottom: 25px; font-size: 14px;">Güvenli Yönetim Paneline Giriş Yapın</p>
         <input type="password" id="adminKeyInput" placeholder="Admin Key (NEONBEST31)">
-        <br>
         <button onclick="girisYap()" style="width: 100%;">Sisteme Bağlan</button>
-        <p id="loginError" style="color: #f85149; margin-top: 15px;"></p>
+        <p id="loginError" style="color: #f85149; margin-top: 15px; font-size: 13px;"></p>
     </div>
 
     <!-- Yönetim Paneli -->
     <div id="panelSection" class="hidden">
         <header>
             <h2>NEON SECURITY - LIVE DASHBOARD</h2>
-            <button class="btn-danger" onclick="cikisYap()"><span style="color: white;">Çıkış Yap</span></button>
+            <button class="btn-danger" onclick="cikisYap()"><span>Çıkış Yap</span></button>
         </header>
 
         <!-- İstatistik Kartları -->
@@ -72,7 +235,7 @@
             <!-- Sol Taraf: Key Yönetimi ve Ekleme -->
             <div>
                 <div class="panel-box">
-                    <h3>Yeni Lisans Key Ekle</h3>
+                    <h3 style="color: #58a6ff; margin-top: 0;">Yeni Lisans Key Ekle</h3>
                     <input type="text" id="newKey" placeholder="Key (Örn: NEON-PRO99)">
                     <select id="newDuration">
                         <option value="1 Dakika">1 Dakika</option>
@@ -84,8 +247,8 @@
                 </div>
 
                 <div class="panel-box">
-                    <h3>Kayıtlı Lisanslar</h3>
-                    <div style="max-height: 300px; overflow-y: auto;">
+                    <h3 style="color: #58a6ff; margin-top: 0;">Kayıtlı Lisanslar</h3>
+                    <div style="max-height: 280px; overflow-y: auto;">
                         <table>
                             <thead>
                                 <tr>
@@ -106,10 +269,10 @@
             <!-- Sağ Taraf: Canlı API İstek Logları -->
             <div>
                 <div class="panel-box">
-                    <h3>Gelen Canlı API İstekleri (Log Terminali)</h3>
-                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader'dan ve dışarıdan yapılan tüm sorgular anlık buraya düşer.</p>
+                    <h3 style="color: #58a6ff; margin-top: 0;">Canlı API İstek Logları</h3>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 12px;">Loader ve dış sorgular anlık olarak terminale düşer.</p>
                     <div class="log-terminal" id="logTerminal">
-                        <!-- Loglar buraya akacak -->
+                        <!-- Loglar akacak -->
                     </div>
                 </div>
             </div>
@@ -142,7 +305,6 @@
                     if (isLogin) {
                         document.getElementById('loginSection').classList.add('hidden');
                         document.getElementById('panelSection').classList.remove('hidden');
-                        // Otomatik arka plan yenileme başlat (Her 4 saniyede bir canlı loglar güncellenir)
                         autoRefreshTimer = setInterval(() => verileriCek(false), 4000);
                     }
                     paneliDoldur(data.keys, data.logs);
@@ -159,7 +321,6 @@
         let totalKeys = Object.keys(keys).length;
         let activeHwid = 0;
 
-        // Key Tablosu
         const tbody = document.getElementById('keyList');
         tbody.innerHTML = "";
         for (const [key, info] of Object.entries(keys)) {
@@ -177,12 +338,10 @@
             tbody.innerHTML += row;
         }
 
-        // İstatistikleri Güncelle
         document.getElementById('statTotalKeys').innerText = totalKeys;
         document.getElementById('statActiveHwid').innerText = activeHwid;
         document.getElementById('statTotalReq').innerText = logs.length;
 
-        // Log Terminalini Güncelle
         const terminal = document.getElementById('logTerminal');
         terminal.innerHTML = "";
         logs.forEach(log => {
