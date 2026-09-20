@@ -30,16 +30,24 @@ function kayitLogEkle($ip, $key, $hwid, $pc_name, $status) {
     @file_put_contents($logsFile, $logSatiri, FILE_APPEND);
 }
 
-// 1. Yeni Key Oluşturma
+// 1. Yeni Key Oluşturma (İster manuel, ister otomatik üretilen formatta)
 if ($action === 'create') {
-    if (empty($key)) { echo "ERROR_EMPTY"; exit; }
+    // Eğer dışarıdan key gönderilmediyse otomatik NEON-XXXX formatında üret
+    if (empty($key)) {
+        $chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $part = function() use ($chars) {
+            return substr(str_shuffle($chars), 0, 4);
+        };
+        $key = 'NEON-' . $part() . '-' . $part() . '-' . $part() . '-' . $part();
+    }
+
     $lines = file_exists($keysFile) ? file($keysFile, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES) : [];
     foreach ($lines as $line) {
         $p = explode('|', $line);
         if (trim($p[0]) === $key) { echo "KEY_EXISTS"; exit; }
     }
     file_put_contents($keysFile, "$key|$expiry|||\n", FILE_APPEND);
-    echo "SUCCESS";
+    echo "SUCCESS|$key"; // Üretilen key'i arayüze döndür
     exit;
 }
 
