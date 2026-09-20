@@ -2,497 +2,100 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEON SOFTWARE // ADMIN CONSOLE v2.5</title>
+<title>NEON SOFTWARE // ADMIN PANEL</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-:root {
-    --cyan: #00f6ff;
-    --cyan-dim: rgba(0,246,255,0.12);
-    --purple: #9d4edd;
-    --green: #00ff9d;
-    --red: #ff3158;
-    --warning: #ffc857;
-    --bg: #020408;
-    --panel-bg: rgba(6, 10, 18, 0.94);
-    --border: rgba(0, 246, 255, 0.2);
-}
-
-body {
-    width: 100vw;
-    height: 100vh;
-    overflow: hidden;
-    background: var(--bg);
-    color: #fff;
-    font-family: 'Orbitron', sans-serif;
-}
-
-/* Background FX */
-.background {
-    position: fixed;
-    inset: 0;
-    overflow: hidden;
-    background: radial-gradient(circle at 50% 20%, rgba(0,246,255,.05), transparent 50%), #020408;
-    z-index: -1;
-}
-.grid {
-    position: absolute;
-    inset: -50%;
-    background-image: linear-gradient(rgba(0,246,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,246,255,.02) 1px, transparent 1px);
-    background-size: 35px 35px;
-    transform: perspective(500px) rotateX(60deg);
-}
-
-/* Layout */
-.app-container {
-    width: 100vw;
-    height: 100vh;
-    display: grid;
-    grid-template-columns: 240px 1fr;
-    grid-template-rows: 55px 1fr;
-}
-
-/* Topbar */
-.topbar {
-    grid-column: 1 / -1;
-    background: var(--panel-bg);
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 25px;
-    z-index: 10;
-}
-.brand {
-    font-size: 12px;
-    letter-spacing: 3px;
-    color: var(--cyan);
-    text-shadow: 0 0 10px var(--cyan);
-}
-.admin-badge {
-    font-size: 8px;
-    letter-spacing: 2px;
-    background: rgba(255,49,88,0.15);
-    color: var(--red);
-    border: 1px solid rgba(255,49,88,0.3);
-    padding: 5px 10px;
-}
-
-/* Sidebar */
-.sidebar {
-    background: rgba(4, 7, 12, 0.9);
-    border-right: 1px solid var(--border);
-    padding: 20px 15px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.nav-item {
-    height: 42px;
-    display: flex;
-    align-items: center;
-    padding: 0 15px;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: #72828c;
-    background: transparent;
-    border: 1px solid transparent;
-    cursor: pointer;
-    transition: 0.25s;
-}
-.nav-item:hover, .nav-item.active {
-    color: var(--cyan);
-    background: var(--cyan-dim);
-    border-color: rgba(0,246,255,0.3);
-    box-shadow: 0 0 15px rgba(0,246,255,0.05);
-}
-
-/* Main Content Area */
-.main-content {
-    padding: 25px;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-}
-
-.tab-pane {
-    display: none;
-    flex-direction: column;
-    gap: 20px;
-    animation: fadeIn 0.4s ease;
-}
-.tab-pane.active {
-    display: flex;
-}
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* Stats Row */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-}
-.stat-box {
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.stat-title {
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: #60727c;
-}
-.stat-value {
-    font-size: 22px;
-    letter-spacing: 1px;
-    color: #fff;
-}
-
-/* Panels & Tables */
-.panel {
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-.panel-title {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--cyan);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.form-row {
-    display: flex;
-    gap: 12px;
-    align-items: flex-end;
-}
-.input-group {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-.input-label {
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: #60727c;
-}
-.cyber-select, .cyber-input {
-    height: 40px;
-    background: rgba(0,0,0,0.6);
-    border: 1px solid #1a3c44;
-    outline: none;
-    color: var(--cyan);
-    padding: 0 12px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
-}
-.cyber-btn {
-    height: 40px;
-    padding: 0 25px;
-    background: linear-gradient(90deg, rgba(0,246,255,.15), rgba(157,78,221,.15));
-    border: 1px solid var(--cyan);
-    color: #fff;
-    font-family: inherit;
-    font-size: 9px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-.cyber-btn:hover {
-    background: rgba(0,246,255,0.25);
-    box-shadow: 0 0 15px rgba(0,246,255,0.2);
-}
-
-/* Data Table */
-.data-table {
-    width: 100%;
-    border-collapse: collapse;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
-}
-.data-table th {
-    text-align: left;
-    padding: 10px;
-    background: rgba(0,246,255,0.05);
-    color: var(--cyan);
-    border-bottom: 1px solid var(--border);
-    letter-spacing: 1px;
-    font-size: 9px;
-}
-.data-table td {
-    padding: 12px 10px;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    color: #a8b8c2;
-}
-.tag {
-    padding: 3px 8px;
-    font-size: 8px;
-    letter-spacing: 1px;
-}
-.tag.active { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
-.tag.unbound { background: rgba(255,200,87,0.15); color: var(--warning); border: 1px solid rgba(255,200,87,0.3); }
-
-.action-link {
-    color: var(--red);
-    cursor: pointer;
-    text-decoration: underline;
-    font-size: 9px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@400;600&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: #020408; color: #fff; font-family: 'Orbitron', sans-serif; padding: 30px; }
+.panel { background: rgba(6, 10, 18, 0.94); border: 1px solid rgba(0,246,255,0.2); padding: 25px; margin-bottom: 20px; }
+h2 { color: #00f6ff; font-size: 14px; margin-bottom: 15px; letter-spacing: 2px; }
+.form-row { display: flex; gap: 15px; align-items: flex-end; }
+.input-group { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+label { font-size: 8px; color: #72828c; }
+select, input { height: 40px; background: #000; border: 1px solid #1a3c44; color: #00f6ff; padding: 0 10px; font-family: 'JetBrains Mono'; }
+button { height: 40px; padding: 0 20px; background: rgba(0,246,255,0.15); border: 1px solid #00f6ff; color: #fff; cursor: pointer; font-family: inherit; font-size: 9px; letter-spacing: 2px; }
+button:hover { background: rgba(0,246,255,0.3); }
+table { width: 100%; border-collapse: collapse; font-family: 'JetBrains Mono'; font-size: 11px; margin-top: 10px; }
+th { text-align: left; padding: 10px; background: rgba(0,246,255,0.05); color: #00f6ff; border-bottom: 1px solid rgba(0,246,255,0.2); }
+td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); color: #a8b8c2; }
+.action { color: #ff3158; cursor: pointer; text-decoration: underline; }
 </style>
 </head>
 <body>
 
-<div class="background"><div class="grid"></div></div>
-
-<div class="app-container">
-    <!-- Topbar -->
-    <div class="topbar">
-        <div class="brand">NEON SOFTWARE // ADMIN PANEL</div>
-        <div class="admin-badge">ROOT ACCESS // SECURE</div>
-    </div>
-
-    <!-- Sidebar Navigation -->
-    <div class="sidebar">
-        <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 GENEL BAKIŞ</div>
-        <div class="nav-item" onclick="switchTab('keys', this)">🔑 LİSANS & HWID YÖNETİMİ</div>
-        <div class="nav-item" onclick="switchTab('requests', this)">📡 CANLI İSTEKLER</div>
-    </div>
-
-    <!-- Main Workspace -->
-    <div class="main-content">
-
-        <!-- TAB 1: DASHBOARD -->
-        <div class="tab-pane active" id="tab-dashboard">
-            <div class="stats-grid">
-                <div class="stat-box">
-                    <span class="stat-title">TOPLAM LİSANS</span>
-                    <span class="stat-value" id="statTotalKeys">128</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-title">AKTİF BAĞLI (HWID)</span>
-                    <span class="stat-value" id="statActiveHwid" style="color: var(--green);">94</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-title">BOŞTA / KULLANILMAMIŞ</span>
-                    <span class="stat-value" id="statUnbound" style="color: var(--warning);">34</span>
-                </div>
-                <div class="stat-box">
-                    <span class="stat-title">BUGÜNKÜ İSTEKLER</span>
-                    <span class="stat-value" id="statRequests" style="color: var(--cyan);">1,420</span>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-title">SİSTEM DURUMU & BİLGİLENDİRME</div>
-                <p style="font-size: 10px; color: #72828c; line-height: 1.6; font-family: 'JetBrains Mono', monospace;">
-                    Sunucu veritabanı aktif olarak senkronize ediliyor. Loader üzerinden gelen tüm kimlik doğrulama istekleri HWID kontrol mekanizmasından geçmektedir. Yeni lisans üretmek için "Lisans & HWID Yönetimi" sekmesini kullanabilirsiniz.
-                </p>
-            </div>
+<div class="panel">
+    <h2>YENİ LİSANS ÜRET (1 DK / 30 DK / 1 SAAT)</h2>
+    <div class="form-row">
+        <div class="input-group">
+            <label>SÜRE SEÇ</label>
+            <select id="durationSelect">
+                <option value="60|1 Dakika">1 Dakika (Test)</option>
+                <option value="1800|30 Dakika">30 Dakika</option>
+                <option value="3600|1 Saat" selected>1 Saat</option>
+                <option value="86400|24 Saat">24 Saat</option>
+            </select>
         </div>
-
-        <!-- TAB 2: KEYS & HWID MANAGEMENT -->
-        <div class="tab-pane" id="tab-keys">
-            <div class="panel">
-                <div class="panel-title">YENİ LİSANS ANAHTARI OLUŞTUR</div>
-                <div class="form-row">
-                    <div class="input-group">
-                        <label class="input-label">SÜRE / TİP</label>
-                        <select class="cyber-select" id="keyDuration">
-                            <option value="1 Gün">1 Günlük Test</option>
-                            <option value="7 Gün">7 Günlük Paket</option>
-                            <option value="30 Gün" selected>30 Günlük VIP</option>
-                            <option value="Sınırsız">Sınırsız (Lifetime)</option>
-                        </select>
-                    </div>
-                    <div class="input-group">
-                        <label class="input-label">NOT / AÇIKLAMA</label>
-                        <input type="text" class="cyber-input" id="keyNote" placeholder="Örn: Beta Test Kullanıcısı">
-                    </div>
-                    <button class="cyber-btn" onclick="generateKey()">KEY ÜRET</button>
-                </div>
-            </div>
-
-            <div class="panel">
-                <div class="panel-title">
-                    <span>AKTİF LİSTELER & HWID EŞLEŞMELERİ</span>
-                    <span style="font-size: 8px; color: #60727c;" id="keyCountText">Toplam: 4 Kayıt</span>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>LİSANS ANAHTARI</th>
-                                <th>SÜRE</th>
-                                <th>BAĞLI HWID</th>
-                                <th>DURUM</th>
-                                <th>İŞLEM</th>
-                            </tr>
-                        </thead>
-                        <tbody id="keyTableBody">
-                            <tr>
-                                <td style="color: var(--cyan);">NEON-9F2A-4B11-88CC</td>
-                                <td>30 Gün</td>
-                                <td style="font-family: monospace;">HWID-8849-TRABZON-0192</td>
-                                <td><span class="tag active">BAĞLI</span></td>
-                                <td><span class="action-link" onclick="resetHwid(this)">HWID SIFIRLA</span></td>
-                            </tr>
-                            <tr>
-                                <td style="color: var(--cyan);">NEON-77C1-002E-99AA</td>
-                                <td>Sınırsız</td>
-                                <td style="font-family: monospace;">HWID-3312-AKCAABAT-5541</td>
-                                <td><span class="tag active">BAĞLI</span></td>
-                                <td><span class="action-link" onclick="resetHwid(this)">HWID SIFIRLA</span></td>
-                            </tr>
-                            <tr>
-                                <td style="color: var(--cyan);">NEON-FREE-TEST-2026</td>
-                                <td>1 Gün</td>
-                                <td style="color: #555;">-</td>
-                                <td><span class="tag unbound">BOŞTA</span></td>
-                                <td><span class="action-link" style="color: var(--red);" onclick="deleteKey(this)">SİL</span></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- TAB 3: LIVE REQUESTS -->
-        <div class="tab-pane" id="tab-requests">
-            <div class="panel">
-                <div class="panel-title">
-                    <span>ANLIK LOADER BAĞLANTI İSTEKLERİ</span>
-                    <span style="font-size: 8px; color: var(--green);">● CANLI AKIŞ</span>
-                </div>
-                <div style="overflow-x: auto;">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>ZAMAN</th>
-                                <th>IP ADRESİ</th>
-                                <th>KULLANILAN KEY</th>
-                                <th>GÖNDERİLEN HWID</th>
-                                <th>SONUÇ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="requestTableBody">
-                            <tr>
-                                <td style="color: #60727c;">17:45:12</td>
-                                <td>85.105.xx.xx (TR)</td>
-                                <td style="color: var(--cyan);">NEON-9F2A-4B11-88CC</td>
-                                <td>HWID-8849-TRABZON-0192</td>
-                                <td style="color: var(--green);">BAŞARILI (GİRİŞ YAPTI)</td>
-                            </tr>
-                            <tr>
-                                <td style="color: #60727c;">17:42:01</td>
-                                <td>176.234.xx.xx (TR)</td>
-                                <td style="color: var(--cyan);">NEON-77C1-002E-99AA</td>
-                                <td>HWID-3312-AKCAABAT-5541</td>
-                                <td style="color: var(--green);">BAŞARILI (GİRİŞ YAPTI)</td>
-                            </tr>
-                            <tr>
-                                <td style="color: #60727c;">17:30.15</td>
-                                <td>94.54.xx.xx (TR)</td>
-                                <td style="color: var(--red);">GEÇERSİZ-KEY-123</td>
-                                <td>HWID-9921-UNKNOWN-0000</td>
-                                <td style="color: var(--red);">REDDEDİLDİ (HATALI KEY)</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
+        <button onclick="createKey()">KEY OLUŞTUR</button>
     </div>
 </div>
 
+<div class="panel">
+    <h2>AKTİF LİSTELER VE HWID KONTROLÜ</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>LİSANS ANAHTARI</th>
+                <th>SÜRE</th>
+                <th>BAĞLI HWID</th>
+                <th>İŞLEM</th>
+            </tr>
+        </thead>
+        <tbody id="keyTable"></tbody>
+    </table>
+</div>
+
 <script>
-/* Tab Navigation */
-function switchTab(tabId, el) {
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-    
-    document.getElementById('tab-' + tabId).classList.add('active');
-    el.classList.add('active');
-}
-
-/* Key Generator Logic */
-function generateKey() {
-    const duration = document.getElementById('keyDuration').value;
-    const note = document.getElementById('keyNote').value || 'Standart';
-    
-    const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const randomPart2 = Math.random().toString(36).substring(2, 6).toUpperCase();
-    const newKey = `NEON-${randomPart}-${randomPart2}-2026`;
-    
-    const tbody = document.getElementById('keyTableBody');
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td style="color: var(--cyan);">${newKey}</td>
-        <td>${duration}</td>
-        <td style="color: #555;">-</td>
-        <td><span class="tag unbound">BOŞTA</span></td>
-        <td><span class="action-link" style="color: var(--red);" onclick="deleteKey(this)">SİL</span></td>
-    `;
-    tbody.prepend(tr);
-    
-    document.getElementById('keyNote').value = '';
-    updateStats();
-    alert(`Yeni Lisans Başarıyla Üretildi:\n${newKey}`);
-}
-
-function resetHwid(el) {
-    const row = el.closest('tr');
-    const hwidCell = row.cells[2];
-    const statusCell = row.cells[3];
-    
-    hwidCell.innerHTML = '-';
-    hwidCell.style.color = '#555';
-    statusCell.innerHTML = '<span class="tag unbound">BOŞTA</span>';
-    updateStats();
-}
-
-function deleteKey(el) {
-    el.closest('tr').remove();
-    updateStats();
-}
-
-function updateStats() {
-    const rows = document.querySelectorAll('#keyTableBody tr');
-    let total = rows.length;
-    let bound = 0;
-    let unbound = 0;
-    
-    rows.forEach(r => {
-        const tag = r.querySelector('.tag');
-        if(tag && tag.classList.contains('active')) bound++;
-        else unbound++;
+async function loadKeys() {
+    let res = await fetch('api.php?action=get_data');
+    let data = await res.json();
+    let tbody = document.getElementById('keyTable');
+    tbody.innerHTML = '';
+    data.forEach(item => {
+        tbody.innerHTML += `
+            <tr>
+                <td style="color: #00f6ff; font-weight:bold;">${item.key}</td>
+                <td>${item.duration_text}</td>
+                <td>${item.hwid || '<span style="color:#555">Boşta</span>'}</td>
+                <td><span class="action" onclick="resetHwid('${item.key}')">HWID Sıfırla</span></td>
+            </tr>`;
     });
-    
-    document.getElementById('statTotalKeys').textContent = total;
-    document.getElementById('statActiveHwid').textContent = bound;
-    document.getElementById('statUnbound').textContent = unbound;
-    document.getElementById('keyCountText').textContent = `Toplam: ${total} Kayıt`;
 }
+
+async function createKey() {
+    let val = document.getElementById('durationSelect').value.split('|');
+    let formData = new URLSearchParams();
+    formData.append('action', 'create');
+    formData.append('duration_sec', val[0]);
+    formData.append('duration_text', val[1]);
+
+    let res = await fetch('api.php', { method: 'POST', body: formData });
+    let result = await res.json();
+    if(result.status === 'success') {
+        alert('Oluşturulan Key: ' + result.key);
+        loadKeys();
+    }
+}
+
+async function resetHwid(key) {
+    let formData = new URLSearchParams();
+    formData.append('action', 'reset_hwid');
+    formData.append('key', key);
+    await fetch('api.php', { method: 'POST', body: formData });
+    loadKeys();
+}
+
+loadKeys();
+setInterval(loadKeys, 5000); // 5 saniyede bir otomatik yenile
 </script>
 </body>
 </html>
