@@ -2,138 +2,228 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Security - Admin Paneli</title>
+    <title>Neon Security - Gelişmiş Admin Dashboard</title>
     <style>
         body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: 0 auto; background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; }
-        h2 { color: #58a6ff; text-align: center; }
-        .login-box, .panel-box { margin-top: 20px; }
-        input, select { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 8px 12px; border-radius: 4px; margin-right: 10px; }
-        button { background: #238636; color: #white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 15px 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
+        h2 { color: #58a6ff; margin: 0; }
+        .login-box { max-width: 400px; margin: 100px auto; background: #161b22; padding: 30px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
+        input, select { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 10px; border-radius: 4px; margin-right: 10px; width: calc(100% - 24px); margin-bottom: 10px; }
+        .login-box input { width: 80%; }
+        button { background: #238636; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         button:hover { background: #2ea043; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #30363d; }
+        .btn-danger { background: #da3633; }
+        .btn-danger:hover { background: #f85149; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
+        .stat-card h3 { margin: 0; color: #8b949e; font-size: 14px; }
+        .stat-card p { margin: 10px 0 0 0; color: #58a6ff; font-size: 24px; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel-box { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
         th { color: #58a6ff; }
+        .log-terminal { background: #010409; color: #7ee787; font-family: monospace; padding: 15px; border-radius: 6px; height: 350px; overflow-y: auto; border: 1px solid #30363d; font-size: 12px; }
+        .log-item { margin-bottom: 5px; border-bottom: 1px dashed #21262d; padding-bottom: 4px; }
         .btn-reset { color: #f85149; background: none; border: none; cursor: pointer; font-weight: bold; }
-        .btn-reset:hover { text-decoration: underline; }
+        .btn-del { color: #da3633; background: none; border: none; cursor: pointer; font-weight: bold; margin-left: 10px; }
         .hidden { display: none; }
-        .msg { margin-top: 10px; font-size: 14px; color: #3fb950; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>NEON SECURITY - ADMIN PANEL</h2>
 
     <!-- Giriş Ekranı -->
     <div id="loginSection" class="login-box">
-        <p>Lütfen Yönetici Anahtarını Girin:</p>
+        <h2>NEON SECURITY</h2>
+        <p style="color: #8b949e; margin-bottom: 20px;">Yönetici Paneline Giriş Yapın</p>
         <input type="password" id="adminKeyInput" placeholder="Admin Key (NEONBEST31)">
-        <button onclick="girisYap()">Giriş Yap</button>
-        <p id="loginError" style="color: #f85149;"></p>
+        <br>
+        <button onclick="girisYap()" style="width: 100%;">Sisteme Bağlan</button>
+        <p id="loginError" style="color: #f85149; margin-top: 15px;"></p>
     </div>
 
     <!-- Yönetim Paneli -->
-    <div id="panelSection" class="panel-box hidden">
-        <div style="margin-bottom: 20px; background: #21262d; padding: 15px; border-radius: 6px;">
-            <h3>Yeni Lisans Key Ekle</h3>
-            <input type="text" id="newKey" placeholder="Key (Örn: NEON-ABC123)">
-            <select id="newDuration">
-                <option value="1 Dakika">1 Dakika</option>
-                <option value="1 Saat">1 Saat</option>
-                <option value="30 Gün">30 Gün</option>
-                <option value="Sınırsız">Sınırsız</option>
-            </select>
-            <button onclick="keyEkle()">Ekle</button>
+    <div id="panelSection" class="hidden">
+        <header>
+            <h2>NEON SECURITY - LIVE DASHBOARD</h2>
+            <button class="btn-danger" onclick="cikisYap()"><span style="color: white;">Çıkış Yap</span></button>
+        </header>
+
+        <!-- İstatistik Kartları -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>TOPLAM LİSANS</h3>
+                <p id="statTotalKeys">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>AKTİF (BAĞLI) HWID</h3>
+                <p id="statActiveHwid">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>TOPLAM API İSTEĞİ</h3>
+                <p id="statTotalReq">0</p>
+            </div>
         </div>
 
-        <h3>Kayıtlı Lisanslar</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>LİSANS ANAHTARI</th>
-                    <th>SÜRE</th>
-                    <th>BAĞLI HWID</th>
-                    <th>İŞLEM</th>
-                </tr>
-            </thead>
-            <tbody id="keyList">
-                <!-- Dinamik doldurulacak -->
-            </tbody>
-        </table>
+        <div class="grid-2">
+            <!-- Sol Taraf: Key Yönetimi ve Ekleme -->
+            <div>
+                <div class="panel-box">
+                    <h3>Yeni Lisans Key Ekle</h3>
+                    <input type="text" id="newKey" placeholder="Key (Örn: NEON-PRO99)">
+                    <select id="newDuration">
+                        <option value="1 Dakika">1 Dakika</option>
+                        <option value="1 Saat">1 Saat</option>
+                        <option value="30 Gün">30 Gün</option>
+                        <option value="Sınırsız">Sınırsız</option>
+                    </select>
+                    <button onclick="keyEkle()" style="width: 100%;">Key Oluştur</button>
+                </div>
+
+                <div class="panel-box">
+                    <h3>Kayıtlı Lisanslar</h3>
+                    <div style="max-height: 300px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ANAHTAR</th>
+                                    <th>SÜRE</th>
+                                    <th>HWID DURUMU</th>
+                                    <th>İŞLEMLER</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyList">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Taraf: Canlı API İstek Logları -->
+            <div>
+                <div class="panel-box">
+                    <h3>Gelen Canlı API İstekleri (Log Terminali)</h3>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader'dan ve dışarıdan yapılan tüm sorgular anlık buraya düşer.</p>
+                    <div class="log-terminal" id="logTerminal">
+                        <!-- Loglar buraya akacak -->
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
 </div>
 
 <script>
     let adminKey = "";
+    let autoRefreshTimer = null;
 
     function girisYap() {
         adminKey = document.getElementById('adminKeyInput').value;
-        fetch(`api.php?action=get_keys&admin_key=${adminKey}`)
+        verileriCek(true);
+    }
+
+    function cikisYap() {
+        clearInterval(autoRefreshTimer);
+        document.getElementById('panelSection').classList.add('hidden');
+        document.getElementById('loginSection').classList.remove('hidden');
+        document.getElementById('adminKeyInput').value = "";
+    }
+
+    function verileriCek(isLogin = false) {
+        fetch(`api.php?action=get_data&admin_key=${adminKey}`)
             .then(res => res.json())
             .then(data => {
                 if (data.status === "success") {
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('panelSection').classList.remove('hidden');
-                    tabloyuGuncelle(data.keys);
+                    if (isLogin) {
+                        document.getElementById('loginSection').classList.add('hidden');
+                        document.getElementById('panelSection').classList.remove('hidden');
+                        // Otomatik arka plan yenileme başlat (Her 4 saniyede bir canlı loglar güncellenir)
+                        autoRefreshTimer = setInterval(() => verileriCek(false), 4000);
+                    }
+                    paneliDoldur(data.keys, data.logs);
                 } else {
-                    document.getElementById('loginError').innerText = "Geçersiz Admin Anahtarı!";
+                    if (isLogin) document.getElementById('loginError').innerText = "Geçersiz Admin Anahtarı!";
                 }
             })
             .catch(err => {
-                document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
+                if (isLogin) document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
             });
     }
 
-    function verileriGetir() {
-        fetch(`api.php?action=get_keys&admin_key=${adminKey}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    tabloyuGuncelle(data.keys);
-                }
-            });
-    }
+    function paneliDoldur(keys, logs) {
+        let totalKeys = Object.keys(keys).length;
+        let activeHwid = 0;
 
-    function tabloyuGuncelle(keys) {
+        // Key Tablosu
         const tbody = document.getElementById('keyList');
         tbody.innerHTML = "";
         for (const [key, info] of Object.entries(keys)) {
-            let hwidText = info.hwid ? info.hwid : '<span style="color: #8b949e;">Boşta</span>';
+            if (info.hwid) activeHwid++;
+            let hwidText = info.hwid ? `<span style="color: #3fb950;" title="${info.hwid}">Kilitli</span>` : '<span style="color: #8b949e;">Boşta</span>';
             let row = `<tr>
                 <td style="color: #58a6ff; font-weight: bold;">${key}</td>
                 <td>${info.expiry}</td>
                 <td>${hwidText}</td>
-                <td><button class="btn-reset" onclick="hwidSifirla('${key}')">HWID Sıfırla</button></td>
+                <td>
+                    <button class="btn-reset" onclick="hwidSifirla('${key}')">Sıfırla</button>
+                    <button class="btn-del" onclick="keySil('${key}')">Sil</button>
+                </td>
             </tr>`;
             tbody.innerHTML += row;
         }
+
+        // İstatistikleri Güncelle
+        document.getElementById('statTotalKeys').innerText = totalKeys;
+        document.getElementById('statActiveHwid').innerText = activeHwid;
+        document.getElementById('statTotalReq').innerText = logs.length;
+
+        // Log Terminalini Güncelle
+        const terminal = document.getElementById('logTerminal');
+        terminal.innerHTML = "";
+        logs.forEach(log => {
+            let color = log.status.includes('SUCCESS') ? '#7ee787' : '#f85149';
+            let logLine = `<div class="log-item">
+                <span style="color: #8b949e;">[${log.time}]</span> 
+                <span style="color: #d2a8ff;">IP: ${log.ip}</span> 
+                <span style="color: #58a6ff;">[${log.action}]</span> 
+                Key: <b>${log.key}</b> ➔ 
+                <span style="color: ${color};">${log.status}</span>
+            </div>`;
+            terminal.innerHTML += logLine;
+        });
     }
 
     function hwidSifirla(targetKey) {
         if (confirm(`${targetKey} için HWID sıfırlansın mı?`)) {
             fetch(`api.php?action=reset_hwid&admin_key=${adminKey}&target_key=${targetKey}`)
                 .then(res => res.json())
-                .then(data => {
-                    alert(data.message);
-                    verileriGetir();
-                });
+                .then(data => { alert(data.message); verileriCek(false); });
+        }
+    }
+
+    function keySil(targetKey) {
+        if (confirm(`${targetKey} tamamen silinsin mi?`)) {
+            fetch(`api.php?action=delete_key&admin_key=${adminKey}&target_key=${targetKey}`)
+                .then(res => res.json())
+                .then(data => { alert(data.message); verileriCek(false); });
         }
     }
 
     function keyEkle() {
         const newKey = document.getElementById('newKey').value;
         const duration = document.getElementById('newDuration').value;
-        if (!newKey) {
-            alert("Lütfen bir key girin!");
-            return;
-        }
+        if (!newKey) { alert("Lütfen bir key girin!"); return; }
         fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${newKey}&duration=${duration}`)
             .then(res => res.json())
             .then(data => {
                 alert(data.message);
                 document.getElementById('newKey').value = "";
-                verileriGetir();
+                verileriCek(false);
             });
     }
 </script>
