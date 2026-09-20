@@ -2,569 +2,151 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON SECURITY // NEXUS COMMAND</title>
+    <title>Neon Security - Gelişmiş Admin Dashboard</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap');
-
-        :root {
-            --bg-deep: #02040a;
-            --surface: rgba(13, 17, 23, 0.75);
-            --border: rgba(88, 166, 255, 0.2);
-            --neon-blue: #00f0ff;
-            --neon-purple: #b000ff;
-            --neon-green: #00ff66;
-            --text-main: #c9d1d9;
-            --text-muted: #8b949e;
-        }
-
-        @keyframes corePulse {
-            0% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
-            50% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.3), inset 0 0 25px rgba(0, 240, 255, 0.15); }
-            100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
-        }
-
-        @keyframes glitchFade {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        #matrixCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            animation: glitchFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Header / Navbar */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            padding: 20px 30px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-            animation: corePulse 5s infinite ease-in-out;
-        }
-
-        .logo-area h1 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin: 0;
-            font-size: 20px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .logo-area span {
-            font-size: 11px;
-            color: var(--neon-blue);
-            letter-spacing: 5px;
-            text-transform: uppercase;
-        }
-
-        /* Giriş Ekranı */
-        .login-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-        }
-
-        .login-box {
-            width: 100%;
-            max-width: 420px;
-            background: var(--surface);
-            backdrop-filter: blur(25px);
-            padding: 45px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
-            animation: glitchFade 0.8s ease-out;
-        }
-
-        .login-box h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-        }
-
-        /* Form Elemanları */
-        input, select {
-            background: rgba(1, 4, 9, 0.85);
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            width: 100%;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--neon-blue);
-            outline: none;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-            transform: translateY(-1px);
-        }
-
-        button {
-            background: linear-gradient(135deg, #0070f3 0%, #00f0ff 100%);
-            color: #fff;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
-            width: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.6);
-            filter: brightness(1.1);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #d32f2f 0%, #ff5252 100%);
-            box-shadow: 0 5px 20px rgba(211, 47, 47, 0.4);
-            width: auto;
-            padding: 10px 20px;
-            font-size: 12px;
-        }
-
-        .btn-danger:hover {
-            box-shadow: 0 8px 25px rgba(255, 82, 82, 0.6);
-        }
-
-        /* Özel Süre Grid Yapısı */
-        .custom-duration-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px dashed var(--border);
-        }
-        .custom-duration-grid label {
-            font-size: 10px;
-            color: var(--neon-blue);
-            margin-bottom: 3px;
-            display: block;
-            font-family: 'Orbitron', sans-serif;
-        }
-        .custom-duration-grid input {
-            margin-bottom: 0;
-            padding: 8px 10px;
-            font-size: 13px;
-        }
-
-        /* İstatistik Kartları */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            backdrop-filter: blur(15px);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            text-align: center;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--neon-blue);
-        }
-
-        .stat-card h3 {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 11px;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .stat-card p {
-            margin: 12px 0 0 0;
-            color: var(--neon-blue);
-            font-size: 32px;
-            font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-        }
-
-        /* Grid Yapısı */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 25px;
-        }
-
-        .panel-box {
-            background: var(--surface);
-            backdrop-filter: blur(15px);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .panel-box h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin-top: 0;
-            font-size: 14px;
-            letter-spacing: 1.5px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-
-        /* Tablo */
-        .table-container {
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th, td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        th {
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            background: #0d1117;
-            z-index: 10;
-        }
-
-        tr { transition: background 0.2s ease; }
-        tr:hover td { background: rgba(0, 240, 255, 0.03); }
-
-        .key-code {
-            font-family: 'Courier New', monospace;
-            color: var(--neon-blue);
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        /* Log Terminali */
-        .log-terminal {
-            background: #010409;
-            color: var(--neon-green);
-            font-family: 'Courier New', Courier, monospace;
-            padding: 18px;
-            border-radius: 12px;
-            height: 380px;
-            overflow-y: auto;
-            border: 1px solid rgba(0, 255, 102, 0.2);
-            font-size: 12px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
-        }
-
-        .log-item {
-            margin-bottom: 8px;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
-            padding-bottom: 6px;
-        }
-
-        .btn-action {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .btn-reset { color: #ffab00; }
-        .btn-reset:hover { background: rgba(255, 171, 0, 0.1); }
-
-        .btn-del { color: #ff5252; margin-left: 5px; }
-        .btn-del:hover { background: rgba(255, 82, 82, 0.1); }
-
-        .hidden { display: none !important; }
-
-        /* Scrollbar Özelleştirme */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: rgba(88, 166, 255, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+        body { background-color: #0d1117; color: #c9d1d9; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1200px; margin: 0 auto; }
+        header { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 15px 25px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
+        h2 { color: #58a6ff; margin: 0; }
+        .login-box { max-width: 400px; margin: 100px auto; background: #161b22; padding: 30px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
+        input, select { background: #0d1117; border: 1px solid #30363d; color: #fff; padding: 10px; border-radius: 4px; margin-right: 10px; width: calc(100% - 24px); margin-bottom: 10px; }
+        .login-box input { width: 80%; }
+        button { background: #238636; color: #fff; border: none; padding: 10px 20px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background: #2ea043; }
+        .btn-danger { background: #da3633; }
+        .btn-danger:hover { background: #f85149; }
+        .btn-info { background: #1f6feb; }
+        .btn-info:hover { background: #388bfd; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px; }
+        .stat-card { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; text-align: center; }
+        .stat-card h3 { margin: 0; color: #8b949e; font-size: 14px; }
+        .stat-card p { margin: 10px 0 0 0; color: #58a6ff; font-size: 24px; font-weight: bold; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .panel-box { background: #161b22; padding: 20px; border-radius: 8px; border: 1px solid #30363d; margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #30363d; }
+        th { color: #58a6ff; }
+        .log-terminal { background: #010409; color: #7ee787; font-family: monospace; padding: 15px; border-radius: 6px; height: 320px; overflow-y: auto; border: 1px solid #30363d; font-size: 12px; }
+        .log-item { margin-bottom: 5px; border-bottom: 1px dashed #21262d; padding-bottom: 4px; }
+        .btn-reset { color: #f85149; background: none; border: none; cursor: pointer; font-weight: bold; }
+        .btn-del { color: #da3633; background: none; border: none; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-    <!-- Arka Planda Kayan Siber Matrix Efekti -->
-    <canvas id="matrixCanvas"></canvas>
+<div class="container">
 
-    <div class="container">
-
-        <!-- Giriş Ekranı -->
-        <div id="loginSection" class="login-wrapper">
-            <div class="login-box">
-                <h2>NEON NEXUS</h2>
-                <span style="color: var(--neon-blue); font-size: 11px; letter-spacing: 3px; display: block; margin-bottom: 25px;">SECURE COMMAND CENTER</span>
-                <input type="password" id="adminKeyInput" placeholder="Yönetici Anahtarı (Admin Key)">
-                <button onclick="girisYap()">SİSTEME BAĞLAN</button>
-                <p id="loginError" style="color: #ff5252; margin-top: 15px; font-size: 12px;"></p>
-            </div>
-        </div>
-
-        <!-- Yönetim Paneli -->
-        <div id="panelSection" class="hidden">
-            <header>
-                <div class="logo-area">
-                    <h1>NEON SECURITY</h1>
-                    <span>NEXUS v3.0 // ACTIVE COMMAND</span>
-                </div>
-                <button class="btn-danger" onclick="cikisYap()">GÜVENLİ ÇIKIŞ</button>
-            </header>
-
-            <!-- İstatistik Kartları -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>TOPLAM LİSANS</h3>
-                    <p id="statTotalKeys">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>AKTİF HWID KİLİDİ</h3>
-                    <p id="statActiveHwid">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>TOPLAM İSTEK (LOG)</h3>
-                    <p id="statTotalReq">0</p>
-                </div>
-            </div>
-
-            <div class="dashboard-grid">
-                <!-- Sol Kolon: Otomatik Key Üretimi & Yönetim -->
-                <div>
-                    <div class="panel-box">
-                        <h3>LİSANS ÜRETİCİ</h3>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">İster hazır paket seç, ister özel süre belirle.</p>
-                        
-                        <label style="font-size: 11px; color: var(--neon-blue); display: block; margin-bottom: 5px; font-family: 'Orbitron';">SÜRE SEÇİMİ</label>
-                        <select id="newDuration" onchange="sureTipiniDegistir()">
-                            <option value="1 Günlük">1 Günlük</option>
-                            <option value="30 Günlük" selected>30 Günlük (1 Ay)</option>
-                            <option value="Yıllık (1 Yıl)">Yıllık (1 Yıl)</option>
-                            <option value="3 Yıllık">3 Yıllık</option>
-                            <option value="Sınırsız (Lifetime)">Sınırsız (Lifetime)</option>
-                            <option value="ozel">⚙️ Özel Süre Belirle...</option>
-                        </select>
-                        
-                        <!-- ÖZEL SÜRE KUTUCUKLARI (Başta Gizli) -->
-                        <div id="customDurationBox" class="custom-duration-grid hidden">
-                            <div>
-                                <label>YIL</label>
-                                <input type="number" id="ozelYil" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>AY</label>
-                                <input type="number" id="ozelAy" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>GÜN</label>
-                                <input type="number" id="ozelGun" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>DAKİKA</label>
-                                <input type="number" id="ozelDakika" placeholder="Boş">
-                            </div>
-                        </div>
-
-                        <button onclick="otomatikKeyUretVeEkle()" style="margin-top: 10px;">OTOMATİK KEY OLUŞTUR</button>
-                    </div>
-                </div>
-
-                <!-- Sağ Kolon: Aktif Veritabanı ve Loglar -->
-                <div>
-                    <div class="panel-box">
-                        <h3>KAYITLI LİSANS LİSTESİ</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>LİSANS ANAHTARI</th>
-                                        <th>SÜRE</th>
-                                        <th>HWID DURUMU</th>
-                                        <th>İŞLEMLER</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keyList">
-                                    <!-- Dinamik Dolacak -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="panel-box">
-                        <h3>CANLI API İSTEK AKIŞI (LOG TERMINAL)</h3>
-                        <div class="log-terminal" id="logTerminal">
-                            <!-- Loglar akacak -->
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+    <!-- Giriş Ekranı -->
+    <div id="loginSection" class="login-box">
+        <h2>NEON SECURITY</h2>
+        <p style="color: #8b949e; margin-bottom: 20px;">Yönetici Paneline Giriş Yapın</p>
+        <input type="password" id="adminKeyInput" placeholder="Admin Key (NEONBEST31)">
+        <br>
+        <button onclick="girisYap()" style="width: 100%;">Sisteme Bağlan</button>
+        <p id="loginError" style="color: #f85149; margin-top: 15px;"></p>
     </div>
 
+    <!-- Yönetim Paneli -->
+    <div id="panelSection" class="hidden">
+        <header>
+            <h2>NEON SECURITY - LIVE DASHBOARD</h2>
+            <button class="btn-danger" onclick="cikisYap()"><span style="color: white;">Çıkış Yap</span></button>
+        </header>
+
+        <!-- İstatistik Kartları -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>TOPLAM LİSANS</h3>
+                <p id="statTotalKeys">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>AKTİF (BAĞLI) HWID</h3>
+                <p id="statActiveHwid">0</p>
+            </div>
+            <div class="stat-card">
+                <h3>TOPLAM API İSTEĞİ</h3>
+                <p id="statTotalReq">0</p>
+            </div>
+        </div>
+
+        <div class="grid-2">
+            <!-- Sol Taraf: Key Yönetimi ve .EXE Güncelleme -->
+            <div>
+                <div class="panel-box">
+                    <h3>Yeni Lisans Key Ekle</h3>
+                    <input type="text" id="newKey" placeholder="Key (Örn: NEON-PRO99)">
+                    <select id="newDuration">
+                        <option value="30 Saniye">30 Saniye</option>
+                        <option value="60 Saniye">60 Saniye</option>
+                        <option value="5 Dakika">5 Dakika</option>
+                        <option value="1 Saat">1 Saat</option>
+                        <option value="30 Gün">30 Gün</option>
+                        <option value="Sınırsız">Sınırsız</option>
+                    </select>
+                    <button onclick="keyEkle()" style="width: 100%;">Key Oluştur</button>
+                </div>
+
+                <div class="panel-box">
+                    <h3>Loader Güncellemesi (.EXE Yükle)</h3>
+                    <p style="font-size: 12px; color: #8b949e;">Müşterilerin otomatik indireceği yeni sürüm .exe dosyasını yükleyin.</p>
+                    <input type="file" id="exeFileInput" accept=".exe" style="padding: 6px;">
+                    <button class="btn-info" onclick="exeYukle()" style="width: 100%; margin-top: 5px;">Yeni .EXE Yayınla</button>
+                </div>
+
+                <div class="panel-box">
+                    <h3>Kayıtlı Lisanslar</h3>
+                    <div style="max-height: 250px; overflow-y: auto;">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>ANAHTAR</th>
+                                    <th>SÜRE / TÜR</th>
+                                    <th>HWID DURUMU</th>
+                                    <th>İŞLEMLER</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyList">
+                                <!-- Dinamik -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sağ Taraf: Canlı API İstek Logları -->
+            <div>
+                <div class="panel-box">
+                    <h3>Gelen Canlı API İstekleri (Log Terminali)</h3>
+                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader'dan ve dışarıdan yapılan tüm sorgular anlık düşer.</p>
+                    <div class="log-terminal" id="logTerminal">
+                        <!-- Loglar buraya akacak -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
 <script>
-    // --- MATRIX / CYBERNETIC CANVAS BACKGROUND ---
-    const canvas = document.getElementById('matrixCanvas');
-    const ctx = canvas.getContext('2d');
-
-    let width, height;
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    let particles = [];
-    for(let i=0; i<60; i++) {
-        particles.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            size: Math.random() * 1.5 + 0.5
-        });
-    }
-
-    function renderBackground() {
-        ctx.fillStyle = 'rgba(2, 4, 10, 0.25)';
-        ctx.fillRect(0, 0, width, height);
-
-        // Grid çizgileri
-        ctx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
-        ctx.lineWidth = 1;
-        let step = 60;
-        for(let x=0; x<width; x+=step) {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-        }
-        for(let y=0; y<height; y+=step) {
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-        }
-
-        // Partiküller
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
-        particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy;
-            if(p.x < 0) p.x = width; if(p.x > width) p.x = 0;
-            if(p.y < 0) p.y = height; if(p.y > height) p.y = 0;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        requestAnimationFrame(renderBackground);
-    }
-    renderBackground();
-
-
-    // --- ÖZEL SÜRE GÖSTER / GİZLE MANTIĞI ---
-    function sureTipiniDegistir() {
-        const secilen = document.getElementById('newDuration').value;
-        const ozelBox = document.getElementById('customDurationBox');
-        if (secilen === 'ozel') {
-            ozelBox.classList.remove('hidden');
-        } else {
-            ozelBox.classList.add('hidden');
-        }
-    }
-
-
-    // --- OTOMATİK RASTGELE KEY ÜRETME FONKSİYONU ---
-    function rastgeleBlokOlustur() {
-        const chars = '0123456789ABCDEF';
-        let blok = '';
-        for (let i = 0; i < 4; i++) {
-            blok += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return blok;
-    }
-
-    function yeniKeyFormatUret() {
-        return `NEON-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}`;
-    }
-
-
-    // --- PANEL YÖNETİM MANTIĞI ---
     let adminKey = "";
-    let refreshInterval = null;
+    let autoRefreshTimer = null;
+    let serverTimeOffset = 0;
 
     function girisYap() {
         adminKey = document.getElementById('adminKeyInput').value;
-        sistemiGuncelle(true);
+        verileriCek(true);
     }
 
     function cikisYap() {
-        clearInterval(refreshInterval);
+        clearInterval(autoRefreshTimer);
         document.getElementById('panelSection').classList.add('hidden');
         document.getElementById('loginSection').classList.remove('hidden');
         document.getElementById('adminKeyInput').value = "";
     }
 
-    function sistemiGuncelle(isLogin = false) {
+    function verileriCek(isLogin = false) {
         fetch(`api.php?action=get_data&admin_key=${adminKey}`)
             .then(res => res.json())
             .then(data => {
@@ -572,35 +154,49 @@
                     if (isLogin) {
                         document.getElementById('loginSection').classList.add('hidden');
                         document.getElementById('panelSection').classList.remove('hidden');
-                        refreshInterval = setInterval(() => sistemiGuncelle(false), 4000);
+                        autoRefreshTimer = setInterval(() => verileriCek(false), 4000);
                     }
-                    arayuzuDoldur(data.keys, data.logs);
+                    serverTimeOffset = Math.floor(Date.now() / 1000) - data.server_time;
+                    paneliDoldur(data.keys, data.logs);
                 } else {
-                    if (isLogin) document.getElementById('loginError').innerText = "Erişim Reddedildi: Geçersiz Yönetici Anahtarı!";
+                    if (isLogin) document.getElementById('loginError').innerText = "Geçersiz Admin Anahtarı!";
                 }
             })
-            .catch(() => {
+            .catch(err => {
                 if (isLogin) document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
             });
     }
 
-    function arayuzuDoldur(keys, logs) {
+    function paneliDoldur(keys, logs) {
         let totalKeys = Object.keys(keys).length;
         let activeHwid = 0;
+        let currentTime = Math.floor(Date.now() / 1000) - serverTimeOffset;
 
         const tbody = document.getElementById('keyList');
         tbody.innerHTML = "";
         for (const [key, info] of Object.entries(keys)) {
             if (info.hwid) activeHwid++;
-            let hwidStatus = info.hwid ? `<span style="color: #00ff66;" title="${info.hwid}">Kilitli</span>` : '<span style="color: var(--text-muted);">Boşta</span>';
+            let hwidText = info.hwid ? `<span style="color: #3fb950;" title="${info.hwid}">Kilitli</span>` : '<span style="color: #8b949e;">Boşta</span>';
             
+            let kalanSureStr = info.duration_text;
+            if (info.expiry_time > 0) {
+                let kalanSec = info.expiry_time - currentTime;
+                if (kalanSec > 0) {
+                    if (kalanSec < 60) kalanSureStr = kalanSec + " sn kaldı";
+                    else if (kalanSec < 3600)ക്കാർ = Math.floor(kalanSec / 60) + " dk kaldı";
+                    else kalanSureStr = Math.floor(kalanSec / 3600) + " saat kaldı";
+                } else {
+                    kalanSureStr = "<span style='color:#f85149;'>Süresi Bitti</span>";
+                }
+            }
+
             let row = `<tr>
-                <td class="key-code">${key}</td>
-                <td>${info.expiry}</td>
-                <td>${hwidStatus}</td>
+                <td style="color: #58a6ff; font-weight: bold;">${key}</td>
+                <td>${kalanSureStr}</td>
+                <td>${hwidText}</td>
                 <td>
-                    <button class="btn-action btn-reset" onclick="hwidSifirla('${key}')">Sıfırla</button>
-                    <button class="btn-action btn-del" onclick="keySil('${key}')">Sil</button>
+                    <button class="btn-reset" onclick="hwidSifirla('${key}')">Sıfırla</button>
+                    <button class="btn-del" onclick="keySil('${key}')">Sil</button>
                 </td>
             </tr>`;
             tbody.innerHTML += row;
@@ -613,60 +209,63 @@
         const terminal = document.getElementById('logTerminal');
         terminal.innerHTML = "";
         logs.forEach(log => {
-            let statusColor = log.status.includes('SUCCESS') ? '#00ff66' : '#ff5252';
+            let color = log.status.includes('SUCCESS') ? '#7ee787' : '#f85149';
             let logLine = `<div class="log-item">
-                <span style="color: var(--text-muted);">[${log.time}]</span> 
-                <span style="color: #d2a8ff;">IP:${log.ip}</span> 
-                <span style="color: var(--neon-blue);">[${log.action}]</span> 
-                Key:<b>${log.key}</b> ➔ 
-                <span style="color: ${statusColor};">${log.status}</span>
+                <span style="color: #8b949e;">[${log.time}]</span> 
+                <span style="color: #d2a8ff;">IP: ${log.ip}</span> 
+                <span style="color: #58a6ff;">[${log.action}]</span> 
+                Key: <b>${log.key}</b> ➔ 
+                <span style="color: ${color};">${log.status}</span>
             </div>`;
             terminal.innerHTML += logLine;
         });
     }
 
-    function otomatikKeyUretVeEkle() {
-        const uretilenKey = yeniKeyFormatUret();
-        let secilenSure = document.getElementById('newDuration').value;
-
-        // Eğer özel süre seçildiyse doldurulan kutuları birleştirip string oluşturuyoruz
-        if (secilenSure === 'ozel') {
-            let yil = parseInt(document.getElementById('ozelYil').value) || 0;
-            let ay = parseInt(document.getElementById('ozelAy').value) || 0;
-            let gun = parseInt(document.getElementById('ozelGun').value) || 0;
-            let dakika = parseInt(document.getElementById('ozelDakika').value) || 0;
-
-            let parcalar = [];
-            if (yil > 0) parcalar.push(`${yil} yıl`);
-            if (ay > 0) parcalar.push(`${ay} ay`);
-            if (gun > 0) parcalar.push(`${gun} gün`);
-            if (dakika > 0) parcalar.push(`${dakika} dakika`);
-
-            secilenSure = parcalar.length > 0 ? parcalar.join(" ") : "0 dakika";
-        }
-
-        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${uretilenKey}&duration=${encodeURIComponent(secilenSure)}`)
-            .then(res => res.json())
-            .then(data => {
-                alert(`Başarıyla Üretildi!\nKey: ${uretilenKey}\nSüre: ${secilenSure}`);
-                sistemiGuncelle(false);
-            });
-    }
-
     function hwidSifirla(targetKey) {
-        if (confirm(`${targetKey} için HWID kilidi kaldırılsın mı?`)) {
+        if (confirm(`${targetKey} için HWID sıfırlansın mı?`)) {
             fetch(`api.php?action=reset_hwid&admin_key=${adminKey}&target_key=${targetKey}`)
                 .then(res => res.json())
-                .then(data => { alert(data.message); sistemiGuncelle(false); });
+                .then(data => { alert(data.message); verileriCek(false); });
         }
     }
 
     function keySil(targetKey) {
-        if (confirm(`${targetKey} veritabanından tamamen silinsin mi?`)) {
+        if (confirm(`${targetKey} tamamen silinsin mi?`)) {
             fetch(`api.php?action=delete_key&admin_key=${adminKey}&target_key=${targetKey}`)
                 .then(res => res.json())
-                .then(data => { alert(data.message); sistemiGuncelle(false); });
+                .then(data => { alert(data.message); verileriCek(false); });
         }
+    }
+
+    function keyEkle() {
+        const newKey = document.getElementById('newKey').value;
+        const duration = document.getElementById('newDuration').value;
+        if (!newKey) { alert("Lütfen bir key girin!"); return; }
+        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${newKey}&duration=${encodeURIComponent(duration)}`)
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                document.getElementById('newKey').value = "";
+                verileriCek(false);
+            });
+    }
+
+    function exeYukle() {
+        const fileInput = document.getElementById('exeFileInput');
+        if (fileInput.files.length === 0) { alert("Lütfen yüklenecek bir .exe dosyası seçin!"); return; }
+        
+        let formData = new FormData();
+        formData.append('action', 'upload_exe');
+        formData.append('admin_key', adminKey);
+        formData.append('exe_file', fileInput.files[0]);
+
+        fetch('api.php', { method: 'POST', body: formData })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                fileInput.value = "";
+            })
+            .catch(err => alert("Yükleme başarısız oldu!"));
     }
 </script>
 
