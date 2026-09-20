@@ -170,6 +170,30 @@
             box-shadow: 0 8px 25px rgba(255, 82, 82, 0.6);
         }
 
+        /* Özel Süre Grid Yapısı */
+        .custom-duration-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed var(--border);
+        }
+        .custom-duration-grid label {
+            font-size: 10px;
+            color: var(--neon-blue);
+            margin-bottom: 3px;
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .custom-duration-grid input {
+            margin-bottom: 0;
+            padding: 8px 10px;
+            font-size: 13px;
+        }
+
         /* İstatistik Kartları */
         .stats-grid {
             display: grid;
@@ -372,17 +396,38 @@
                 <div>
                     <div class="panel-box">
                         <h3>LİSANS ÜRETİCİ</h3>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">Seçilen süreye uygun formatta otomatik key üretir.</p>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">İster hazır paket seç, ister özel süre belirle.</p>
                         
-                        <label style="font-size: 11px; color: var(--neon-blue); display: block; margin-bottom: 5px; font-family: 'Orbitron';">SÜRE SEÇİNİ</label>
-                        <select id="newDuration">
+                        <label style="font-size: 11px; color: var(--neon-blue); display: block; margin-bottom: 5px; font-family: 'Orbitron';">SÜRE SEÇİMİ</label>
+                        <select id="newDuration" onchange="sureTipiniDegistir()">
                             <option value="1 Günlük">1 Günlük</option>
                             <option value="30 Günlük" selected>30 Günlük (1 Ay)</option>
                             <option value="Yıllık (1 Yıl)">Yıllık (1 Yıl)</option>
                             <option value="3 Yıllık">3 Yıllık</option>
                             <option value="Sınırsız (Lifetime)">Sınırsız (Lifetime)</option>
+                            <option value="ozel">⚙️ Özel Süre Belirle...</option>
                         </select>
                         
+                        <!-- ÖZEL SÜRE KUTUCUKLARI (Başta Gizli) -->
+                        <div id="customDurationBox" class="custom-duration-grid hidden">
+                            <div>
+                                <label>YIL</label>
+                                <input type="number" id="ozelYil" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>AY</label>
+                                <input type="number" id="ozelAy" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>GÜN</label>
+                                <input type="number" id="ozelGun" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>DAKİKA</label>
+                                <input type="number" id="ozelDakika" placeholder="Boş">
+                            </div>
+                        </div>
+
                         <button onclick="otomatikKeyUretVeEkle()" style="margin-top: 10px;">OTOMATİK KEY OLUŞTUR</button>
                     </div>
                 </div>
@@ -476,8 +521,19 @@
     renderBackground();
 
 
+    // --- ÖZEL SÜRE GÖSTER / GİZLE MANTIĞI ---
+    function sureTipiniDegistir() {
+        const secilen = document.getElementById('newDuration').value;
+        const ozelBox = document.getElementById('customDurationBox');
+        if (secilen === 'ozel') {
+            ozelBox.classList.remove('hidden');
+        } else {
+            ozelBox.classList.add('hidden');
+        }
+    }
+
+
     // --- OTOMATİK RASTGELE KEY ÜRETME FONKSİYONU ---
-    // İstediğin format: NEON-77C1-002E-99AA (4'erli random hex/sayı blokları)
     function rastgeleBlokOlustur() {
         const chars = '0123456789ABCDEF';
         let blok = '';
@@ -571,7 +627,23 @@
 
     function otomatikKeyUretVeEkle() {
         const uretilenKey = yeniKeyFormatUret();
-        const secilenSure = document.getElementById('newDuration').value;
+        let secilenSure = document.getElementById('newDuration').value;
+
+        // Eğer özel süre seçildiyse doldurulan kutuları birleştirip string oluşturuyoruz
+        if (secilenSure === 'ozel') {
+            let yil = parseInt(document.getElementById('ozelYil').value) || 0;
+            let ay = parseInt(document.getElementById('ozelAy').value) || 0;
+            let gun = parseInt(document.getElementById('ozelGun').value) || 0;
+            let dakika = parseInt(document.getElementById('ozelDakika').value) || 0;
+
+            let parcalar = [];
+            if (yil > 0) parcalar.push(`${yil} yıl`);
+            if (ay > 0) parcalar.push(`${ay} ay`);
+            if (gun > 0) parcalar.push(`${gun} gün`);
+            if (dakika > 0) parcalar.push(`${dakika} dakika`);
+
+            secilenSure = parcalar.length > 0 ? parcalar.join(" ") : "0 dakika";
+        }
 
         fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${uretilenKey}&duration=${encodeURIComponent(secilenSure)}`)
             .then(res => res.json())
