@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NEON SOFTWARE // SECURE LOADER v2.5</title>
+<title>NEON SOFTWARE // ADMIN CONSOLE v2.5</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
 
@@ -15,14 +15,13 @@
 
 :root {
     --cyan: #00f6ff;
-    --cyan-dim: rgba(0,246,255,0.15);
+    --cyan-dim: rgba(0,246,255,0.12);
     --purple: #9d4edd;
-    --pink: #ff00cc;
     --green: #00ff9d;
     --red: #ff3158;
     --warning: #ffc857;
     --bg: #020408;
-    --panel-bg: rgba(6, 10, 18, 0.92);
+    --panel-bg: rgba(6, 10, 18, 0.94);
     --border: rgba(0, 246, 255, 0.2);
 }
 
@@ -35,563 +34,465 @@ body {
     font-family: 'Orbitron', sans-serif;
 }
 
-/* ================= BACKGROUND EFFECTS ================= */
+/* Background FX */
 .background {
     position: fixed;
     inset: 0;
     overflow: hidden;
-    background: radial-gradient(circle at 50% 30%, rgba(0,246,255,.07), transparent 40%), #020408;
+    background: radial-gradient(circle at 50% 20%, rgba(0,246,255,.05), transparent 50%), #020408;
     z-index: -1;
 }
-
 .grid {
     position: absolute;
     inset: -50%;
-    background-image: 
-        linear-gradient(rgba(0,246,255,.025) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,246,255,.025) 1px, transparent 1px);
-    background-size: 40px 40px;
+    background-image: linear-gradient(rgba(0,246,255,.02) 1px, transparent 1px), linear-gradient(90deg, rgba(0,246,255,.02) 1px, transparent 1px);
+    background-size: 35px 35px;
     transform: perspective(500px) rotateX(60deg);
-    animation: gridMove 15s linear infinite;
 }
 
-@keyframes gridMove {
-    from { transform: perspective(500px) rotateX(60deg) translateY(0); }
-    to { transform: perspective(500px) rotateX(60deg) translateY(40px); }
+/* Layout */
+.app-container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    grid-template-rows: 55px 1fr;
 }
 
-.scanlines {
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-    background: repeating-linear-gradient(0deg, rgba(255,255,255,.01) 0px, rgba(255,255,255,.01) 1px, transparent 2px, transparent 4px);
-}
-
-/* ================= AUTH SCREEN ================= */
-.screen {
-    position: fixed;
-    inset: 0;
+/* Topbar */
+.topbar {
+    grid-column: 1 / -1;
+    background: var(--panel-bg);
+    border-bottom: 1px solid var(--border);
     display: flex;
     align-items: center;
-    justify-content: center;
-    z-index: 100;
-    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    justify-content: space-between;
+    padding: 0 25px;
+    z-index: 10;
+}
+.brand {
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--cyan);
+    text-shadow: 0 0 10px var(--cyan);
+}
+.admin-badge {
+    font-size: 8px;
+    letter-spacing: 2px;
+    background: rgba(255,49,88,0.15);
+    color: var(--red);
+    border: 1px solid rgba(255,49,88,0.3);
+    padding: 5px 10px;
 }
 
-.screen.hidden {
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(1.08);
+/* Sidebar */
+.sidebar {
+    background: rgba(4, 7, 12, 0.9);
+    border-right: 1px solid var(--border);
+    padding: 20px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.nav-item {
+    height: 42px;
+    display: flex;
+    align-items: center;
+    padding: 0 15px;
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: #72828c;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: 0.25s;
+}
+.nav-item:hover, .nav-item.active {
+    color: var(--cyan);
+    background: var(--cyan-dim);
+    border-color: rgba(0,246,255,0.3);
+    box-shadow: 0 0 15px rgba(0,246,255,0.05);
 }
 
-.auth-card {
-    width: min(420px, 90vw);
-    padding: 35px;
+/* Main Content Area */
+.main-content {
+    padding: 25px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.tab-pane {
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+    animation: fadeIn 0.4s ease;
+}
+.tab-pane.active {
+    display: flex;
+}
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Stats Row */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+}
+.stat-box {
     background: var(--panel-bg);
     border: 1px solid var(--border);
-    box-shadow: 0 0 40px rgba(0,246,255,.08), inset 0 0 30px rgba(0,246,255,.02);
-    backdrop-filter: blur(20px);
-    position: relative;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
-
-.auth-title {
-    font-size: 22px;
-    letter-spacing: 4px;
-    color: var(--cyan);
-    text-shadow: 0 0 12px var(--cyan);
-    text-align: center;
-    margin-bottom: 5px;
-}
-
-.auth-sub {
+.stat-title {
     font-size: 8px;
     letter-spacing: 2px;
     color: #60727c;
-    text-align: center;
-    margin-bottom: 30px;
+}
+.stat-value {
+    font-size: 22px;
+    letter-spacing: 1px;
+    color: #fff;
 }
 
+/* Panels & Tables */
+.panel {
+    background: var(--panel-bg);
+    border: 1px solid var(--border);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+.panel-title {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--cyan);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.form-row {
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
 .input-group {
-    margin-bottom: 20px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
 }
-
 .input-label {
     font-size: 8px;
-    letter-spacing: 2px;
-    color: #72828c;
-    margin-bottom: 8px;
-    display: block;
+    letter-spacing: 1px;
+    color: #60727c;
 }
-
-.cyber-input {
-    width: 100%;
-    height: 48px;
+.cyber-select, .cyber-input {
+    height: 40px;
     background: rgba(0,0,0,0.6);
     border: 1px solid #1a3c44;
     outline: none;
     color: var(--cyan);
-    padding: 0 15px;
+    padding: 0 12px;
     font-family: 'JetBrains Mono', monospace;
-    letter-spacing: 2px;
-    transition: 0.3s;
+    font-size: 11px;
 }
-
-.cyber-input:focus {
-    border-color: var(--cyan);
-    box-shadow: 0 0 15px rgba(0,246,255,.2);
-}
-
 .cyber-btn {
-    width: 100%;
-    height: 48px;
-    background: linear-gradient(90deg, rgba(0,246,255,.12), rgba(157,78,221,.12));
+    height: 40px;
+    padding: 0 25px;
+    background: linear-gradient(90deg, rgba(0,246,255,.15), rgba(157,78,221,.15));
     border: 1px solid var(--cyan);
     color: #fff;
     font-family: inherit;
-    letter-spacing: 3px;
-    font-size: 11px;
+    font-size: 9px;
+    letter-spacing: 2px;
     cursor: pointer;
     transition: 0.3s;
 }
-
 .cyber-btn:hover {
-    background: rgba(0,246,255,.2);
-    box-shadow: 0 0 20px rgba(0,246,255,.3);
+    background: rgba(0,246,255,0.25);
+    box-shadow: 0 0 15px rgba(0,246,255,0.2);
 }
 
-.auth-error {
-    color: var(--red);
-    font-size: 9px;
-    text-align: center;
-    margin-top: 12px;
-    height: 15px;
-    opacity: 0;
-    transition: 0.3s;
-}
-.auth-error.show { opacity: 1; }
-
-/* ================= MAIN DASHBOARD ================= */
-#app {
-    position: fixed;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0.95);
-    transition: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-    z-index: 50;
-}
-
-#app.visible {
-    opacity: 1;
-    pointer-events: auto;
-    transform: scale(1);
-}
-
-.main-window {
-    width: min(900px, 95vw);
-    height: min(640px, 92vh);
-    background: var(--panel-bg);
-    border: 1px solid var(--border);
-    box-shadow: 0 0 50px rgba(0,246,255,.07), inset 0 0 50px rgba(0,246,255,.01);
-    backdrop-filter: blur(20px);
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-}
-
-.topbar {
-    height: 50px;
-    border-bottom: 1px solid rgba(255,255,255,.06);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 20px;
-}
-
-.brand {
-    font-size: 11px;
-    letter-spacing: 3px;
-    color: #fff;
-    text-shadow: 0 0 10px var(--cyan);
-}
-
-.license-pill {
-    font-size: 8px;
-    letter-spacing: 1px;
-    color: var(--cyan);
-    background: var(--cyan-dim);
-    padding: 4px 10px;
-    border: 1px solid rgba(0,246,255,.3);
-}
-
-/* Dashboard Grid Layout */
-.dashboard-grid {
-    display: grid;
-    grid-template-columns: 280px 1fr;
-    flex: 1;
-    overflow: hidden;
-}
-
-.sidebar {
-    border-right: 1px solid rgba(255,255,255,.06);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    background: rgba(0,0,0,0.2);
-}
-
-.section-title {
-    font-size: 8px;
-    letter-spacing: 2px;
-    color: #586a75;
-    margin-bottom: 5px;
-}
-
-/* Toggle Switches for Bypass Modules */
-.toggle-item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,.04);
-    padding: 10px 12px;
-    font-size: 9px;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.toggle-item:hover {
-    border-color: rgba(0,246,255,.3);
-}
-
-.toggle-switch {
-    width: 28px;
-    height: 14px;
-    background: #151d24;
-    border-radius: 10px;
-    position: relative;
-    transition: 0.3s;
-}
-
-.toggle-switch::after {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: 10px;
-    height: 10px;
-    background: #50606a;
-    border-radius: 50%;
-    transition: 0.3s;
-}
-
-.toggle-item.active .toggle-switch {
-    background: rgba(0,246,255,0.3);
-}
-
-.toggle-item.active .toggle-switch::after {
-    left: 16px;
-    background: var(--cyan);
-    box-shadow: 0 0 8px var(--cyan);
-}
-
-/* Content Area */
-.content-area {
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-    overflow-y: auto;
-}
-
-.status-card {
-    background: rgba(0,0,0,0.4);
-    border: 1px solid rgba(255,255,255,.05);
-    padding: 20px;
-    text-align: center;
-    position: relative;
-}
-
-.status-indicator {
-    font-size: 26px;
-    letter-spacing: 2px;
-    margin: 8px 0;
-    font-weight: 700;
-}
-
-.status-indicator.waiting { color: var(--warning); text-shadow: 0 0 15px rgba(255,200,87,0.3); }
-.status-indicator.ready { color: var(--green); text-shadow: 0 0 15px rgba(0,255,157,0.4); }
-
-/* Log Console */
-.console-box {
-    flex: 1;
-    background: rgba(0,0,0,0.5);
-    border: 1px solid rgba(255,255,255,.06);
-    display: flex;
-    flex-direction: column;
-    min-height: 160px;
-}
-
-.console-header {
-    height: 30px;
-    background: rgba(255,255,255,.02);
-    border-bottom: 1px solid rgba(255,255,255,.05);
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 12px;
-    font-size: 8px;
-    color: #60707a;
-}
-
-.console-body {
-    flex: 1;
-    padding: 10px;
-    overflow-y: auto;
+/* Data Table */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
     font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
-    line-height: 1.6;
 }
-
-.log-entry { color: #80929c; }
-.log-entry.good { color: var(--green); }
-.log-entry.cyan { color: var(--cyan); }
-.log-entry.warn { color: var(--warning); }
-.log-entry.bad { color: var(--red); }
-.log-time { color: #35424a; margin-right: 6px; }
-
-/* Bottom Action Bar */
-.action-bar {
-    display: flex;
-    gap: 10px;
-    margin-top: auto;
-}
-
-.action-btn {
-    flex: 1;
-    height: 40px;
-    background: rgba(0,0,0,0.4);
-    border: 1px solid #1c3842;
-    color: #a8b8c2;
-    font-family: inherit;
+.data-table th {
+    text-align: left;
+    padding: 10px;
+    background: rgba(0,246,255,0.05);
+    color: var(--cyan);
+    border-bottom: 1px solid var(--border);
+    letter-spacing: 1px;
     font-size: 9px;
-    letter-spacing: 2px;
-    cursor: pointer;
-    transition: 0.25s;
 }
-
-.action-btn:hover {
-    border-color: var(--cyan);
-    color: #fff;
-    box-shadow: 0 0 15px rgba(0,246,255,.15);
+.data-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    color: #a8b8c2;
 }
+.tag {
+    padding: 3px 8px;
+    font-size: 8px;
+    letter-spacing: 1px;
+}
+.tag.active { background: rgba(0,255,157,0.15); color: var(--green); border: 1px solid rgba(0,255,157,0.3); }
+.tag.unbound { background: rgba(255,200,87,0.15); color: var(--warning); border: 1px solid rgba(255,200,87,0.3); }
 
-.action-btn.danger:hover {
-    border-color: var(--red);
+.action-link {
     color: var(--red);
-    box-shadow: 0 0 15px rgba(255,49,88,.15);
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: 9px;
 }
 </style>
 </head>
 <body>
 
-<div class="background">
-    <div class="grid"></div>
-    <div class="scanlines"></div>
-</div>
+<div class="background"><div class="grid"></div></div>
 
-<!-- ================= AUTH SCREEN ================= -->
-<div class="screen" id="authScreen">
-    <div class="auth-card">
-        <div class="auth-title">NEON SYSTEM</div>
-        <div class="auth-sub">SECURE AUTHENTICATION GATEWAY</div>
-        
-        <div class="input-group">
-            <label class="input-label">LICENSE KEY</label>
-            <input type="text" id="keyInput" class="cyber-input" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
-        </div>
-        
-        <button class="cyber-btn" id="loginBtn">VERIFY & LAUNCH</button>
-        <div class="auth-error" id="authError">GEÇERSİZ LİSANS ANAHTARI!</div>
+<div class="app-container">
+    <!-- Topbar -->
+    <div class="topbar">
+        <div class="brand">NEON SOFTWARE // ADMIN PANEL</div>
+        <div class="admin-badge">ROOT ACCESS // SECURE</div>
     </div>
-</div>
 
-<!-- ================= MAIN DASHBOARD ================= -->
-<div id="app">
-    <div class="main-window">
-        <div class="topbar">
-            <div class="brand">NEON SOFTWARE // KERNEL BYPASS v2.5</div>
-            <div class="license-pill" id="pillExpire">LİSANS: AKTİF (30 GÜN)</div>
-        </div>
-        
-        <div class="dashboard-grid">
-            <!-- Sidebar / Modules -->
-            <div class="sidebar">
-                <div class="section-title">BYPASS MODÜLLERİ</div>
-                
-                <div class="toggle-item active" onclick="toggleModule(this)">
-                    <span>Memory Shield</span>
-                    <div class="toggle-switch"></div>
-                </div>
-                
-                <div class="toggle-item active" onclick="toggleModule(this)">
-                    <span>Signature Bypass</span>
-                    <div class="toggle-switch"></div>
-                </div>
-                
-                <div class="toggle-item" onclick="toggleModule(this)">
-                    <span>Handle Masking</span>
-                    <div class="toggle-switch"></div>
-                </div>
+    <!-- Sidebar Navigation -->
+    <div class="sidebar">
+        <div class="nav-item active" onclick="switchTab('dashboard', this)">📊 GENEL BAKIŞ</div>
+        <div class="nav-item" onclick="switchTab('keys', this)">🔑 LİSANS & HWID YÖNETİMİ</div>
+        <div class="nav-item" onclick="switchTab('requests', this)">📡 CANLI İSTEKLER</div>
+    </div>
 
-                <div class="toggle-item active" onclick="toggleModule(this)">
-                    <span>Telemetry Blocker</span>
-                    <div class="toggle-switch"></div>
-                </div>
+    <!-- Main Workspace -->
+    <div class="main-content">
 
-                <div class="section-title" style="margin-top: 10px;">SİSTEM BİLGİSİ</div>
-                <div style="font-size: 8px; color: #60727c; line-height: 1.6;">
-                    SESSION: <span id="sessionTimer" style="color: var(--cyan);">00:00:00</span><br>
-                    TARGET: <span style="color: #fff;">PROTECTED PROC</span><br>
-                    STATUS: <span style="color: var(--green);">STABLE</span>
+        <!-- TAB 1: DASHBOARD -->
+        <div class="tab-pane active" id="tab-dashboard">
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <span class="stat-title">TOPLAM LİSANS</span>
+                    <span class="stat-value" id="statTotalKeys">128</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-title">AKTİF BAĞLI (HWID)</span>
+                    <span class="stat-value" id="statActiveHwid" style="color: var(--green);">94</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-title">BOŞTA / KULLANILMAMIŞ</span>
+                    <span class="stat-value" id="statUnbound" style="color: var(--warning);">34</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-title">BUGÜNKÜ İSTEKLER</span>
+                    <span class="stat-value" id="statRequests" style="color: var(--cyan);">1,420</span>
                 </div>
             </div>
 
-            <!-- Main Content Area -->
-            <div class="content-area">
-                <div class="status-card">
-                    <div class="section-title">GÜNCEL DURUM</div>
-                    <div class="status-indicator waiting" id="mainStatus">BEKLENİYOR...</div>
-                </div>
+            <div class="panel">
+                <div class="panel-title">SİSTEM DURUMU & BİLGİLENDİRME</div>
+                <p style="font-size: 10px; color: #72828c; line-height: 1.6; font-family: 'JetBrains Mono', monospace;">
+                    Sunucu veritabanı aktif olarak senkronize ediliyor. Loader üzerinden gelen tüm kimlik doğrulama istekleri HWID kontrol mekanizmasından geçmektedir. Yeni lisans üretmek için "Lisans & HWID Yönetimi" sekmesini kullanabilirsiniz.
+                </p>
+            </div>
+        </div>
 
-                <div class="console-box">
-                    <div class="console-header">
-                        <span>CANLI İŞLEM LOGLARI</span>
-                        <span id="clearLogs" style="cursor: pointer; color: var(--cyan);">TEMİZLE</span>
+        <!-- TAB 2: KEYS & HWID MANAGEMENT -->
+        <div class="tab-pane" id="tab-keys">
+            <div class="panel">
+                <div class="panel-title">YENİ LİSANS ANAHTARI OLUŞTUR</div>
+                <div class="form-row">
+                    <div class="input-group">
+                        <label class="input-label">SÜRE / TİP</label>
+                        <select class="cyber-select" id="keyDuration">
+                            <option value="1 Gün">1 Günlük Test</option>
+                            <option value="7 Gün">7 Günlük Paket</option>
+                            <option value="30 Gün" selected>30 Günlük VIP</option>
+                            <option value="Sınırsız">Sınırsız (Lifetime)</option>
+                        </select>
                     </div>
-                    <div class="console-body" id="consoleBody"></div>
+                    <div class="input-group">
+                        <label class="input-label">NOT / AÇIKLAMA</label>
+                        <input type="text" class="cyber-input" id="keyNote" placeholder="Örn: Beta Test Kullanıcısı">
+                    </div>
+                    <button class="cyber-btn" onclick="generateKey()">KEY ÜRET</button>
                 </div>
+            </div>
 
-                <div class="action-bar">
-                    <button class="action-btn" id="injectBtn">⚡ İŞLEMİ BAŞLAT</button>
-                    <button class="action-btn" id="refreshBtn">↻ YENİLE</button>
-                    <button class="action-btn danger" id="exitBtn">ÇIKIŞ</button>
+            <div class="panel">
+                <div class="panel-title">
+                    <span>AKTİF LİSTELER & HWID EŞLEŞMELERİ</span>
+                    <span style="font-size: 8px; color: #60727c;" id="keyCountText">Toplam: 4 Kayıt</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>LİSANS ANAHTARI</th>
+                                <th>SÜRE</th>
+                                <th>BAĞLI HWID</th>
+                                <th>DURUM</th>
+                                <th>İŞLEM</th>
+                            </tr>
+                        </thead>
+                        <tbody id="keyTableBody">
+                            <tr>
+                                <td style="color: var(--cyan);">NEON-9F2A-4B11-88CC</td>
+                                <td>30 Gün</td>
+                                <td style="font-family: monospace;">HWID-8849-TRABZON-0192</td>
+                                <td><span class="tag active">BAĞLI</span></td>
+                                <td><span class="action-link" onclick="resetHwid(this)">HWID SIFIRLA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color: var(--cyan);">NEON-77C1-002E-99AA</td>
+                                <td>Sınırsız</td>
+                                <td style="font-family: monospace;">HWID-3312-AKCAABAT-5541</td>
+                                <td><span class="tag active">BAĞLI</span></td>
+                                <td><span class="action-link" onclick="resetHwid(this)">HWID SIFIRLA</span></td>
+                            </tr>
+                            <tr>
+                                <td style="color: var(--cyan);">NEON-FREE-TEST-2026</td>
+                                <td>1 Gün</td>
+                                <td style="color: #555;">-</td>
+                                <td><span class="tag unbound">BOŞTA</span></td>
+                                <td><span class="action-link" style="color: var(--red);" onclick="deleteKey(this)">SİL</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>
+
+        <!-- TAB 3: LIVE REQUESTS -->
+        <div class="tab-pane" id="tab-requests">
+            <div class="panel">
+                <div class="panel-title">
+                    <span>ANLIK LOADER BAĞLANTI İSTEKLERİ</span>
+                    <span style="font-size: 8px; color: var(--green);">● CANLI AKIŞ</span>
+                </div>
+                <div style="overflow-x: auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ZAMAN</th>
+                                <th>IP ADRESİ</th>
+                                <th>KULLANILAN KEY</th>
+                                <th>GÖNDERİLEN HWID</th>
+                                <th>SONUÇ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="requestTableBody">
+                            <tr>
+                                <td style="color: #60727c;">17:45:12</td>
+                                <td>85.105.xx.xx (TR)</td>
+                                <td style="color: var(--cyan);">NEON-9F2A-4B11-88CC</td>
+                                <td>HWID-8849-TRABZON-0192</td>
+                                <td style="color: var(--green);">BAŞARILI (GİRİŞ YAPTI)</td>
+                            </tr>
+                            <tr>
+                                <td style="color: #60727c;">17:42:01</td>
+                                <td>176.234.xx.xx (TR)</td>
+                                <td style="color: var(--cyan);">NEON-77C1-002E-99AA</td>
+                                <td>HWID-3312-AKCAABAT-5541</td>
+                                <td style="color: var(--green);">BAŞARILI (GİRİŞ YAPTI)</td>
+                            </tr>
+                            <tr>
+                                <td style="color: #60727c;">17:30.15</td>
+                                <td>94.54.xx.xx (TR)</td>
+                                <td style="color: var(--red);">GEÇERSİZ-KEY-123</td>
+                                <td>HWID-9921-UNKNOWN-0000</td>
+                                <td style="color: var(--red);">REDDEDİLDİ (HATALI KEY)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
     </div>
 </div>
 
 <script>
-/* ---------------- INTERACTION LOGIC ---------------- */
-const DEMO_KEY = "NEON-2026-OPEN";
-
-const authScreen = document.getElementById("authScreen");
-const app = document.getElementById("app");
-const keyInput = document.getElementById("keyInput");
-const loginBtn = document.getElementById("loginBtn");
-const authError = document.getElementById("authError");
-const consoleBody = document.getElementById("consoleBody");
-const mainStatus = document.getElementById("mainStatus");
-const sessionTimerEl = document.getElementById("sessionTimer");
-
-let sessionSeconds = 0;
-let timerInterval = null;
-
-function addLog(msg, type = "") {
-    const d = new Date();
-    const timeStr = d.toLocaleTimeString("tr-TR", { hour12: false });
-    const div = document.createElement("div");
-    div.className = `log-entry ${type}`;
-    div.innerHTML = `<span class="log-time">[${timeStr}]</span>${msg}`;
-    consoleBody.appendChild(div);
-    consoleBody.scrollTop = consoleBody.scrollHeight;
+/* Tab Navigation */
+function switchTab(tabId, el) {
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    
+    document.getElementById('tab-' + tabId).classList.add('active');
+    el.classList.add('active');
 }
 
-function toggleModule(el) {
-    el.classList.toggle("active");
-    const name = el.querySelector("span").textContent;
-    const active = el.classList.contains("active");
-    addLog(`Modül durumu değiştirildi: ${name} -> [${active ? 'AKTİF' : 'PASİF'}]`, active ? 'good' : 'warn');
+/* Key Generator Logic */
+function generateKey() {
+    const duration = document.getElementById('keyDuration').value;
+    const note = document.getElementById('keyNote').value || 'Standart';
+    
+    const randomPart = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const randomPart2 = Math.random().toString(36).substring(2, 6).toUpperCase();
+    const newKey = `NEON-${randomPart}-${randomPart2}-2026`;
+    
+    const tbody = document.getElementById('keyTableBody');
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+        <td style="color: var(--cyan);">${newKey}</td>
+        <td>${duration}</td>
+        <td style="color: #555;">-</td>
+        <td><span class="tag unbound">BOŞTA</span></td>
+        <td><span class="action-link" style="color: var(--red);" onclick="deleteKey(this)">SİL</span></td>
+    `;
+    tbody.prepend(tr);
+    
+    document.getElementById('keyNote').value = '';
+    updateStats();
+    alert(`Yeni Lisans Başarıyla Üretildi:\n${newKey}`);
 }
 
-// Login Handler
-loginBtn.addEventListener("click", verifyKey);
-keyInput.addEventListener("keydown", (e) => { if(e.key === 'Enter') verifyKey(); });
-
-function verifyKey() {
-    const val = keyInput.value.trim();
-    if (val !== DEMO_KEY) {
-        authError.classList.add("show");
-        return;
-    }
+function resetHwid(el) {
+    const row = el.closest('tr');
+    const hwidCell = row.cells[2];
+    const statusCell = row.cells[3];
     
-    authError.classList.remove("show");
-    loginBtn.textContent = "BAĞLANIYOR...";
-    
-    setTimeout(() => {
-        authScreen.classList.add("hidden");
-        app.classList.add("visible");
-        initSession();
-    }, 800);
+    hwidCell.innerHTML = '-';
+    hwidCell.style.color = '#555';
+    statusCell.innerHTML = '<span class="tag unbound">BOŞTA</span>';
+    updateStats();
 }
 
-function initSession() {
-    addLog("Güvenli tünel oluşturuldu.", "cyan");
-    addLog("Sürücü imzaları kontrol ediliyor...", "warn");
-    
-    setTimeout(() => {
-        addLog("Bypass modülleri belleğe enjekte edildi.", "good");
-        mainStatus.textContent = "HAZIR (GÜVENLİ)";
-        mainStatus.className = "status-indicator ready";
-    }, 1500);
-
-    if(!timerInterval) {
-        timerInterval = setInterval(() => {
-            sessionSeconds++;
-            const h = String(Math.floor(sessionSeconds / 3600)).padStart(2, '0');
-            const m = String(Math.floor((sessionSeconds % 3600) / 60)).padStart(2, '0');
-            const s = String(sessionSeconds % 60).padStart(2, '0');
-            sessionTimerEl.textContent = `${h}:${m}:${s}`;
-        }, 1000);
-    }
+function deleteKey(el) {
+    el.closest('tr').remove();
+    updateStats();
 }
 
-// Action Buttons
-document.getElementById("injectBtn").addEventListener("click", () => {
-    mainStatus.textContent = "ÇALIŞIYOR...";
-    mainStatus.className = "status-indicator waiting";
-    addLog("İşlem komutu tetiklendi, hedef işlem izleniyor...", "cyan");
+function updateStats() {
+    const rows = document.querySelectorAll('#keyTableBody tr');
+    let total = rows.length;
+    let bound = 0;
+    let unbound = 0;
     
-    setTimeout(() => {
-        addLog("Kritik hook engelleme başarıyla uygulandı.", "good");
-        mainStatus.textContent = "AKTİF & KORUNUYOR";
-        mainStatus.className = "status-indicator ready";
-    }, 2000);
-});
-
-document.getElementById("refreshBtn").addEventListener("click", () => {
-    addLog("Bağlantı ve önbellek yenileniyor...", "warn");
-    mainStatus.textContent = "Yenileniyor...";
-    setTimeout(() => {
-        addLog("Sistem kararlı durumda.", "good");
-        mainStatus.textContent = "HAZIR (GÜVENLİ)";
-        mainStatus.className = "status-indicator ready";
-    }, 1000);
-});
-
-document.getElementById("exitBtn").addEventListener("click", () => {
-    location.reload();
-});
-
-document.getElementById("clearLogs").addEventListener("click", () => {
-    consoleBody.innerHTML = "";
-});
+    rows.forEach(r => {
+        const tag = r.querySelector('.tag');
+        if(tag && tag.classList.contains('active')) bound++;
+        else unbound++;
+    });
+    
+    document.getElementById('statTotalKeys').textContent = total;
+    document.getElementById('statActiveHwid').textContent = bound;
+    document.getElementById('statUnbound').textContent = unbound;
+    document.getElementById('keyCountText').textContent = `Toplam: ${total} Kayıt`;
+}
 </script>
 </body>
 </html>
