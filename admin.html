@@ -2,139 +2,196 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON COMMAND // CYBERPUNK SECURITY SYSTEM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEON SECURITY // NEXUS COMMAND</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap');
+
         :root {
-            --bg-deep: #030712;
-            --panel-bg: rgba(13, 17, 23, 0.75);
-            --neon-cyan: #00f0ff;
-            --neon-pink: #ff007f;
+            --bg-deep: #02040a;
+            --surface: rgba(13, 17, 23, 0.75);
+            --border: rgba(88, 166, 255, 0.2);
+            --neon-blue: #00f0ff;
+            --neon-purple: #b000ff;
             --neon-green: #00ff66;
-            --neon-purple: #9d00ff;
             --text-main: #c9d1d9;
-            --border-glow: rgba(0, 240, 255, 0.3);
+            --text-muted: #8b949e;
         }
 
-        * { box-sizing: border-box; }
+        @keyframes corePulse {
+            0% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
+            50% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.3), inset 0 0 25px rgba(0, 240, 255, 0.15); }
+            100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
+        }
+
+        @keyframes glitchFade {
+            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
 
         body {
             background-color: var(--bg-deep);
             color: var(--text-main);
-            font-family: 'Share Tech Mono', monospace;
+            font-family: 'Inter', sans-serif;
             margin: 0;
             padding: 20px;
             overflow-x: hidden;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(13, 27, 42, 0.4) 0%, rgba(3, 7, 18, 0.9) 100%),
-                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
-            background-size: 100% 100%, 30px 30px, 30px 30px;
+            min-height: 100vh;
         }
 
-        /* Tarama Çizgisi Animasyonu (CRT Efekti) */
-        body::after {
-            content: " ";
-            display: block;
+        #matrixCanvas {
             position: fixed;
-            top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px;
-            z-index: 99999;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
             pointer-events: none;
-            opacity: 0.3;
         }
 
-        .container { max-width: 1300px; margin: 0 auto; position: relative; z-index: 2; }
-
-        /* Giriş Ekranı Fütürisik Tasarım */
-        #loginSection {
-            max-width: 450px;
-            margin: 120px auto;
-            background: var(--panel-bg);
-            border: 1px solid var(--neon-cyan);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.2), inset 0 0 20px rgba(0, 240, 255, 0.05);
-            backdrop-filter: blur(12px);
-            text-align: center;
-            animation: pulseGlow 4s infinite alternate;
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            animation: glitchFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            position: relative;
+            z-index: 2;
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); border-color: rgba(0, 240, 255, 0.4); }
-            100% { box-shadow: 0 0 40px rgba(255, 0, 127, 0.3); border-color: rgba(255, 0, 127, 0.6); }
-        }
-
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.6);
-            letter-spacing: 2px;
-            margin-top: 0;
-        }
-
-        input, select {
-            background: rgba(3, 7, 18, 0.8);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            color: var(--neon-cyan);
-            padding: 12px;
-            border-radius: 4px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 16px;
-            width: 100%;
-            margin-bottom: 15px;
-            outline: none;
-            transition: all 0.3s ease;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--neon-pink);
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
-        }
-
-        button {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #00f0ff, #9d00ff);
-            color: #030712;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 800;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-            text-transform: uppercase;
-        }
-
-        button:hover {
-            background: linear-gradient(135deg, #ff007f, #00f0ff);
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.7);
-            transform: translateY(-2px);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #ff0055, #ff007f) !important;
-            color: white !important;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4) !important;
-        }
-        .btn-danger:hover {
-            box-shadow: 0 0 25px rgba(255, 0, 85, 0.8) !important;
-        }
-
-        /* Header */
+        /* Header / Navbar */
         header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: var(--panel-bg);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
             padding: 20px 30px;
-            border-radius: 8px;
-            border: 1px solid var(--neon-cyan);
+            border-radius: 16px;
+            border: 1px solid var(--border);
             margin-bottom: 25px;
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.15);
-            backdrop-filter: blur(10px);
+            animation: corePulse 5s infinite ease-in-out;
+        }
+
+        .logo-area h1 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            margin: 0;
+            font-size: 20px;
+            letter-spacing: 3px;
+            text-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .logo-area span {
+            font-size: 11px;
+            color: var(--neon-blue);
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        /* Giriş Ekranı */
+        .login-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 80vh;
+        }
+
+        .login-box {
+            width: 100%;
+            max-width: 420px;
+            background: var(--surface);
+            backdrop-filter: blur(25px);
+            padding: 45px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            text-align: center;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
+            animation: glitchFade 0.8s ease-out;
+        }
+
+        .login-box h2 {
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
+            margin-bottom: 5px;
+            letter-spacing: 2px;
+        }
+
+        /* Form Elemanları */
+        input, select {
+            background: rgba(1, 4, 9, 0.85);
+            border: 1px solid var(--border);
+            color: #fff;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            width: 100%;
+            box-sizing: border-box;
+            transition: all 0.3s ease;
+            font-family: 'Inter', sans-serif;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--neon-blue);
+            outline: none;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            transform: translateY(-1px);
+        }
+
+        button {
+            background: linear-gradient(135deg, #0070f3 0%, #00f0ff 100%);
+            color: #fff;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
+            width: 100%;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.6);
+            filter: brightness(1.1);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #d32f2f 0%, #ff5252 100%);
+            box-shadow: 0 5px 20px rgba(211, 47, 47, 0.4);
+            width: auto;
+            padding: 10px 20px;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(255, 82, 82, 0.6);
+        }
+
+        /* Özel Süre Grid Yapısı */
+        .custom-duration-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+            background: rgba(0,0,0,0.3);
+            padding: 12px;
+            border-radius: 10px;
+            border: 1px dashed var(--border);
+        }
+        .custom-duration-grid label {
+            font-size: 10px;
+            color: var(--neon-blue);
+            margin-bottom: 3px;
+            display: block;
+            font-family: 'Orbitron', sans-serif;
+        }
+        .custom-duration-grid input {
+            margin-bottom: 0;
+            padding: 8px 10px;
+            font-size: 13px;
         }
 
         /* İstatistik Kartları */
@@ -146,203 +203,368 @@
         }
 
         .stat-card {
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 240, 255, 0.3);
+            background: var(--surface);
+            backdrop-filter: blur(15px);
+            padding: 25px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
             text-align: center;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            transition: transform 0.3s ease;
+            transition: transform 0.3s ease, border-color 0.3s ease;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            border-color: var(--neon-blue);
         }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 10px var(--neon-cyan);
+        .stat-card h3 {
+            margin: 0;
+            color: var(--text-muted);
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-family: 'Orbitron', sans-serif;
         }
 
-        .stat-card h3 { margin: 0; color: #8b949e; font-size: 13px; font-family: 'Orbitron'; }
-        .stat-card p { margin: 10px 0 0 0; color: var(--neon-cyan); font-size: 28px; font-family: 'Orbitron'; font-weight: 900; text-shadow: 0 0 10px rgba(0,240,255,0.5); }
+        .stat-card p {
+            margin: 12px 0 0 0;
+            color: var(--neon-blue);
+            font-size: 32px;
+            font-weight: 800;
+            font-family: 'Orbitron', sans-serif;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
+        }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        /* Grid Yapısı */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 380px 1fr;
+            gap: 25px;
+        }
 
         .panel-box {
-            background: var(--panel-bg);
+            background: var(--surface);
+            backdrop-filter: blur(15px);
             padding: 25px;
-            border-radius: 8px;
-            border: 1px solid rgba(157, 0, 255, 0.3);
+            border-radius: 16px;
+            border: 1px solid var(--border);
             margin-bottom: 25px;
-            box-shadow: 0 0 20px rgba(157, 0, 255, 0.1);
-            backdrop-filter: blur(10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
 
         .panel-box h3 {
-            font-family: 'Orbitron';
-            color: var(--neon-pink);
-            text-shadow: 0 0 8px rgba(255, 0, 127, 0.4);
+            font-family: 'Orbitron', sans-serif;
+            color: #fff;
             margin-top: 0;
-            border-bottom: 1px dashed rgba(255, 0, 127, 0.3);
-            padding-bottom: 10px;
+            font-size: 14px;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+            margin-bottom: 20px;
         }
 
-        /* Tablo Tasarımı */
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 240, 255, 0.15); }
-        th { color: var(--neon-cyan); font-family: 'Orbitron'; font-size: 12px; letter-spacing: 1px; }
-        tr:hover { background: rgba(0, 240, 255, 0.03); }
+        /* Tablo */
+        .table-container {
+            max-height: 380px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        th {
+            color: var(--neon-blue);
+            font-family: 'Orbitron', sans-serif;
+            font-size: 11px;
+            letter-spacing: 1px;
+            position: sticky;
+            top: 0;
+            background: #0d1117;
+            z-index: 10;
+        }
+
+        tr { transition: background 0.2s ease; }
+        tr:hover td { background: rgba(0, 240, 255, 0.03); }
+
+        .key-code {
+            font-family: 'Courier New', monospace;
+            color: var(--neon-blue);
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
 
         /* Log Terminali */
         .log-terminal {
             background: #010409;
             color: var(--neon-green);
-            font-family: 'Share Tech Mono', monospace;
-            padding: 15px;
-            border-radius: 6px;
-            height: 350px;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 18px;
+            border-radius: 12px;
+            height: 380px;
             overflow-y: auto;
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            box-shadow: inset 0 0 15px rgba(0, 255, 102, 0.1);
-            font-size: 13px;
+            border: 1px solid rgba(0, 255, 102, 0.2);
+            font-size: 12px;
+            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
         }
 
-        .log-item { margin-bottom: 6px; border-bottom: 1px dashed #112211; padding-bottom: 4px; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        .log-item {
+            margin-bottom: 8px;
+            border-bottom: 1px dashed rgba(255,255,255,0.05);
+            padding-bottom: 6px;
+        }
 
-        .btn-reset { color: var(--neon-cyan); background: none; border: none; cursor: pointer; font-weight: bold; font-family: 'Orbitron'; font-size: 11px; text-shadow: 0 0 5px rgba(0,240,255,0.5); }
-        .btn-reset:hover { color: #fff; text-shadow: 0 0 10px var(--neon-cyan); }
-        
-        .btn-del { color: var(--neon-pink); background: none; border: none; cursor: pointer; font-weight: bold; font-family: 'Orbitron'; font-size: 11px; margin-left: 10px; text-shadow: 0 0 5px rgba(255,0,127,0.5); }
-        .btn-del:hover { color: #fff; text-shadow: 0 0 10px var(--neon-pink); }
+        .btn-action {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .btn-reset { color: #ffab00; }
+        .btn-reset:hover { background: rgba(255, 171, 0, 0.1); }
+
+        .btn-del { color: #ff5252; margin-left: 5px; }
+        .btn-del:hover { background: rgba(255, 82, 82, 0.1); }
 
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #030712; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; box-shadow: 0 0 10px var(--neon-cyan); }
+
+        /* Scrollbar Özelleştirme */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-deep); }
+        ::-webkit-scrollbar-thumb { background: rgba(88, 166, 255, 0.3); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
     </style>
 </head>
 <body>
 
-<div class="container">
+    <!-- Arka Planda Kayan Siber Matrix Efekti -->
+    <canvas id="matrixCanvas"></canvas>
 
-    <!-- Giriş Ekranı -->
-    <div id="loginSection">
-        <h2>NEON TERMINAL</h2>
-        <p style="color: #8b949e; margin-bottom: 25px; font-size: 14px;">Güvenli Yönetim Arayüzüne Bağlanın</p>
-        <input type="password" id="adminKeyInput" placeholder="ADMIN KEY (NEONBEST31)">
-        <button onclick="girisYap()" style="width: 100%;">Sisteme Sız (Connect)</button>
-        <p id="loginError" style="color: var(--neon-pink); margin-top: 15px; text-shadow: 0 0 5px rgba(255,0,127,0.5);"></p>
-    </div>
+    <div class="container">
 
-    <!-- Yönetim Paneli -->
-    <div id="panelSection" class="hidden">
-        <header>
-            <h2 style="margin:0; font-size: 20px;">⚡ NEON CORE // COMMAND CENTER</h2>
-            <button class="btn-danger" onclick="cikisYap()">Bağlantıyı Kes</button>
-        </header>
-
-        <!-- İstatistik Kartları -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <h3>TOPLAM LİSANS</h3>
-                <p id="statTotalKeys">0</p>
-            </div>
-            <div class="stat-card" style="border-color: var(--neon-pink);">
-                <h3 style="color: var(--neon-pink);">AKTİF HWID KİLİDİ</h3>
-                <p id="statActiveHwid" style="color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5);">0</p>
-            </div>
-            <div class="stat-card" style="border-color: var(--neon-green);">
-                <h3 style="color: var(--neon-green);">TOPLAM İSTEK (LOG)</h3>
-                <p id="statTotalReq" style="color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,102,0.5);">0</p>
+        <!-- Giriş Ekranı -->
+        <div id="loginSection" class="login-wrapper">
+            <div class="login-box">
+                <h2>NEON NEXUS</h2>
+                <span style="color: var(--neon-blue); font-size: 11px; letter-spacing: 3px; display: block; margin-bottom: 25px;">SECURE COMMAND CENTER</span>
+                <input type="password" id="adminKeyInput" placeholder="Yönetici Anahtarı (Admin Key)">
+                <button onclick="girisYap()">SİSTEME BAĞLAN</button>
+                <p id="loginError" style="color: #ff5252; margin-top: 15px; font-size: 12px;"></p>
             </div>
         </div>
 
-        <div class="grid-2">
-            <!-- Sol Taraf: Lisans Oluşturma ve .EXE Yükleme -->
-            <div>
-                <div class="panel-box">
-                    <h3>Yeni Lisans Üret</h3>
-                    <input type="text" id="newKey" placeholder="Anahtar (Örn: NEON-VIP-X)">
-                    <select id="newDuration">
-                        <option value="30 Saniye">30 Saniye</option>
-                        <option value="60 Saniye">60 Saniye</option>
-                        <option value="5 Dakika">5 Dakika</option>
-                        <option value="1 Saat">1 Saat</option>
-                        <option value="30 Gün">30 Gün</option>
-                        <option value="Sınırsız">Sınırsız</option>
-                    </select>
-                    <button onclick="keyEkle()" style="width: 100%;">Key Oluştur ve Kaydet</button>
+        <!-- Yönetim Paneli -->
+        <div id="panelSection" class="hidden">
+            <header>
+                <div class="logo-area">
+                    <h1>NEON SECURITY</h1>
+                    <span>NEXUS v3.0 // ACTIVE COMMAND</span>
                 </div>
+                <button class="btn-danger" onclick="cikisYap()">GÜVENLİ ÇIKIŞ</button>
+            </header>
 
-                <div class="panel-box">
-                    <h3>Auto-Update (.EXE Yayınla)</h3>
-                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader'ların otomatik olarak indireceği yeni sürüm binary dosyasını yükleyin.</p>
-                    <input type="file" id="exeFileInput" accept=".exe" style="padding: 6px; font-size: 13px;">
-                    <button class="btn-reset" onclick="exeYukle()" style="width: 100%; margin-top: 10px; background: rgba(0,240,255,0.1); border: 1px solid var(--neon-cyan); padding: 10px;">YENİ .EXE DOSYASINI YÜKLE</button>
+            <!-- İstatistik Kartları -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>TOPLAM LİSANS</h3>
+                    <p id="statTotalKeys">0</p>
                 </div>
-
-                <div class="panel-box">
-                    <h3>Aktif Veritabanı (Keys)</h3>
-                    <div style="max-height: 220px; overflow-y: auto;">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>ANAHTAR</th>
-                                    <th>SÜRE</th>
-                                    <th>HWID</th>
-                                    <th>İŞLEM</th>
-                                </tr>
-                            </thead>
-                            <tbody id="keyList">
-                                <!-- Dinamik -->
-                            </tbody>
-                        </table>
-                    </div>
+                <div class="stat-card">
+                    <h3>AKTİF HWID KİLİDİ</h3>
+                    <p id="statActiveHwid">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>TOPLAM İSTEK (LOG)</h3>
+                    <p id="statTotalReq">0</p>
                 </div>
             </div>
 
-            <!-- Sağ Taraf: Canlı Log Terminali -->
-            <div>
-                <div class="panel-box" style="border-color: var(--neon-green); box-shadow: 0 0 20px rgba(0, 255, 102, 0.1);">
-                    <h3 style="color: var(--neon-green); border-bottom-color: rgba(0,255,102,0.3); text-shadow: 0 0 8px rgba(0,255,102,0.4);">Canlı Ağ İstekleri (Live Terminal)</h3>
-                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader doğrulama ve API istekleri gerçek zamanlı izleniyor.</p>
-                    <div class="log-terminal" id="logTerminal">
-                        <!-- Loglar -->
+            <div class="dashboard-grid">
+                <!-- Sol Kolon: Otomatik Key Üretimi & Yönetim -->
+                <div>
+                    <div class="panel-box">
+                        <h3>LİSANS ÜRETİCİ</h3>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">İster hazır paket seç, ister özel süre belirle.</p>
+                        
+                        <label style="font-size: 11px; color: var(--neon-blue); display: block; margin-bottom: 5px; font-family: 'Orbitron';">SÜRE SEÇİMİ</label>
+                        <select id="newDuration" onchange="sureTipiniDegistir()">
+                            <option value="1 Günlük">1 Günlük</option>
+                            <option value="30 Günlük" selected>30 Günlük (1 Ay)</option>
+                            <option value="Yıllık (1 Yıl)">Yıllık (1 Yıl)</option>
+                            <option value="3 Yıllık">3 Yıllık</option>
+                            <option value="Sınırsız (Lifetime)">Sınırsız (Lifetime)</option>
+                            <option value="ozel">⚙️ Özel Süre Belirle...</option>
+                        </select>
+                        
+                        <!-- ÖZEL SÜRE KUTUCUKLARI (Başta Gizli) -->
+                        <div id="customDurationBox" class="custom-duration-grid hidden">
+                            <div>
+                                <label>YIL</label>
+                                <input type="number" id="ozelYil" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>AY</label>
+                                <input type="number" id="ozelAy" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>GÜN</label>
+                                <input type="number" id="ozelGun" placeholder="Boş">
+                            </div>
+                            <div>
+                                <label>DAKİKA</label>
+                                <input type="number" id="ozelDakika" placeholder="Boş">
+                            </div>
+                        </div>
+
+                        <button onclick="otomatikKeyUretVeEkle()" style="margin-top: 10px;">OTOMATİK KEY OLUŞTUR</button>
+                    </div>
+                </div>
+
+                <!-- Sağ Kolon: Aktif Veritabanı ve Loglar -->
+                <div>
+                    <div class="panel-box">
+                        <h3>KAYITLI LİSANS LİSTESİ</h3>
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>LİSANS ANAHTARI</th>
+                                        <th>SÜRE</th>
+                                        <th>HWID DURUMU</th>
+                                        <th>İŞLEMLER</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keyList">
+                                    <!-- Dinamik Dolacak -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="panel-box">
+                        <h3>CANLI API İSTEK AKIŞI (LOG TERMINAL)</h3>
+                        <div class="log-terminal" id="logTerminal">
+                            <!-- Loglar akacak -->
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
 
-</div>
+    </div>
 
 <script>
+    // --- MATRIX / CYBERNETIC CANVAS BACKGROUND ---
+    const canvas = document.getElementById('matrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width, height;
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    let particles = [];
+    for(let i=0; i<60; i++) {
+        particles.push({
+            x: Math.random() * width,
+            y: Math.random() * height,
+            vx: (Math.random() - 0.5) * 0.5,
+            vy: (Math.random() - 0.5) * 0.5,
+            size: Math.random() * 1.5 + 0.5
+        });
+    }
+
+    function renderBackground() {
+        ctx.fillStyle = 'rgba(2, 4, 10, 0.25)';
+        ctx.fillRect(0, 0, width, height);
+
+        // Grid çizgileri
+        ctx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
+        ctx.lineWidth = 1;
+        let step = 60;
+        for(let x=0; x<width; x+=step) {
+            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+        }
+        for(let y=0; y<height; y+=step) {
+            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        }
+
+        // Partiküller
+        ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
+        particles.forEach(p => {
+            p.x += p.vx; p.y += p.vy;
+            if(p.x < 0) p.x = width; if(p.x > width) p.x = 0;
+            if(p.y < 0) p.y = height; if(p.y > height) p.y = 0;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+        });
+
+        requestAnimationFrame(renderBackground);
+    }
+    renderBackground();
+
+
+    // --- ÖZEL SÜRE GÖSTER / GİZLE MANTIĞI ---
+    function sureTipiniDegistir() {
+        const secilen = document.getElementById('newDuration').value;
+        const ozelBox = document.getElementById('customDurationBox');
+        if (secilen === 'ozel') {
+            ozelBox.classList.remove('hidden');
+        } else {
+            ozelBox.classList.add('hidden');
+        }
+    }
+
+
+    // --- OTOMATİK RASTGELE KEY ÜRETME FONKSİYONU ---
+    function rastgeleBlokOlustur() {
+        const chars = '0123456789ABCDEF';
+        let blok = '';
+        for (let i = 0; i < 4; i++) {
+            blok += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return blok;
+    }
+
+    function yeniKeyFormatUret() {
+        return `NEON-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}`;
+    }
+
+
+    // --- PANEL YÖNETİM MANTIĞI ---
     let adminKey = "";
-    let autoRefreshTimer = null;
-    let serverTimeOffset = 0;
+    let refreshInterval = null;
 
     function girisYap() {
         adminKey = document.getElementById('adminKeyInput').value;
-        verileriCek(true);
+        sistemiGuncelle(true);
     }
 
     function cikisYap() {
-        clearInterval(autoRefreshTimer);
+        clearInterval(refreshInterval);
         document.getElementById('panelSection').classList.add('hidden');
         document.getElementById('loginSection').classList.remove('hidden');
         document.getElementById('adminKeyInput').value = "";
     }
 
-    function verileriCek(isLogin = false) {
+    function sistemiGuncelle(isLogin = false) {
         fetch(`api.php?action=get_data&admin_key=${adminKey}`)
             .then(res => res.json())
             .then(data => {
@@ -350,49 +572,35 @@
                     if (isLogin) {
                         document.getElementById('loginSection').classList.add('hidden');
                         document.getElementById('panelSection').classList.remove('hidden');
-                        autoRefreshTimer = setInterval(() => verileriCek(false), 4000);
+                        refreshInterval = setInterval(() => sistemiGuncelle(false), 4000);
                     }
-                    serverTimeOffset = Math.floor(Date.now() / 1000) - data.server_time;
-                    paneliDoldur(data.keys, data.logs);
+                    arayuzuDoldur(data.keys, data.logs);
                 } else {
-                    if (isLogin) document.getElementById('loginError').innerText = "HATA: Geçersiz Admin Anahtarı!";
+                    if (isLogin) document.getElementById('loginError').innerText = "Erişim Reddedildi: Geçersiz Yönetici Anahtarı!";
                 }
             })
-            .catch(err => {
-                if (isLogin) document.getElementById('loginError').innerText = "KRİTİK HATA: Sunucuya erişilemiyor!";
+            .catch(() => {
+                if (isLogin) document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
             });
     }
 
-    function paneliDoldur(keys, logs) {
+    function arayuzuDoldur(keys, logs) {
         let totalKeys = Object.keys(keys).length;
         let activeHwid = 0;
-        let currentTime = Math.floor(Date.now() / 1000) - serverTimeOffset;
 
         const tbody = document.getElementById('keyList');
         tbody.innerHTML = "";
         for (const [key, info] of Object.entries(keys)) {
             if (info.hwid) activeHwid++;
-            let hwidText = info.hwid ? `<span style="color: var(--neon-pink);" title="${info.hwid}">[KİLİTLİ]</span>` : '<span style="color: #8b949e;">[BOŞTA]</span>';
+            let hwidStatus = info.hwid ? `<span style="color: #00ff66;" title="${info.hwid}">Kilitli</span>` : '<span style="color: var(--text-muted);">Boşta</span>';
             
-            let kalanSureStr = info.duration_text;
-            if (info.expiry_time > 0) {
-                let kalanSec = info.expiry_time - currentTime;
-                if (kalanSec > 0) {
-                    if (kalanSec < 60) kalanSureStr = kalanSec + " sn kaldı";
-                    else if (kalanSec < 3600) kalanSureStr = Math.floor(kalanSec / 60) + " dk kaldı";
-                    else kalanSureStr = Math.floor(kalanSec / 3600) + " saat kaldı";
-                } else {
-                    kalanSureStr = "<span style='color:var(--neon-pink);'>SÜRESİ BİTTİ</span>";
-                }
-            }
-
             let row = `<tr>
-                <td style="color: var(--neon-cyan); font-weight: bold;">${key}</td>
-                <td>${kalanSureStr}</td>
-                <td>${hwidText}</td>
+                <td class="key-code">${key}</td>
+                <td>${info.expiry}</td>
+                <td>${hwidStatus}</td>
                 <td>
-                    <button class="btn-reset" onclick="hwidSifirla('${key}')">SIFIRLA</button>
-                    <button class="btn-del" onclick="keySil('${key}')">SİL</button>
+                    <button class="btn-action btn-reset" onclick="hwidSifirla('${key}')">Sıfırla</button>
+                    <button class="btn-action btn-del" onclick="keySil('${key}')">Sil</button>
                 </td>
             </tr>`;
             tbody.innerHTML += row;
@@ -405,23 +613,51 @@
         const terminal = document.getElementById('logTerminal');
         terminal.innerHTML = "";
         logs.forEach(log => {
-            let color = log.status.includes('SUCCESS') ? '#00ff66' : '#ff0055';
+            let statusColor = log.status.includes('SUCCESS') ? '#00ff66' : '#ff5252';
             let logLine = `<div class="log-item">
-                <span style="color: #6e7681;">[${log.time}]</span> 
-                <span style="color: #d2a8ff;">IP: ${log.ip}</span> 
-                <span style="color: var(--neon-cyan);">[${log.action}]</span> 
-                Key: <b style="color: #fff;">${log.key}</b> ➔ 
-                <span style="color: ${color};">${log.status}</span>
+                <span style="color: var(--text-muted);">[${log.time}]</span> 
+                <span style="color: #d2a8ff;">IP:${log.ip}</span> 
+                <span style="color: var(--neon-blue);">[${log.action}]</span> 
+                Key:<b>${log.key}</b> ➔ 
+                <span style="color: ${statusColor};">${log.status}</span>
             </div>`;
             terminal.innerHTML += logLine;
         });
     }
 
+    function otomatikKeyUretVeEkle() {
+        const uretilenKey = yeniKeyFormatUret();
+        let secilenSure = document.getElementById('newDuration').value;
+
+        // Eğer özel süre seçildiyse doldurulan kutuları birleştirip string oluşturuyoruz
+        if (secilenSure === 'ozel') {
+            let yil = parseInt(document.getElementById('ozelYil').value) || 0;
+            let ay = parseInt(document.getElementById('ozelAy').value) || 0;
+            let gun = parseInt(document.getElementById('ozelGun').value) || 0;
+            let dakika = parseInt(document.getElementById('ozelDakika').value) || 0;
+
+            let parcalar = [];
+            if (yil > 0) parcalar.push(`${yil} yıl`);
+            if (ay > 0) parcalar.push(`${ay} ay`);
+            if (gun > 0) parcalar.push(`${gun} gün`);
+            if (dakika > 0) parcalar.push(`${dakika} dakika`);
+
+            secilenSure = parcalar.length > 0 ? parcalar.join(" ") : "0 dakika";
+        }
+
+        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${uretilenKey}&duration=${encodeURIComponent(secilenSure)}`)
+            .then(res => res.json())
+            .then(data => {
+                alert(`Başarıyla Üretildi!\nKey: ${uretilenKey}\nSüre: ${secilenSure}`);
+                sistemiGuncelle(false);
+            });
+    }
+
     function hwidSifirla(targetKey) {
-        if (confirm(`${targetKey} için donanım kilidi (HWID) kaldırılsın mı?`)) {
+        if (confirm(`${targetKey} için HWID kilidi kaldırılsın mı?`)) {
             fetch(`api.php?action=reset_hwid&admin_key=${adminKey}&target_key=${targetKey}`)
                 .then(res => res.json())
-                .then(data => { alert(data.message); verileriCek(false); });
+                .then(data => { alert(data.message); sistemiGuncelle(false); });
         }
     }
 
@@ -429,39 +665,8 @@
         if (confirm(`${targetKey} veritabanından tamamen silinsin mi?`)) {
             fetch(`api.php?action=delete_key&admin_key=${adminKey}&target_key=${targetKey}`)
                 .then(res => res.json())
-                .then(data => { alert(data.message); verileriCek(false); });
+                .then(data => { alert(data.message); sistemiGuncelle(false); });
         }
-    }
-
-    function keyEkle() {
-        const newKey = document.getElementById('newKey').value;
-        const duration = document.getElementById('newDuration').value;
-        if (!newKey) { alert("Lütfen geçerli bir anahtar adı girin!"); return; }
-        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${newKey}&duration=${encodeURIComponent(duration)}`)
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                document.getElementById('newKey').value = "";
-                verileriCek(false);
-            });
-    }
-
-    function exeYukle() {
-        const fileInput = document.getElementById('exeFileInput');
-        if (fileInput.files.length === 0) { alert("Lütfen bir .exe dosyası seçin!"); return; }
-        
-        let formData = new FormData();
-        formData.append('action', 'upload_exe');
-        formData.append('admin_key', adminKey);
-        formData.append('exe_file', fileInput.files[0]);
-
-        fetch('api.php', { method: 'POST', body: formData })
-            .then(res => res.json())
-            .then(data => {
-                alert(data.message);
-                fileInput.value = "";
-            })
-            .catch(err => alert("Dosya yükleme başarısız!"));
     }
 </script>
 
