@@ -1,206 +1,286 @@
 <?php
-// ============================================================================
-// NEON SECURITY SYSTEM - ULTRA SECURE API BACKEND v3.0
-// ============================================================================
+// Hata ayıklama kapalı (JSON çıktısının bozulmaması için)
 error_reporting(0);
+ini_set('display_errors', 0);
+
 header('Content-Type: application/json; charset=utf-8');
 
-// ! ÖNEMLİ: Bu anahtar C++ istemcisindeki API_SECRET_KEY ile BİREBİR aynı olmalıdır!
-define('SECRET_KEY', 'NEON_ULTRA_SECURE_SECRET_2026_KEY!'); 
-define('ADMIN_TOKEN', 'ADMIN_GIZLI_TOKEN_123'); // Panel ve admin istekleri için gizli token
+// --- VERİTABANI BAĞLANTISI (MySQL Örneği - Dilerseniz SQLite yapabilirsiniz) ---
+$host = 'localhost';
+$db   = 'neon_security';
+$user = 'root';
+$pass = 'sifreniz';
+$charset = 'utf8mb4';
 
-// Veritabanı Bilgileri (Render/Dış veritabanı bağlantı bilgilerinizi buraya girin)
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'neon_db');
-define('DB_USER', 'root');
-define('DB_PASS', 'sifreniz_buraya');
+$dsn = "mysql:host=$host;dbname=$db;charset=$charset";
+$options = [
+    PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+    PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    PDO::ATTR_EMULATE_PREPARES   => false,
+];
 
 try {
-    $pdo = new PDO("mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4", DB_USER, DB_PASS, [
-        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
-    ]);
-} catch (Exception $e) {
-    exit(json_encode(['status' => 'error', 'message' => 'Veritabanı bağlantı hatası!']));
+    $pdo = new PDO($dsn, $user, $pass, $options);
+} catch (\PDOException $e) {
+    // Veritabanı yoksa otomatik oluşturma denemesi veya hata döndürme
+    echo json_encode(["status" => "error", "message" => "Database connection failed"]);
+    exit;
 }
 
+// Tabloların varlığını kontrol et / Yoksa oluştur
+$pdo->exec("CREATE TABLE IF NOT EXISTS licenses (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    license_key VARCHAR(255) NOT NULL UNIQUE,
+    hwid VARCHAR(255) DEFAULT NULL,
+    last_ip VARCHAR(50) DEFAULT NULL,
+    expiry_date DATETIME DEFAULT NULL,
+    status VARCHAR(50) DEFAULT 'unused',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+)");
+
+$pdo->exec("CREATE TABLE IF NOT EXISTS hwid_bans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    hwid VARCHAR(255) NOT NULL UNIQUE,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+
+$pdo->exec("CREATE TABLE IF NOT EXISTS ip_bans (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    ip VARCHAR(50) NOT NULL UNIQUE,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP
+)");
+
+$pdo->exec("CREATE TABLE IF NOT EXISTS logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    date DATETIME DEFAULT CURRENT_TIMESTAMP,
+    ip VARCHAR(50),
+    action VARCHAR(100),
+    status VARCHAR(50),
+    details TEXT
+)");
+
+// Yardımcı Fonksiyon: İstemci IP adresini al
+function getClientIP() {
+    $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+    if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        $ip = $_SERVER['HTTP_CLIENT_IP'];
+    } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+    }
+    return $ip;
+}
+
+// Log kaydetme fonksiyonu
+function writeLog($pdo, $ip, $action, $status, $details) {
+    try {
+        $stmt = $pdo->prepare("INSERT INTO logs (ip, action, status, details) VALUES (?, ?, ?, ?)");
+        $stmt->execute([$ip, $action, $status, $details]);
+    } catch (\Exception $e) {}
+}
+
+$clientIp = getClientIP();
+
+// --- 1. ADMIN PANELİ İSTEKLERİ (POST / JSON) ---
 $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
-$clientIp = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
 
-if (!$data || !isset($data['action'])) {
-    http_response_code(400);
-    exit(json_encode(['status' => 'error', 'message' => 'Geçersiz istek paketi!']));
+if ($data && isset($data['action'])) {
+    $adminToken = $data['admin_token'] ?? '';
+    $expectedToken = 'ADMIN_GIZLI_TOKEN_123'; // Admin panelindeki token ile birebir aynı olmalı!
+
+    // Admin yetki kontrolü gerektiren işlemler
+    if (strpos($data['action'], 'admin_') === 0) {
+        if ($adminToken !== $expectedToken) {
+            echo json_encode(["status" => "error", "message" => "Unauthorized Admin Token"]);
+            exit;
+        }
+    }
+
+    $action = $data['action'];
+
+    switch ($action) {
+        case 'admin_get_all':
+            $licenses = $pdo->query("SELECT * FROM licenses ORDER BY id DESC")->fetchAll();
+            $hwidBans = $pdo->query("SELECT * FROM hwid_bans ORDER BY id DESC")->fetchAll();
+            $ipBans   = $pdo->query("SELECT * FROM ip_bans ORDER BY id DESC")->fetchAll();
+            $logs     = $pdo->query("SELECT * FROM logs ORDER BY id DESC LIMIT 100")->fetchAll();
+
+            // Durum güncellemeleri (Süresi bitenleri expired yap)
+            foreach($licenses as &$l) {
+                if ($l['expiry_date'] && strtotime($l['expiry_date']) < time() && $l['status'] == 'active') {
+                    $up = $pdo->prepare("UPDATE licenses SET status = 'expired' WHERE id = ?");
+                    $up->execute([$l['id']]);
+                    $l['status'] = 'expired';
+                }
+            }
+
+            echo json_encode([
+                "status" => "success",
+                "licenses" => $licenses,
+                "hwid_bans" => $hwidBans,
+                "ip_bans" => $ipBans,
+                "logs" => $logs
+            ]);
+            exit;
+
+        case 'admin_generate_keys':
+            $prefix = $data['prefix'] ?? 'NEON';
+            $count = intval($data['count'] ?? 1);
+            $days = intval($data['days'] ?? 30);
+            
+            $generatedKeys = [];
+            for ($i = 0; $i < $count; $i++) {
+                $randomStr = strtoupper(bin2hex(random_bytes(4)));
+                $key = $prefix . '-' . $randomStr;
+                $generatedKeys[] = $key;
+
+                $expiryDate = ($days > 0) ? date('Y-m-d H:i:s', strtotime("+$days days")) : NULL;
+
+                $stmt = $pdo->prepare("INSERT INTO licenses (license_key, status, expiry_date) VALUES (?, 'unused', ?)");
+                $stmt->execute([$key, $expiryDate]);
+            }
+
+            writeLog($pdo, $clientIp, 'Generate Keys', 'success', "$count adet key üretildi.");
+            echo json_encode(["status" => "success", "keys" => $generatedKeys]);
+            exit;
+
+        case 'admin_reset_hwid':
+            $id = intval($data['id'] ?? 0);
+            $stmt = $pdo->prepare("UPDATE licenses SET hwid = NULL, status = 'unused' WHERE id = ?");
+            $stmt->execute([$id]);
+            writeLog($pdo, $clientIp, 'Reset HWID', 'success', "ID: $id HWID sıfırlandı.");
+            echo json_encode(["status" => "success"]);
+            exit;
+
+        case 'admin_delete_license':
+            $id = intval($data['id'] ?? 0);
+            $stmt = $pdo->prepare("DELETE FROM licenses WHERE id = ?");
+            $stmt->execute([$id]);
+            writeLog($pdo, $clientIp, 'Delete License', 'success', "ID: $id silindi.");
+            echo json_encode(["status" => "success"]);
+            exit;
+
+        case 'admin_ban_hwid':
+            $hwid = $data['hwid'] ?? '';
+            if ($hwid) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO hwid_bans (hwid) VALUES (?)");
+                $stmt->execute([$hwid]);
+                // İlgili lisansı banla
+                $stmt2 = $pdo->prepare("UPDATE licenses SET status = 'banned' WHERE hwid = ?");
+                $stmt2->execute([$hwid]);
+                writeLog($pdo, $clientIp, 'Ban HWID', 'error', "HWID banlandı: $hwid");
+            }
+            echo json_encode(["status" => "success"]);
+            exit;
+
+        case 'admin_remove_hwid_ban':
+            $id = intval($data['id'] ?? 0);
+            $stmt = $pdo->prepare("DELETE FROM hwid_bans WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode(["status" => "success"]);
+            exit;
+
+        case 'admin_ban_ip':
+            $ip = $data['ip'] ?? '';
+            if ($ip) {
+                $stmt = $pdo->prepare("INSERT IGNORE INTO ip_bans (ip) VALUES (?)");
+                $stmt->execute([$ip]);
+                writeLog($pdo, $clientIp, 'Ban IP', 'error', "IP banlandı: $ip");
+            }
+            echo json_encode(["status" => "success"]);
+            exit;
+
+        case 'admin_remove_ip_ban':
+            $id = intval($data['id'] ?? 0);
+            $stmt = $pdo->prepare("DELETE FROM ip_bans WHERE id = ?");
+            $stmt->execute([$id]);
+            echo json_encode(["status" => "success"]);
+            exit;
+    }
 }
 
-$action = $data['action'];
+// --- 2. C++ İSTEMCİ (CLIENT) İSTEKLERİ (GET) ---
+$action = $_GET['action'] ?? '';
 
-// Güvenli İstek Loglama Fonksiyonu
-function logRequest($pdo, $ip, $action, $status, $details) {
-    try {
-        $stmt = $pdo->prepare("INSERT INTO request_logs (ip, action, status, details, date) VALUES (?, ?, ?, ?, NOW())");
-        $stmt->execute([$ip, $action, $status, $details]);
-    } catch (Exception $e) {}
-}
-
-// 1. IP Ban Kontrolü (Sisteme girmeden önce engelle)
+// IP Ban Kontrolü
 $stmt = $pdo->prepare("SELECT * FROM ip_bans WHERE ip = ?");
 $stmt->execute([$clientIp]);
-if ($stmt->rowCount() > 0) {
-    logRequest($pdo, $clientIp, $action, 'banned', 'Yasaklı IP Erişimi Engellendi');
-    exit(json_encode(['status' => 'banned', 'message' => 'IP adresiniz sistemden kalıcı olarak yasaklandı!']));
+if ($stmt->fetch()) {
+    writeLog($pdo, $clientIp, 'Client Connect', 'banned', 'Yasaklı IP erişim denemesi.');
+    echo "IP_BANNED";
+    exit;
 }
 
-// --- İŞLEM YÖNETİCİSİ ---
-switch ($action) {
-    case 'auth': // C++ İstemci Lisans ve Donanım Doğrulaması
-        $licenseKey = $data['key'] ?? '';
-        $hwid = $data['hwid'] ?? '';
-        $timestamp = $data['time'] ?? 0;
-        $clientSignature = $data['signature'] ?? '';
-
-        // 2. Kriptografik İmza Doğrulama (Anti-Tamper & Man-in-the-Middle Koruması)
-        $expectedSignature = hash_hmac('sha256', $action . $timestamp, SECRET_KEY);
-        if (!hash_equals($expectedSignature, $clientSignature)) {
-            logRequest($pdo, $clientIp, 'auth', 'error', 'Geçersiz Kriptografik İmza');
-            exit(json_encode(['status' => 'error', 'message' => 'Güvenlik imzası uyuşmazlığı! Yetkisiz istemci.']));
-        }
-
-        // 3. HWID Ban Kontrolü
-        $stmt = $pdo->prepare("SELECT * FROM hwid_bans WHERE hwid = ?");
-        $stmt->execute([$hwid]);
-        if ($stmt->rowCount() > 0) {
-            logRequest($pdo, $clientIp, 'auth', 'banned', 'Yasaklı HWID Denemesi: ' . $hwid);
-            exit(json_encode(['status' => 'banned', 'message' => 'Bu donanım (HWID) sistem tarafından yasaklanmıştır!']));
-        }
-
-        // 4. Lisans Anahtarı Sorgulama
-        $stmt = $pdo->prepare("SELECT * FROM licenses WHERE license_key = ?");
-        $stmt->execute([$licenseKey]);
-        $lic = $stmt->fetch();
-
-        if (!$lic) {
-            logRequest($pdo, $clientIp, 'auth', 'error', 'Geçersiz Key Denemesi: ' . $licenseKey);
-            exit(json_encode(['status' => 'error', 'message' => 'Geçersiz Lisans Anahtarı!']));
-        }
-
-        if ($lic['status'] === 'banned') {
-            logRequest($pdo, $clientIp, 'auth', 'error', 'Banlı Key Kullanımı');
-            exit(json_encode(['status' => 'error', 'message' => 'Bu lisans anahtarı kalıcı olarak yasaklanmıştır!']));
-        }
-
-        // 5. Süre (Expiry) Kontrolü
-        if ($lic['expiry_date'] && strtotime($lic['expiry_date']) < time()) {
-            $pdo->prepare("UPDATE licenses SET status = 'expired' WHERE id = ?")->execute([$lic['id']]);
-            logRequest($pdo, $clientIp, 'auth', 'expired', 'Süresi Dolan Key');
-            exit(json_encode(['status' => 'error', 'message' => 'Lisans anahtarınızın kullanım süresi dolmuştur!']));
-        }
-
-        // 6. HWID Eşleştirme ve Kilitleme
-        if (empty($lic['hwid'])) {
-            // İlk kez aktif ediliyor, bu cihaza kilitle
-            $upd = $pdo->prepare("UPDATE licenses SET hwid = ?, last_ip = ?, status = 'active', last_login = NOW() WHERE id = ?");
-            $upd->execute([$hwid, $clientIp, $lic['id']]);
-            logRequest($pdo, $clientIp, 'auth', 'success', 'İlk Cihaz Eşleşmesi Başarılı');
-            echo json_encode(['status' => 'success', 'message' => 'Lisans başarıyla bu cihaza bağlandı! Bitiş: ' . ($lic['expiry_date'] ?: 'Sınırsız')]);
-        } elseif ($lic['hwid'] === $hwid) {
-            // Zaten bu cihaza kayıtlı, giriş izni ver
-            $pdo->prepare("UPDATE licenses SET last_ip = ?, last_login = NOW() WHERE id = ?")->execute([$clientIp, $lic['id']]);
-            logRequest($pdo, $clientIp, 'auth', 'success', 'Oturum Açıldı');
-            echo json_encode(['status' => 'success', 'message' => 'Giriş başarılı! Bitiş: ' . ($lic['expiry_date'] ?: 'Sınırsız')]);
-        } else {
-            // Başka bir cihaza kayıtlı HWID uyuşmazlığı
-            logRequest($pdo, $clientIp, 'auth', 'error', 'HWID Uyuşmazlığı (Başka Cihaz)');
-            echo json_encode(['status' => 'error', 'message' => 'Bu lisans başka bir donanıma (HWID) kayıtlı!']);
-        }
-        break;
-
-    // --- ADMIN PANEL İŞLEMLERİ (admin.html tarafından tetiklenir) ---
-    case 'admin_get_all':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) {
-            exit(json_encode(['status' => 'error', 'message' => 'Yetkisiz Admin Erişimi!']));
-        }
-        $licenses = $pdo->query("SELECT * FROM licenses ORDER BY id DESC")->fetchAll();
-        $hwidBans = $pdo->query("SELECT * FROM hwid_bans ORDER BY id DESC")->fetchAll();
-        $ipBans = $pdo->query("SELECT * FROM ip_bans ORDER BY id DESC")->fetchAll();
-        $logs = $pdo->query("SELECT * FROM request_logs ORDER BY id DESC LIMIT 150")->fetchAll();
-
-        echo json_encode([
-            'status' => 'success',
-            'licenses' => $licenses,
-            'hwid_bans' => $hwidBans,
-            'ip_bans' => $ipBans,
-            'logs' => $logs
-        ]);
-        break;
-
-    case 'admin_generate_keys':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $count = intval($data['count'] ?? 1);
-        $days = intval($data['days'] ?? 30);
-        $prefix = preg_replace('/[^A-Z]/', '', strtoupper($data['prefix'] ?? 'NEON'));
-
-        $expiryDate = $days > 0 ? date('Y-m-d H:i:s', strtotime("+$days days")) : null;
-        $generated = [];
-
-        for ($i = 0; $i < $count; $i++) {
-            $key = $prefix . '-' . strtoupper(bin2hex(random_bytes(3))) . '-' . strtoupper(bin2hex(random_bytes(3))) . '-' . strtoupper(bin2hex(random_bytes(3)));
-            $stmt = $pdo->prepare("INSERT INTO licenses (license_key, status, expiry_date, created_at) VALUES (?, 'unused', ?, NOW())");
-            $stmt->execute([$key, $expiryDate]);
-            $generated[] = $key;
-        }
-        logRequest($pdo, $clientIp, 'admin_generate', 'success', "$count adet lisans üretildi.");
-        echo json_encode(['status' => 'success', 'keys' => $generated]);
-        break;
-
-    case 'admin_reset_hwid':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $id = intval($data['id'] ?? 0);
-        $pdo->prepare("UPDATE licenses SET hwid = NULL, status = 'unused' WHERE id = ?")->execute([$id]);
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'admin_delete_license':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $id = intval($data['id'] ?? 0);
-        $pdo->prepare("DELETE FROM licenses WHERE id = ?")->execute([$id]);
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'admin_ban_hwid':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $hwid = $data['hwid'] ?? '';
-        if (!empty($hwid)) {
-            $pdo->prepare("INSERT IGNORE INTO hwid_bans (hwid, date) VALUES (?, NOW())")->execute([$hwid]);
-            $pdo->prepare("UPDATE licenses SET status = 'banned' WHERE hwid = ?")->execute([$hwid]);
-        }
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'admin_remove_hwid_ban':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $id = intval($data['id'] ?? 0);
-        $pdo->prepare("DELETE FROM hwid_bans WHERE id = ?")->execute([$id]);
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'admin_ban_ip':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $ip = $data['ip'] ?? '';
-        if (!empty($ip)) {
-            $pdo->prepare("INSERT IGNORE INTO ip_bans (ip, date) VALUES (?, NOW())")->execute([$ip]);
-        }
-        echo json_encode(['status' => 'success']);
-        break;
-
-    case 'admin_remove_ip_ban':
-        if (($data['admin_token'] ?? '') !== ADMIN_TOKEN) exit(json_encode(['status' => 'error']));
-        $id = intval($data['id'] ?? 0);
-        $pdo->prepare("DELETE FROM ip_bans WHERE id = ?")->execute([$id]);
-        echo json_encode(['status' => 'success']);
-        break;
-
-    default:
-        echo json_encode(['status' => 'error', 'message' => 'Bilinmeyen komut.']);
-        break;
+if ($action === 'ping') {
+    echo "OK";
+    exit;
 }
+
+if ($action === 'verify') {
+    $key = $_GET['key'] ?? '';
+    $hwid = $_GET['hwid'] ?? '';
+    $pcName = $_GET['pc_name'] ?? '';
+
+    if (empty($key) || empty($hwid)) {
+        echo "INVALID_REQUEST";
+        exit;
+    }
+
+    // HWID Ban Kontrolü
+    $stmt = $pdo->prepare("SELECT * FROM hwid_bans WHERE hwid = ?");
+    $stmt->execute([$hwid]);
+    if ($stmt->fetch()) {
+        writeLog($pdo, $clientIp, 'Verify Key', 'banned', "Yasaklı HWID ile giriş denemesi: $hwid");
+        echo "HWID_BANNED";
+        exit;
+    }
+
+    // Lisans Sorgula
+    $stmt = $pdo->prepare("SELECT * FROM licenses WHERE license_key = ?");
+    $stmt->execute([$key]);
+    $license = $stmt->fetch();
+
+    if (!$license) {
+        writeLog($pdo, $clientIp, 'Verify Key', 'error', "Geçersiz key denemesi: $key");
+        echo "KEY_NOT_FOUND";
+        exit;
+    }
+
+    if ($license['status'] === 'banned') {
+        echo "KEY_BANNED";
+        exit;
+    }
+
+    // Süre kontrolü
+    if ($license['expiry_date'] && strtotime($license['expiry_date']) < time()) {
+        $up = $pdo->prepare("UPDATE licenses SET status = 'expired' WHERE id = ?");
+        $up->execute([$license['id']]);
+        writeLog($pdo, $clientIp, 'Verify Key', 'error', "Süresi dolmuş key: $key");
+        echo "KEY_EXPIRED";
+        exit;
+    }
+
+    // HWID Kilitleme ve Eşleştirme
+    if (empty($license['hwid'])) {
+        $update = $pdo->prepare("UPDATE licenses SET hwid = ?, last_ip = ?, status = 'active' WHERE id = ?");
+        $update->execute([$hwid, $clientIp, $license['id']]);
+        writeLog($pdo, $clientIp, 'Verify Key', 'success', "Yeni HWID bağlandı: $key -> $hwid");
+    } else if ($license['hwid'] !== $hwid) {
+        writeLog($pdo, $clientIp, 'Verify Key', 'error', "HWID uyuşmazlığı: $key");
+        echo "HWID_MISMATCH";
+        exit;
+    } else {
+        // IP ve aktiflik güncelle
+        $update = $pdo->prepare("UPDATE licenses SET last_ip = ?, status = 'active' WHERE id = ?");
+        $update->execute([$clientIp, $license['id']]);
+    }
+
+    // C++ İstemcisinin Beklediği Format: SUCCESS|Kalan Süre (veya Tarih)
+    $expiryText = $license['expiry_date'] ? date('d.m.Y', strtotime($license['expiry_date'])) : "Sınırsız";
+    writeLog($pdo, $clientIp, 'Verify Key', 'success', "Başarılı giriş: $key");
+    echo "SUCCESS|" . $expiryText;
+    exit;
+}
+
+echo "INVALID_ACTION";
+?>
