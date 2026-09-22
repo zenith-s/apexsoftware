@@ -2,42 +2,33 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON SOFTWARE // STORE & LAUNCHER</title>
+    <title>NEON SOFTWARE // STORE</title>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #030712;
-            --panel-bg: rgba(13, 17, 23, 0.88);
-            --neon-cyan: #00f0ff;
-            --neon-pink: #ff007f;
-            --neon-green: #00ff66;
-            --neon-purple: #9d00ff;
-            --text-main: #c9d1d9;
+            --bg-deep: #000000;
+            --panel-bg: rgba(8, 8, 8, 0.95);
+            --bw-white: #ffffff;
+            --bw-gray: #888888;
+            --bw-light-gray: #cccccc;
+            --bw-border: #333333;
         }
 
         * {
-            cursor: url("data:image/svg+xml,%3Csvg height='28' width='28' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 0,18 5,13 11,20 14,18 8,11 16,11' fill='%2300f0ff' stroke='%23ff007f' stroke-width='1'/%3E%3C/svg%3E"), auto !important;
+            cursor: url("data:image/svg+xml,%3Csvg height='28' width='28' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 0,18 5,13 11,20 14,18 8,11 16,11' fill='%23ffffff' stroke='%23000000' stroke-width='1'/%3E%3C/svg%3E"), auto !important;
             box-sizing: border-box;
             transition: all 0.25s ease-in-out;
         }
 
         body {
             background-color: var(--bg-deep);
-            color: var(--text-main);
+            color: var(--bw-light-gray);
             font-family: 'Share Tech Mono', monospace;
             margin: 0;
             padding: 20px;
             overflow-x: hidden;
             min-height: 100vh;
-            background: linear-gradient(125deg, #030712, #0d1117, #120524, #021a24);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
-        }
-
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            background: radial-gradient(circle at center, #0a0a0a 0%, #000000 100%);
         }
 
         /* CRT Tarama Çizgisi */
@@ -46,11 +37,11 @@
             display: block;
             position: fixed;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.7) 50%);
             background-size: 100% 4px;
             z-index: 99999;
             pointer-events: none;
-            opacity: 0.25;
+            opacity: 0.5;
         }
 
         .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
@@ -62,55 +53,70 @@
             background: var(--panel-bg);
             padding: 20px 30px;
             border-radius: 8px;
-            border: 1px solid var(--neon-cyan);
+            border: 1px solid var(--bw-border);
             margin-bottom: 35px;
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.03);
             backdrop-filter: blur(10px);
         }
 
         h1, h2, h3 {
             font-family: 'Orbitron', sans-serif;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            color: var(--bw-white);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
             letter-spacing: 2px;
         }
 
         .nav-btn {
             font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #ff007f, #9d00ff);
-            color: #fff;
+            background: #ffffff;
+            color: #000000;
             border: none;
             padding: 10px 20px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: 800;
             letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
             text-decoration: none;
             display: inline-block;
             text-transform: uppercase;
         }
 
         .nav-btn:hover {
-            background: linear-gradient(135deg, #00f0ff, #ff007f);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+            background: #000000;
+            color: #ffffff;
+            border: 1px solid #ffffff;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
             transform: translateY(-2px) scale(1.02);
         }
 
         /* Biz Kimiz & Güvenilirlik Bölümü */
         .about-section {
             background: var(--panel-bg);
-            border: 1px solid rgba(157, 0, 255, 0.4);
+            border: 1px solid var(--bw-border);
             border-radius: 12px;
             padding: 25px 30px;
             margin-bottom: 35px;
-            box-shadow: 0 0 25px rgba(157, 0, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             backdrop-filter: blur(12px);
         }
-        .about-section h2 { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5); font-size: 18px; margin-top: 0; }
-        .about-section p { color: #8b949e; font-size: 14px; line-height: 1.6; margin-bottom: 0; }
+        .about-section h2 { color: var(--bw-white); font-size: 18px; margin-top: 0; border-bottom: 1px solid var(--bw-border); padding-bottom: 8px; }
+        .about-section p { color: var(--bw-gray); font-size: 14px; line-height: 1.6; margin-bottom: 0; }
 
-        /* Ürünler Grid (3 Ürün: Spoofer, Internal, Bypass) */
+        /* Güvenilirlik Şeridi */
+        .trust-badge {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--bw-border);
+            color: var(--bw-white);
+            padding: 12px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 12px;
+            font-family: 'Orbitron';
+            margin-bottom: 35px;
+        }
+
+        /* Ürünler Grid (3 Ürün) */
         .products-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -120,36 +126,36 @@
 
         .product-card {
             background: var(--panel-bg);
-            border: 1px solid rgba(0, 240, 255, 0.3);
+            border: 1px solid var(--bw-border);
             border-radius: 12px;
             padding: 25px;
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(12px);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
         }
 
         .product-card:hover {
-            border-color: var(--neon-pink);
-            box-shadow: 0 0 35px rgba(255, 0, 127, 0.3);
+            border-color: var(--bw-white);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.15);
             transform: translateY(-5px);
         }
 
         .product-card::before {
             content: '';
             position: absolute;
-            top: 0; left: 0; width: 100%; height: 4px;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: #ffffff;
         }
 
         .tag {
             display: inline-block;
-            background: rgba(0, 240, 255, 0.1);
-            color: var(--neon-cyan);
-            border: 1px solid rgba(0, 240, 255, 0.4);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--bw-white);
+            border: 1px solid var(--bw-border);
             padding: 4px 10px;
             border-radius: 4px;
             font-size: 11px;
@@ -165,88 +171,17 @@
 
         .feature-list li {
             padding: 6px 0;
-            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
             font-size: 13px;
+            color: var(--bw-light-gray);
             display: flex;
             align-items: center;
         }
 
         .feature-list li::before {
-            content: '⚡';
-            color: var(--neon-green);
+            content: '▪';
+            color: var(--bw-white);
             margin-right: 8px;
-            text-shadow: 0 0 8px var(--neon-green);
-        }
-
-        /* Güvenilirlik Badgeleri */
-        .trust-badge {
-            background: rgba(0, 255, 102, 0.08);
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            color: var(--neon-green);
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 12px;
-            font-family: 'Orbitron';
-            margin-bottom: 35px;
-            box-shadow: 0 0 15px rgba(0, 255, 102, 0.1);
-        }
-
-        /* Yüklenme / İşlem Ekranı */
-        .loader-box {
-            background: var(--panel-bg);
-            border: 1px solid rgba(0, 240, 255, 0.4);
-            border-radius: 12px;
-            padding: 25px;
-            max-width: 600px;
-            margin: 0 auto;
-            box-shadow: 0 0 30px rgba(0, 240, 255, 0.15);
-            backdrop-filter: blur(12px);
-            text-align: center;
-        }
-
-        .action-btn {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #00f0ff, #9d00ff);
-            color: #030712;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 900;
-            letter-spacing: 1px;
-            width: 100%;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-            text-transform: uppercase;
-        }
-
-        .action-btn:hover {
-            background: linear-gradient(135deg, #ff007f, #00f0ff);
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.8);
-            transform: translateY(-2px);
-        }
-
-        /* Yüklenme Animasyonu (Spinner) */
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(0, 240, 255, 0.1);
-            border-top: 4px solid var(--neon-cyan);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 15px auto 0 auto;
-            display: none;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        #statusText {
-            margin-top: 15px;
-            font-size: 14px;
-            font-weight: bold;
         }
 
         @media (max-width: 900px) {
@@ -262,7 +197,7 @@
     <header>
         <div>
             <h1 style="margin:0; font-size: 22px;">NEON SOFTWARE</h1>
-            <p style="margin:5px 0 0 0; color: #8b949e; font-size: 13px;">Advanced Security & Gaming Solutions</p>
+            <p style="margin:5px 0 0 0; color: var(--bw-gray); font-size: 13px;">Advanced Security & Gaming Solutions</p>
         </div>
         <div>
             <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn">🛒 Discord Destek & Fiyat</a>
@@ -271,13 +206,13 @@
 
     <!-- Biz Kimiz? / Güvenilirlik Vurgusu -->
     <div class="about-section">
-        <h2>BİZ KİMİZ? // NEON KERNEL TEAM</h2>
+        <h2>BİZ KİMİZ? // KERNEL TEAM</h2>
         <p>Neon Software; oyun güvenliği, donanım spoofleme ve özel sistem bypass teknolojilerinde %100 güvenilirlik ve müşteri memnuniyeti ilkesiyle çalışan profesyonel bir yazılım ekibidir. Tüm araçlarımız güncel koruma sistemlerine karşı tamamen gizli (undetected) ve yüksek performans odaklıdır.</p>
     </div>
 
     <!-- Güvenilirlik Şeridi -->
     <div class="trust-badge">
-        🔒 %100 GÜVENİLİR ALT YAPI • ANINDA TESLİMAT • 7/24 AKTİF DESTEK
+        [SECURE] %100 GÜVENİLİR ALT YAPI • ANINDA TESLİMAT • 7/24 AKTİF DESTEK
     </div>
 
     <!-- Ürünler ve Bypass Vitrini -->
@@ -287,7 +222,7 @@
             <div>
                 <span class="tag">HARDWARE SPOOFING</span>
                 <h2>PERM SPOOFER</h2>
-                <p style="color: #8b949e; font-size: 13px;">Anakart ve donanım banlarınızı kalıcı olarak kaldıran profesyonel temizleme aracı.</p>
+                <p style="color: var(--bw-gray); font-size: 13px;">Anakart ve donanım banlarınızı kalıcı olarak kaldıran profesyonel temizleme aracı.</p>
                 <ul class="feature-list">
                     <li>WINDOWS 10 & 11 SUPPORT</li>
                     <li>BIOS UP / OPT (Otomatik)</li>
@@ -302,9 +237,9 @@
             <div>
                 <span class="tag">GAME ENHANCEMENT</span>
                 <h2>VALORANT LEGIT INTERNAL</h2>
-                <p style="color: #8b949e; font-size: 13px;">Yüksek güvenlikli, optimize edilmiş ve ban riskini minimuma indiren dahili yazılım.</p>
+                <p style="color: var(--bw-gray); font-size: 13px;">Yüksek güvenlikli, optimize edilmiş ve ban riskini minimuma indiren dahili yazılım.</p>
                 <ul class="feature-list">
-                    <li>Gelişmiş Kernel Entegrasyonu</li>
+                    <li>Gelişmiş Entegrasyon</li>
                     <li>Düşük Risk / Yüksek Performans</li>
                     <li>Özel Optimizasyon</li>
                 </ul>
@@ -313,49 +248,22 @@
         </div>
 
         <!-- Ürün 3: Özel Bypass Ürünü -->
-        <div class="product-card" style="border-color: var(--neon-pink);">
+        <div class="product-card">
             <div>
-                <span class="tag" style="background: rgba(255,0,127,0.1); color: var(--neon-pink); border-color: rgba(255,0,127,0.4);">SECURITY BYPASS</span>
+                <span class="tag">SECURITY BYPASS</span>
                 <h2>NEON ULTIMATE BYPASS</h2>
-                <p style="color: #8b949e; font-size: 13px;">Sistem korumalarını ve sanallaştırma kontrollerini kusursuz şekilde atlatan özel bypass kütüphanesi.</p>
+                <p style="color: var(--bw-gray); font-size: 13px;">Sistem korumalarını ve sanallaştırma kontrollerini kusursuz şekilde atlatan özel bypass kütüphanesi.</p>
                 <ul class="feature-list">
                     <li>Tamamen Gizli Çalışma</li>
                     <li>Anlık Sürüm Güncellemeleri</li>
                     <li>7/24 Kesintisiz Stabilite</li>
                 </ul>
             </div>
-            <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn" style="width:100%; text-align:center; display:block; margin-top:15px; background: linear-gradient(135deg, #ff007f, #00f0ff);">Satın Al</a>
+            <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn" style="width:100%; text-align:center; display:block; margin-top:15px;">Satın Al</a>
         </div>
     </div>
 
-    <!-- Hızlı Başlatma / Yüklenme Simülasyon Paneli -->
-    <div class="loader-box">
-        <h2>SİSTEM BAŞLATICI</h2>
-        <p style="color: #8b949e; font-size: 13px; margin-bottom: 20px;">Neon modüllerini güvenli bir şekilde bilgisayarınıza / oturumunuza entegre edin.</p>
-        
-        <button class="action-btn" onclick="sistemiBaslat()">⚡ MODÜLLERİ AKTİF ET</button>
-        
-        <div class="spinner" id="loadingSpinner"></div>
-        <div id="statusText"></div>
-    </div>
-
 </div>
-
-<script>
-    function sistemiBaslat() {
-        let spinner = document.getElementById('loadingSpinner');
-        let statusText = document.getElementById('statusText');
-        
-        // Butona basıldığında sıfırla ve animasyonu başlat
-        spinner.style.display = 'block';
-        statusText.innerHTML = `<span style="color: var(--neon-cyan);">Güvenli tünel oluşturuluyor ve modüller yükleniyor...</span>`;
-        
-        setTimeout(() => {
-            spinner.style.display = 'none';
-            statusText.innerHTML = `<span style="color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);">[BAŞARILI] Tüm Neon sistemleri aktif edildi, keyifli oyunlar!</span>`;
-        }, 1800);
-    }
-</script>
 
 </body>
 </html>
