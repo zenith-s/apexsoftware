@@ -1,674 +1,397 @@
 <!DOCTYPE html>
-<html lang="tr">
+<html lang="tr" class="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON SECURITY // NEXUS COMMAND</title>
+    <title>NEON COMMAND CENTER - Ultra Admin Suite</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=Inter:wght@300;400;600&display=swap');
-
-        :root {
-            --bg-deep: #02040a;
-            --surface: rgba(13, 17, 23, 0.75);
-            --border: rgba(88, 166, 255, 0.2);
-            --neon-blue: #00f0ff;
-            --neon-purple: #b000ff;
-            --neon-green: #00ff66;
-            --text-main: #c9d1d9;
-            --text-muted: #8b949e;
-        }
-
-        @keyframes corePulse {
-            0% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
-            50% { box-shadow: 0 0 35px rgba(0, 240, 255, 0.3), inset 0 0 25px rgba(0, 240, 255, 0.15); }
-            100% { box-shadow: 0 0 15px rgba(0, 240, 255, 0.1), inset 0 0 15px rgba(0, 240, 255, 0.05); }
-        }
-
-        @keyframes glitchFade {
-            0% { opacity: 0; transform: translateY(20px) scale(0.98); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
-
-        body {
-            background-color: var(--bg-deep);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            margin: 0;
-            padding: 20px;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-
-        #matrixCanvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: -1;
-            pointer-events: none;
-        }
-
-        .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            animation: glitchFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            position: relative;
-            z-index: 2;
-        }
-
-        /* Header / Navbar */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            padding: 20px 30px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-            animation: corePulse 5s infinite ease-in-out;
-        }
-
-        .logo-area h1 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin: 0;
-            font-size: 20px;
-            letter-spacing: 3px;
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
-
-        .logo-area span {
-            font-size: 11px;
-            color: var(--neon-blue);
-            letter-spacing: 5px;
-            text-transform: uppercase;
-        }
-
-        /* Giriş Ekranı */
-        .login-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80vh;
-        }
-
-        .login-box {
-            width: 100%;
-            max-width: 420px;
-            background: var(--surface);
-            backdrop-filter: blur(25px);
-            padding: 45px;
-            border-radius: 20px;
-            border: 1px solid var(--border);
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.9);
-            animation: glitchFade 0.8s ease-out;
-        }
-
-        .login-box h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin-bottom: 5px;
-            letter-spacing: 2px;
-        }
-
-        /* Form Elemanları */
-        input, select {
-            background: rgba(1, 4, 9, 0.85);
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 14px 18px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            width: 100%;
-            box-sizing: border-box;
-            transition: all 0.3s ease;
-            font-family: 'Inter', sans-serif;
-            font-size: 14px;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--neon-blue);
-            outline: none;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
-            transform: translateY(-1px);
-        }
-
-        button {
-            background: linear-gradient(135deg, #0070f3 0%, #00f0ff 100%);
-            color: #fff;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 10px;
-            cursor: pointer;
-            font-weight: 600;
-            font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1px;
-            transition: all 0.3s ease;
-            box-shadow: 0 5px 20px rgba(0, 240, 255, 0.3);
-            width: 100%;
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 240, 255, 0.6);
-            filter: brightness(1.1);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, #d32f2f 0%, #ff5252 100%);
-            box-shadow: 0 5px 20px rgba(211, 47, 47, 0.4);
-            width: auto;
-            padding: 10px 20px;
-            font-size: 12px;
-        }
-
-        .btn-danger:hover {
-            box-shadow: 0 8px 25px rgba(255, 82, 82, 0.6);
-        }
-
-        /* Özel Süre Grid Yapısı */
-        .custom-duration-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 12px;
-            border-radius: 10px;
-            border: 1px dashed var(--border);
-        }
-        .custom-duration-grid label {
-            font-size: 10px;
-            color: var(--neon-blue);
-            margin-bottom: 3px;
-            display: block;
-            font-family: 'Orbitron', sans-serif;
-        }
-        .custom-duration-grid input {
-            margin-bottom: 0;
-            padding: 8px 10px;
-            font-size: 13px;
-        }
-
-        /* İstatistik Kartları */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: var(--surface);
-            backdrop-filter: blur(15px);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            text-align: center;
-            transition: transform 0.3s ease, border-color 0.3s ease;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-5px);
-            border-color: var(--neon-blue);
-        }
-
-        .stat-card h3 {
-            margin: 0;
-            color: var(--text-muted);
-            font-size: 11px;
-            letter-spacing: 2px;
-            font-family: 'Orbitron', sans-serif;
-        }
-
-        .stat-card p {
-            margin: 12px 0 0 0;
-            color: var(--neon-blue);
-            font-size: 32px;
-            font-weight: 800;
-            font-family: 'Orbitron', sans-serif;
-            text-shadow: 0 0 10px rgba(0, 240, 255, 0.4);
-        }
-
-        /* Grid Yapısı */
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 380px 1fr;
-            gap: 25px;
-        }
-
-        .panel-box {
-            background: var(--surface);
-            backdrop-filter: blur(15px);
-            padding: 25px;
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            margin-bottom: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
-
-        .panel-box h3 {
-            font-family: 'Orbitron', sans-serif;
-            color: #fff;
-            margin-top: 0;
-            font-size: 14px;
-            letter-spacing: 1.5px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-        }
-
-        /* Tablo */
-        .table-container {
-            max-height: 380px;
-            overflow-y: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-        }
-
-        th, td {
-            padding: 14px;
-            text-align: left;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-
-        th {
-            color: var(--neon-blue);
-            font-family: 'Orbitron', sans-serif;
-            font-size: 11px;
-            letter-spacing: 1px;
-            position: sticky;
-            top: 0;
-            background: #0d1117;
-            z-index: 10;
-        }
-
-        tr { transition: background 0.2s ease; }
-        tr:hover td { background: rgba(0, 240, 255, 0.03); }
-
-        .key-code {
-            font-family: 'Courier New', monospace;
-            color: var(--neon-blue);
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        /* Log Terminali */
-        .log-terminal {
-            background: #010409;
-            color: var(--neon-green);
-            font-family: 'Courier New', Courier, monospace;
-            padding: 18px;
-            border-radius: 12px;
-            height: 380px;
-            overflow-y: auto;
-            border: 1px solid rgba(0, 255, 102, 0.2);
-            font-size: 12px;
-            box-shadow: inset 0 0 25px rgba(0,0,0,0.9);
-        }
-
-        .log-item {
-            margin-bottom: 8px;
-            border-bottom: 1px dashed rgba(255,255,255,0.05);
-            padding-bottom: 6px;
-        }
-
-        .btn-action {
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .btn-reset { color: #ffab00; }
-        .btn-reset:hover { background: rgba(255, 171, 0, 0.1); }
-
-        .btn-del { color: #ff5252; margin-left: 5px; }
-        .btn-del:hover { background: rgba(255, 82, 82, 0.1); }
-
-        .hidden { display: none !important; }
-
-        /* Scrollbar Özelleştirme */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: rgba(88, 166, 255, 0.3); border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--neon-blue); }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
     </style>
 </head>
-<body>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
 
-    <!-- Arka Planda Kayan Siber Matrix Efekti -->
-    <canvas id="matrixCanvas"></canvas>
+    <!-- Üst Navbar -->
+    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-xl">
+        <div class="flex items-center space-x-3">
+            <div class="relative">
+                <div class="bg-cyan-500 w-4 h-4 rounded-full animate-ping absolute opacity-75"></div>
+                <div class="bg-cyan-400 w-4 h-4 rounded-full relative"></div>
+            </div>
+            <h1 class="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 to-indigo-500 bg-clip-text text-transparent">NEON SUITE <span class="text-xs font-normal text-slate-400">v3.0 Ultimate</span></h1>
+        </div>
+        <div class="flex items-center space-x-3">
+            <span id="systemStatus" class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono rounded-full flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sunucu Bağlı
+            </span>
+            <button onclick="fetchAllData()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-cyan-900/20 active:scale-95">Verileri Yenile</button>
+        </div>
+    </header>
 
-    <div class="container">
+    <!-- Ana İçerik Konteyneri -->
+    <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
 
-        <!-- Giriş Ekranı -->
-        <div id="loginSection" class="login-wrapper">
-            <div class="login-box">
-                <h2>NEON NEXUS</h2>
-                <span style="color: var(--neon-blue); font-size: 11px; letter-spacing: 3px; display: block; margin-bottom: 25px;">SECURE COMMAND CENTER</span>
-                <input type="password" id="adminKeyInput" placeholder="Yönetici Anahtarı (Admin Key)">
-                <button onclick="girisYap()">SİSTEME BAĞLAN</button>
-                <p id="loginError" style="color: #ff5252; margin-top: 15px; font-size: 12px;"></p>
+        <!-- İstatistik Kartları -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Toplam Lisans</div>
+                <div id="statTotalKeys" class="text-3xl font-black text-cyan-400 mt-2">0</div>
+                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🔑</div>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Aktif Oturumlar</div>
+                <div id="statActiveKeys" class="text-3xl font-black text-emerald-400 mt-2">0</div>
+                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">💻</div>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Yasaklı HWID</div>
+                <div id="statHwidBans" class="text-3xl font-black text-rose-400 mt-2">0</div>
+                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🛡️</div>
+            </div>
+            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
+                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Yasaklı IP</div>
+                <div id="statIpBans" class="text-3xl font-black text-amber-400 mt-2">0</div>
+                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🌐</div>
             </div>
         </div>
 
-        <!-- Yönetim Paneli -->
-        <div id="panelSection" class="hidden">
-            <header>
-                <div class="logo-area">
-                    <h1>NEON SECURITY</h1>
-                    <span>NEXUS v3.0 // ACTIVE COMMAND</span>
-                </div>
-                <button class="btn-danger" onclick="cikisYap()">GÜVENLİ ÇIKIŞ</button>
-            </header>
+        <!-- Sekme Butonları -->
+        <div class="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
+            <button onclick="switchTab('licenses')" id="btnTab-licenses" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-600 text-white shadow-md">Lisans Yönetimi</button>
+            <button onclick="switchTab('generator')" id="btnTab-generator" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Key Üretici</button>
+            <button onclick="switchTab('bans')" id="btnTab-bans" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Ban Listeleri</button>
+            <button onclick="switchTab('logs')" id="btnTab-logs" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Canlı İstek Logları</button>
+        </div>
 
-            <!-- İstatistik Kartları -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <h3>TOPLAM LİSANS</h3>
-                    <p id="statTotalKeys">0</p>
+        <!-- SEKME 1: LİSANS YÖNETİMİ -->
+        <div id="tab-licenses" class="space-y-4 animate-fade">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
+                    <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">Kayıtlı Lisanslar ve Cihaz Eşleşmeleri</h3>
+                    <input type="text" id="searchKey" onkeyup="filterLicenses()" placeholder="Key veya HWID ara..." class="bg-slate-950 border border-slate-800 text-xs rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 w-full sm:w-64">
                 </div>
-                <div class="stat-card">
-                    <h3>AKTİF HWID KİLİDİ</h3>
-                    <p id="statActiveHwid">0</p>
-                </div>
-                <div class="stat-card">
-                    <h3>TOPLAM İSTEK (LOG)</h3>
-                    <p id="statTotalReq">0</p>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto rounded-xl border border-slate-800/60">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
+                            <tr>
+                                <th class="p-3.5">ID</th>
+                                <th class="p-3.5">Lisans Anahtarı</th>
+                                <th class="p-3.5">HWID (Donanım)</th>
+                                <th class="p-3.5">Son IP</th>
+                                <th class="p-3.5">Bitiş Tarihi</th>
+                                <th class="p-3.5">Durum</th>
+                                <th class="p-3.5 text-right">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody id="licensesTableBody" class="divide-y divide-slate-800/60">
+                            <!-- JS dolduracak -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <div class="dashboard-grid">
-                <!-- Sol Kolon: Otomatik Key Üretimi & Yönetim -->
-                <div>
-                    <div class="panel-box">
-                        <h3>LİSANS ÜRETİCİ</h3>
-                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">İster hazır paket seç, ister özel süre belirle.</p>
-                        
-                        <label style="font-size: 11px; color: var(--neon-blue); display: block; margin-bottom: 5px; font-family: 'Orbitron';">SÜRE SEÇİMİ</label>
-                        <select id="newDuration" onchange="sureTipiniDegistir()">
-                            <option value="1 Günlük">1 Günlük</option>
-                            <option value="30 Günlük" selected>30 Günlük (1 Ay)</option>
-                            <option value="Yıllık (1 Yıl)">Yıllık (1 Yıl)</option>
-                            <option value="3 Yıllık">3 Yıllık</option>
-                            <option value="Sınırsız (Lifetime)">Sınırsız (Lifetime)</option>
-                            <option value="ozel">⚙️ Özel Süre Belirle...</option>
+        <!-- SEKME 2: KEY ÜRETİCİ -->
+        <div id="tab-generator" class="space-y-4 animate-fade hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-xl mx-auto">
+                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-4">Toplu Lisans Anahtarı Üret</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Ön Ek (Prefix)</label>
+                        <input type="text" id="genPrefix" value="NEON" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 uppercase">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Adet</label>
+                        <input type="number" id="genCount" value="1" min="1" max="50" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Süre (Gün)</label>
+                        <select id="genDays" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
+                            <option value="1">1 Günlük (Trial)</option>
+                            <option value="7">7 Günlük (Haftalık)</option>
+                            <option value="30" selected>30 Günlük (Aylık)</option>
+                            <option value="365">365 Günlük (Yıllık)</option>
+                            <option value="0">Sınırsız (Lifetime)</option>
                         </select>
-                        
-                        <!-- ÖZEL SÜRE KUTUCUKLARI (Başta Gizli) -->
-                        <div id="customDurationBox" class="custom-duration-grid hidden">
-                            <div>
-                                <label>YIL</label>
-                                <input type="number" id="ozelYil" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>AY</label>
-                                <input type="number" id="ozelAy" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>GÜN</label>
-                                <input type="number" id="ozelGun" placeholder="Boş">
-                            </div>
-                            <div>
-                                <label>DAKİKA</label>
-                                <input type="number" id="ozelDakika" placeholder="Boş">
-                            </div>
-                        </div>
+                    </div>
+                    <button onclick="generateKeys()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-900/20 text-xs">Anahtarları Üret</button>
+                </div>
+                <div id="generatedResultBox" class="hidden mt-6 bg-slate-950 p-4 rounded-xl border border-emerald-500/30 max-h-48 overflow-y-auto font-mono text-xs text-emerald-400 space-y-1"></div>
+            </div>
+        </div>
 
-                        <button onclick="otomatikKeyUretVeEkle()" style="margin-top: 10px;">OTOMATİK KEY OLUŞTUR</button>
+        <!-- SEKME 3: BAN LİSTELERİ -->
+        <div id="tab-bans" class="space-y-6 animate-fade hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- HWID Banlar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h3 class="text-sm font-bold text-rose-400 uppercase tracking-wider mb-3">Yasaklı Donanımlar (HWID Bans)</h3>
+                    <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-slate-800/60">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase">
+                                <tr><th class="p-3">HWID</th><th class="p-3">Tarih</th><th class="p-3 text-right">İşlem</th></tr>
+                            </thead>
+                            <tbody id="hwidBansBody" class="divide-y divide-slate-800/60"></tbody>
+                        </table>
                     </div>
                 </div>
-
-                <!-- Sağ Kolon: Aktif Veritabanı ve Loglar -->
-                <div>
-                    <div class="panel-box">
-                        <h3>KAYITLI LİSANS LİSTESİ</h3>
-                        <div class="table-container">
-                            <table>
-                                <thead>
-                                    <tr>
-                                        <th>LİSANS ANAHTARI</th>
-                                        <th>SÜRE</th>
-                                        <th>HWID DURUMU</th>
-                                        <th>İŞLEMLER</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="keyList">
-                                    <!-- Dinamik Dolacak -->
-                                </tbody>
-                            </table>
-                        </div>
+                <!-- IP Banlar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">Yasaklı IP Adresleri (IP Bans)</h3>
+                    <div class="flex gap-2 mb-3">
+                        <input type="text" id="manualIpInput" placeholder="Örn: 192.168.1.50" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
+                        <button onclick="banIpManual()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition">IP Banla</button>
                     </div>
-
-                    <div class="panel-box">
-                        <h3>CANLI API İSTEK AKIŞI (LOG TERMINAL)</h3>
-                        <div class="log-terminal" id="logTerminal">
-                            <!-- Loglar akacak -->
-                        </div>
+                    <div class="overflow-x-auto max-h-56 overflow-y-auto rounded-xl border border-slate-800/60">
+                        <table class="w-full text-left text-xs text-slate-300">
+                            <thead class="bg-slate-950 text-slate-400 uppercase">
+                                <tr><th class="p-3">IP Adresi</th><th class="p-3">Tarih</th><th class="p-3 text-right">İşlem</th></tr>
+                            </thead>
+                            <tbody id="ipBansBody" class="divide-y divide-slate-800/60"></tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
 
+        <!-- SEKME 4: CANLI LOGLAR -->
+        <div id="tab-logs" class="space-y-4 animate-fade hidden">
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-3">Canlı İstek ve Aktivite Akışı</h3>
+                <div class="overflow-x-auto max-h-[500px] overflow-y-auto rounded-xl border border-slate-800/60">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
+                            <tr>
+                                <th class="p-3">Zaman</th>
+                                <th class="p-3">IP Adresi</th>
+                                <th class="p-3">İşlem (Action)</th>
+                                <th class="p-3">Durum</th>
+                                <th class="p-3">Detay</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody" class="divide-y divide-slate-800/60"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Bildirim Toast Alanı -->
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-cyan-500/40 text-cyan-300 px-5 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50 text-xs font-semibold flex items-center gap-2">
+        <span id="toastMsg">İşlem başarılı!</span>
     </div>
 
-<script>
-    // --- MATRIX / CYBERNETIC CANVAS BACKGROUND ---
-    const canvas = document.getElementById('matrixCanvas');
-    const ctx = canvas.getContext('2d');
+    <script>
+        const API_URL = 'api.php';
+        const ADMIN_TOKEN = 'ADMIN_GIZLI_TOKEN_123'; // api.php içindeki token ile aynı olmalı
+        let globalLicensesData = [];
 
-    let width, height;
-    function resize() {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    let particles = [];
-    for(let i=0; i<60; i++) {
-        particles.push({
-            x: Math.random() * width,
-            y: Math.random() * height,
-            vx: (Math.random() - 0.5) * 0.5,
-            vy: (Math.random() - 0.5) * 0.5,
-            size: Math.random() * 1.5 + 0.5
-        });
-    }
-
-    function renderBackground() {
-        ctx.fillStyle = 'rgba(2, 4, 10, 0.25)';
-        ctx.fillRect(0, 0, width, height);
-
-        // Grid çizgileri
-        ctx.strokeStyle = 'rgba(0, 240, 255, 0.03)';
-        ctx.lineWidth = 1;
-        let step = 60;
-        for(let x=0; x<width; x+=step) {
-            ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-        }
-        for(let y=0; y<height; y+=step) {
-            ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toastMsg').innerText = msg;
+            toast.classList.remove('translate-y-20', 'opacity-0');
+            setTimeout(() => {
+                toast.classList.add('translate-y-20', 'opacity-0');
+            }, 3000);
         }
 
-        // Partiküller
-        ctx.fillStyle = 'rgba(0, 240, 255, 0.4)';
-        particles.forEach(p => {
-            p.x += p.vx; p.y += p.vy;
-            if(p.x < 0) p.x = width; if(p.x > width) p.x = 0;
-            if(p.y < 0) p.y = height; if(p.y > height) p.y = 0;
-
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-            ctx.fill();
-        });
-
-        requestAnimationFrame(renderBackground);
-    }
-    renderBackground();
-
-
-    // --- ÖZEL SÜRE GÖSTER / GİZLE MANTIĞI ---
-    function sureTipiniDegistir() {
-        const secilen = document.getElementById('newDuration').value;
-        const ozelBox = document.getElementById('customDurationBox');
-        if (secilen === 'ozel') {
-            ozelBox.classList.remove('hidden');
-        } else {
-            ozelBox.classList.add('hidden');
+        function switchTab(tabName) {
+            ['licenses', 'generator', 'bans', 'logs'].forEach(t => {
+                document.getElementById('tab-' + t).classList.add('hidden');
+                document.getElementById('btnTab-' + t).className = "px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white";
+            });
+            document.getElementById('tab-' + tabName).classList.remove('hidden');
+            document.getElementById('btnTab-' + tabName).className = "px-5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-600 text-white shadow-md";
         }
-    }
 
+        async function fetchAllData() {
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'admin_get_all', admin_token: ADMIN_TOKEN })
+                });
+                const data = await res.json();
+                if(data.status === 'success') {
+                    globalLicensesData = data.licenses;
+                    renderLicenses(data.licenses);
+                    renderBans(data.hwid_bans, data.ip_bans);
+                    renderLogs(data.logs);
 
-    // --- OTOMATİK RASTGELE KEY ÜRETME FONKSİYONU ---
-    function rastgeleBlokOlustur() {
-        const chars = '0123456789ABCDEF';
-        let blok = '';
-        for (let i = 0; i < 4; i++) {
-            blok += chars.charAt(Math.floor(Math.random() * chars.length));
-        }
-        return blok;
-    }
-
-    function yeniKeyFormatUret() {
-        return `NEON-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}-${rastgeleBlokOlustur()}`;
-    }
-
-
-    // --- PANEL YÖNETİM MANTIĞI ---
-    let adminKey = "";
-    let refreshInterval = null;
-
-    function girisYap() {
-        adminKey = document.getElementById('adminKeyInput').value;
-        sistemiGuncelle(true);
-    }
-
-    function cikisYap() {
-        clearInterval(refreshInterval);
-        document.getElementById('panelSection').classList.add('hidden');
-        document.getElementById('loginSection').classList.remove('hidden');
-        document.getElementById('adminKeyInput').value = "";
-    }
-
-    function sistemiGuncelle(isLogin = false) {
-        fetch(`api.php?action=get_data&admin_key=${adminKey}`)
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    if (isLogin) {
-                        document.getElementById('loginSection').classList.add('hidden');
-                        document.getElementById('panelSection').classList.remove('hidden');
-                        refreshInterval = setInterval(() => sistemiGuncelle(false), 4000);
-                    }
-                    arayuzuDoldur(data.keys, data.logs);
-                } else {
-                    if (isLogin) document.getElementById('loginError').innerText = "Erişim Reddedildi: Geçersiz Yönetici Anahtarı!";
+                    // İstatistikleri Güncelle
+                    document.getElementById('statTotalKeys').innerText = data.licenses.length;
+                    document.getElementById('statActiveKeys').innerText = data.licenses.filter(l => l.status === 'active').length;
+                    document.getElementById('statHwidBans').innerText = data.hwid_bans.length;
+                    document.getElementById('statIpBans').innerText = data.ip_bans.length;
                 }
-            })
-            .catch(() => {
-                if (isLogin) document.getElementById('loginError').innerText = "Sunucu bağlantı hatası!";
+            } catch(e) {
+                showToast("Sunucu verileri alınamadı!");
+            }
+        }
+
+        function renderLicenses(licenses) {
+            let html = '';
+            licenses.forEach(l => {
+                let badgeColor = 'bg-slate-800 text-slate-400';
+                if(l.status === 'active') badgeColor = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
+                if(l.status === 'banned') badgeColor = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
+                if(l.status === 'expired') badgeColor = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
+                if(l.status === 'unused') badgeColor = 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30';
+
+                html += `<tr class="hover:bg-slate-900/40 transition">
+                    <td class="p-3.5">${l.id}</td>
+                    <td class="p-3.5 font-mono text-cyan-300 font-semibold">${l.license_key}</td>
+                    <td class="p-3.5 font-mono text-slate-400">${l.hwid || '<span class="text-slate-600">Kayıtsız / Boş</span>'}</td>
+                    <td class="p-3.5 text-slate-400">${l.last_ip || '-'}</td>
+                    <td class="p-3.5 text-slate-400">${l.expiry_date || 'Sınırsız'}</td>
+                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${badgeColor}">${l.status}</span></td>
+                    <td class="p-3.5 text-right space-x-2">
+                        ${l.hwid ? `<button onclick="resetHwid(${l.id})" class="text-amber-400 hover:underline font-medium">HWID Sıfırla</button>` : ''}
+                        ${l.hwid ? `<button onclick="banHwid('${l.hwid}')" class="text-rose-400 hover:underline font-medium">HWID Banla</button>` : ''}
+                        <button onclick="deleteLicense(${l.id})" class="text-slate-500 hover:text-rose-400 font-medium">Sil</button>
+                    </td>
+                </tr>`;
             });
-    }
-
-    function arayuzuDoldur(keys, logs) {
-        let totalKeys = Object.keys(keys).length;
-        let activeHwid = 0;
-
-        const tbody = document.getElementById('keyList');
-        tbody.innerHTML = "";
-        for (const [key, info] of Object.entries(keys)) {
-            if (info.hwid) activeHwid++;
-            let hwidStatus = info.hwid ? `<span style="color: #00ff66;" title="${info.hwid}">Kilitli</span>` : '<span style="color: var(--text-muted);">Boşta</span>';
-            
-            let row = `<tr>
-                <td class="key-code">${key}</td>
-                <td>${info.expiry}</td>
-                <td>${hwidStatus}</td>
-                <td>
-                    <button class="btn-action btn-reset" onclick="hwidSifirla('${key}')">Sıfırla</button>
-                    <button class="btn-action btn-del" onclick="keySil('${key}')">Sil</button>
-                </td>
-            </tr>`;
-            tbody.innerHTML += row;
+            document.getElementById('licensesTableBody').innerHTML = html || '<tr><td colspan="7" class="p-6 text-center text-slate-500">Kayıtlı lisans bulunamadı.</td></tr>';
         }
 
-        document.getElementById('statTotalKeys').innerText = totalKeys;
-        document.getElementById('statActiveHwid').innerText = activeHwid;
-        document.getElementById('statTotalReq').innerText = logs.length;
-
-        const terminal = document.getElementById('logTerminal');
-        terminal.innerHTML = "";
-        logs.forEach(log => {
-            let statusColor = log.status.includes('SUCCESS') ? '#00ff66' : '#ff5252';
-            let logLine = `<div class="log-item">
-                <span style="color: var(--text-muted);">[${log.time}]</span> 
-                <span style="color: #d2a8ff;">IP:${log.ip}</span> 
-                <span style="color: var(--neon-blue);">[${log.action}]</span> 
-                Key:<b>${log.key}</b> ➔ 
-                <span style="color: ${statusColor};">${log.status}</span>
-            </div>`;
-            terminal.innerHTML += logLine;
-        });
-    }
-
-    function otomatikKeyUretVeEkle() {
-        const uretilenKey = yeniKeyFormatUret();
-        let secilenSure = document.getElementById('newDuration').value;
-
-        // Eğer özel süre seçildiyse doldurulan kutuları birleştirip string oluşturuyoruz
-        if (secilenSure === 'ozel') {
-            let yil = parseInt(document.getElementById('ozelYil').value) || 0;
-            let ay = parseInt(document.getElementById('ozelAy').value) || 0;
-            let gun = parseInt(document.getElementById('ozelGun').value) || 0;
-            let dakika = parseInt(document.getElementById('ozelDakika').value) || 0;
-
-            let parcalar = [];
-            if (yil > 0) parcalar.push(`${yil} yıl`);
-            if (ay > 0) parcalar.push(`${ay} ay`);
-            if (gun > 0) parcalar.push(`${gun} gün`);
-            if (dakika > 0) parcalar.push(`${dakika} dakika`);
-
-            secilenSure = parcalar.length > 0 ? parcalar.join(" ") : "0 dakika";
+        function filterLicenses() {
+            const query = document.getElementById('searchKey').value.toLowerCase();
+            const filtered = globalLicensesData.filter(l => 
+                l.license_key.toLowerCase().includes(query) || 
+                (l.hwid && l.hwid.toLowerCase().includes(query))
+            );
+            renderLicenses(filtered);
         }
 
-        fetch(`api.php?action=add_key&admin_key=${adminKey}&new_key=${uretilenKey}&duration=${encodeURIComponent(secilenSure)}`)
-            .then(res => res.json())
-            .then(data => {
-                alert(`Başarıyla Üretildi!\nKey: ${uretilenKey}\nSüre: ${secilenSure}`);
-                sistemiGuncelle(false);
+        async function generateKeys() {
+            const prefix = document.getElementById('genPrefix').value;
+            const count = document.getElementById('genCount').value;
+            const days = document.getElementById('genDays').value;
+
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_generate_keys', prefix, count, days, admin_token: ADMIN_TOKEN })
             });
-    }
-
-    function hwidSifirla(targetKey) {
-        if (confirm(`${targetKey} için HWID kilidi kaldırılsın mı?`)) {
-            fetch(`api.php?action=reset_hwid&admin_key=${adminKey}&target_key=${targetKey}`)
-                .then(res => res.json())
-                .then(data => { alert(data.message); sistemiGuncelle(false); });
+            const data = await res.json();
+            if(data.status === 'success') {
+                showToast(`${count} adet lisans başarıyla üretildi!`);
+                const box = document.getElementById('generatedResultBox');
+                box.classList.remove('hidden');
+                box.innerHTML = data.keys.join('<br>');
+                fetchAllData();
+            }
         }
-    }
 
-    function keySil(targetKey) {
-        if (confirm(`${targetKey} veritabanından tamamen silinsin mi?`)) {
-            fetch(`api.php?action=delete_key&admin_key=${adminKey}&target_key=${targetKey}`)
-                .then(res => res.json())
-                .then(data => { alert(data.message); sistemiGuncelle(false); });
+        async function resetHwid(id) {
+            if(!confirm("Bu lisansın HWID kilidini sıfırlamak istediğinize emin misiniz?")) return;
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_reset_hwid', id, admin_token: ADMIN_TOKEN })
+            });
+            showToast("HWID başarıyla sıfırlandı.");
+            fetchAllData();
         }
-    }
-</script>
 
+        async function deleteLicense(id) {
+            if(!confirm("Bu lisansı tamamen silmek istiyor musunuz?")) return;
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_delete_license', id, admin_token: ADMIN_TOKEN })
+            });
+            showToast("Lisans silindi.");
+            fetchAllData();
+        }
+
+        async function banHwid(hwid) {
+            if(!confirm("Bu donanımı (HWID) kalıcı olarak banlamak istiyor musunuz?")) return;
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_ban_hwid', hwid, admin_token: ADMIN_TOKEN })
+            });
+            showToast("HWID banlandı.");
+            fetchAllData();
+        }
+
+        async function removeHwidBan(id) {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_remove_hwid_ban', id, admin_token: ADMIN_TOKEN })
+            });
+            showToast("HWID banı kaldırıldı.");
+            fetchAllData();
+        }
+
+        async function banIpManual() {
+            const ip = document.getElementById('manualIpInput').value;
+            if(!ip) return alert("Lütfen bir IP adresi girin!");
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_ban_ip', ip, admin_token: ADMIN_TOKEN })
+            });
+            document.getElementById('manualIpInput').value = '';
+            showToast("IP adresi yasaklandı.");
+            fetchAllData();
+        }
+
+        async function removeIpBan(id) {
+            await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'admin_remove_ip_ban', id, admin_token: ADMIN_TOKEN })
+            });
+            showToast("IP banı kaldırıldı.");
+            fetchAllData();
+        }
+
+        function renderBans(hwidBans, ipBans) {
+            let hHtml = '';
+            hwidBans.forEach(b => {
+                hHtml += `<tr><td class="p-3 font-mono text-rose-400">${b.hwid}</td><td class="p-3 text-slate-500">${b.date}</td><td class="p-3 text-right"><button onclick="removeHwidBan(${b.id})" class="text-cyan-400 hover:underline">Kaldır</button></td></tr>`;
+            });
+            document.getElementById('hwidBansBody').innerHTML = hHtml || '<tr><td colspan="3" class="p-3 text-center text-slate-500">Banlı HWID yok.</td></tr>';
+
+            let iHtml = '';
+            ipBans.forEach(b => {
+                iHtml += `<tr><td class="p-3 font-mono text-amber-400">${b.ip}</td><td class="p-3 text-slate-500">${b.date}</td><td class="p-3 text-right"><button onclick="removeIpBan(${b.id})" class="text-cyan-400 hover:underline">Kaldır</button></td></tr>`;
+            });
+            document.getElementById('ipBansBody').innerHTML = iHtml || '<tr><td colspan="3" class="p-3 text-center text-slate-500">Banlı IP yok.</td></tr>';
+        }
+
+        function renderLogs(logs) {
+            let html = '';
+            logs.forEach(l => {
+                let badge = 'bg-slate-800 text-slate-300';
+                if(l.status === 'success') badge = 'bg-emerald-500/20 text-emerald-400';
+                if(l.status === 'error') badge = 'bg-rose-500/20 text-rose-400';
+                if(l.status === 'banned') badge = 'bg-amber-500/20 text-amber-400';
+
+                html += `<tr class="hover:bg-slate-900/40">
+                    <td class="p-3 text-slate-500 font-mono">${l.date}</td>
+                    <td class="p-3 font-mono text-slate-300">${l.ip}</td>
+                    <td class="p-3 text-cyan-300 font-semibold">${l.action}</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badge}">${l.status}</span></td>
+                    <td class="p-3 text-slate-400">${l.details}</td>
+                </tr>`;
+            });
+            document.getElementById('logsTableBody').innerHTML = html || '<tr><td colspan="5" class="p-4 text-center text-slate-500">Log kaydı yok.</td></tr>';
+        }
+
+        window.onload = () => {
+            fetchAllData();
+            setInterval(fetchAllData, 10000);
+        };
+    </script>
 </body>
 </html>
