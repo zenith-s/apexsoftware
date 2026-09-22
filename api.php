@@ -54,7 +54,7 @@ $pdo->exec("CREATE TABLE IF NOT EXISTS logs (
     details TEXT
 )");
 
-// IP Adresi Alma
+// IP Adresi Alma ve Maskeleme Fonksiyonu
 function getClientIP() {
     $ip = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
     if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
@@ -65,11 +65,21 @@ function getClientIP() {
     return $ip;
 }
 
-// Log Kaydetme
+function maskIPString($ip) {
+    if (!$ip) return "127.0.***";
+    $parts = explode('.', $ip);
+    if (count($parts) === 4) {
+        return "{$parts[0]}.{$parts[1]}.***.***";
+    }
+    return substr($ip, 0, 6) . "****";
+}
+
+// Log Kaydetme (IP'yi maskeli şekilde veritabanına kaydeder)
 function writeLog($pdo, $ip, $action, $status, $details) {
     try {
+        $maskedIp = maskIPString($ip);
         $stmt = $pdo->prepare("INSERT INTO logs (ip, action, status, details) VALUES (?, ?, ?, ?)");
-        $stmt->execute([$ip, $action, $status, $details]);
+        $stmt->execute([$maskedIp, $action, $status, $details]);
     } catch (\Exception $e) {}
 }
 
@@ -80,12 +90,14 @@ $rawInput = file_get_contents('php://input');
 $data = json_decode($rawInput, true);
 
 if ($data && isset($data['action'])) {
-    $adminToken = $data['admin_token'] ?? '';
-    $expectedToken = 'ADMIN_GIZLI_TOKEN_123'; // Admin panelindeki ile aynı olmalı
+    $adminToken = strtoupper(trim($data['admin_token'] ?? ''));
+    
+    // İzin verilen çoklu admin key listesi
+    $validTokens = ['SYVEX', 'BQWET', 'UFC', 'NEONBEST31'];
 
     if (strpos($data['action'], 'admin_') === 0) {
-        if ($adminToken !== $expectedToken) {
-            echo json_encode(["status" => "error", "message" => "Yetkisiz Token!"]);
+        if (!in_array($adminToken, $validTokens)) {
+            echo json_encode(["status" => "error", "message" => "Yetkisiz Token! Geçersiz Admin Key."]);
             exit;
         }
     }
@@ -133,6 +145,7 @@ if ($data && isset($data['action'])) {
             $id = intval($data['id'] ?? 0);
             $stmt = $pdo->prepare("UPDATE licenses SET hwid = NULL, status = 'unused' WHERE id = ?");
             $stmt->execute([$id]);
+            writeLog($pdo, $clientIp, 'Reset HWID', 'success', "ID: $id HWID sıfırlandı.");
             echo json_encode(["status" => "success"]);
             exit;
 
@@ -140,32 +153,13 @@ if ($data && isset($data['action'])) {
             $id = intval($data['id'] ?? 0);
             $stmt = $pdo->prepare("DELETE FROM licenses WHERE id = ?");
             $stmt->execute([$id]);
-            echo json_encode(["status" => "success"]);
-            exit;
-
-        case 'admin_ban_hwid':
-            $hwid = $data['hwid'] ?? '';
-            if ($hwid) {
-                $stmt = $pdo->prepare("INSERT OR IGNORE INTO hwid_bans (hwid) VALUES (?)");
-                $stmt->execute([$hwid]);
-                $stmt2 = $pdo->prepare("UPDATE licenses SET status = 'banned' WHERE hwid = ?");
-                $stmt2->execute([$hwid]);
-            }
-            echo json_encode(["status" => "success"]);
-            exit;
-
-        case 'admin_ban_ip':
-            $ip = $data['ip'] ?? '';
-            if ($ip) {
-                $stmt = $pdo->prepare("INSERT OR IGNORE INTO ip_bans (ip) VALUES (?)");
-                $stmt->execute([$ip]);
-            }
+            writeLog($pdo, $clientIp, 'Delete License', 'success', "ID: $id lisans silindi.");
             echo json_encode(["status" => "success"]);
             exit;
     }
 }
 
-// --- GET İSTEKLERİ (C++ Client veya Ping) ---
+// --- GET İSTEKLERİ ---
 $action = $_GET['action'] ?? '';
 
 if ($action === 'ping') {
@@ -193,7 +187,7 @@ if ($action === 'verify') {
 
     if (empty($license['hwid'])) {
         $update = $pdo->prepare("UPDATE licenses SET hwid = ?, last_ip = ?, status = 'active' WHERE id = ?");
-        $update->execute([$hwid, $clientIp, $license['id']]);
+        $update->execute([$hwid, maskIPString($clientIp), $license['id']]);
     } else if ($license['hwid'] !== $hwid) {
         echo "HWID_MISMATCH";
         exit;
