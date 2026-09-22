@@ -2,319 +2,294 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>NEON COMMAND // CYBERPUNK SECURITY SYSTEM</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <title>NEON SOFTWARE // SUPREME COMMAND V7</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syncopate:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #030712;
-            --panel-bg: rgba(13, 17, 23, 0.85);
-            --neon-cyan: #00f0ff;
-            --neon-pink: #ff007f;
-            --neon-green: #00ff66;
-            --neon-purple: #9d00ff;
-            --text-main: #c9d1d9;
+            --bg-base: #010101;
+            --panel-bg: rgba(6, 6, 6, 0.94);
+            --border-color: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.4);
+            --text-main: #eaeaea;
+            --text-muted: #6e6e6e;
+            --accent: #ffffff;
+            --danger: #ff2a2a;
+            --success: #2aff7f;
         }
 
-        /* Özel Animasyonlu Neon İmleç ve Tüm Elementlere Akıcı Geçiş */
         * {
-            cursor: url("data:image/svg+xml,%3Csvg height='28' width='28' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 0,18 5,13 11,20 14,18 8,11 16,11' fill='%2300f0ff' stroke='%23ff007f' stroke-width='1'/%3E%3C/svg%3E"), auto !important;
+            cursor: url("data:image/svg+xml,%3Csvg height='24' width='24' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 0,16 4,12 10,18 12,16 6,10 14,10' fill='%23ffffff' stroke='%23000000' stroke-width='1'/%3E%3C/svg%3E"), auto !important;
             box-sizing: border-box;
-            transition: all 0.25s ease-in-out;
+            transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body {
-            background-color: var(--bg-deep);
+            background-color: var(--bg-base);
             color: var(--text-main);
             font-family: 'Share Tech Mono', monospace;
             margin: 0;
-            padding: 20px;
+            padding: 25px;
             overflow-x: hidden;
             min-height: 100vh;
-            background: linear-gradient(125deg, #030712, #0d1117, #120524, #021a24);
-            background-size: 400% 400%;
-            animation: gradientBG 15s ease infinite;
+            background-image: 
+                radial-gradient(circle at 50% 50%, #0c0c0c 0%, #010101 100%),
+                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 100% 100%, 100% 3px;
         }
 
-        @keyframes gradientBG {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        /* CRT Tarama Çizgisi */
         body::after {
             content: " ";
             display: block;
             position: fixed;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
-            background-size: 100% 4px;
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.55) 50%);
+            background-size: 100% 2px;
             z-index: 99999;
             pointer-events: none;
-            opacity: 0.25;
+            opacity: 0.3;
         }
 
-        /* --- AÇILIŞ (BOOT) ANİMASYONU --- */
+        /* MOUSE VFX - PARÇACIK İZİ */
+        .vfx-dot {
+            position: fixed;
+            width: 5px;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 10px #ffffff, 0 0 18px #ffffff;
+            pointer-events: none;
+            border-radius: 50%;
+            z-index: 999999;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s ease-out, opacity 0.3s ease-out;
+        }
+
+        .watermark-syvex {
+            position: fixed;
+            bottom: 12px;
+            left: 15px;
+            font-family: 'Syncopate', sans-serif;
+            font-size: 9px;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.25);
+            z-index: 100000;
+            pointer-events: none;
+            text-transform: uppercase;
+            border-left: 2px solid rgba(255, 255, 255, 0.2);
+            padding-left: 8px;
+        }
+
+        .strict-panel {
+            background: var(--panel-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .strict-panel:hover {
+            border-color: var(--border-hover);
+        }
+
         #bootScreen {
             position: fixed;
             top: 0; left: 0; width: 100vw; height: 100vh;
-            background: #030712;
+            background: #000;
             z-index: 100000;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            font-family: 'Share Tech Mono', monospace;
-            color: var(--neon-green);
-            transition: opacity 0.8s ease, visibility 0.8s ease;
+            transition: opacity 0.4s ease, visibility 0.4s;
         }
-        #bootScreen.fade-out {
-            opacity: 0;
-            visibility: hidden;
-        }
+        #bootScreen.fade-out { opacity: 0; visibility: hidden; }
+
         .boot-box {
-            border: 1px solid var(--neon-cyan);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 0 35px rgba(0, 240, 255, 0.35);
-            background: rgba(0, 240, 255, 0.03);
-            width: 420px;
+            border: 1px solid #222;
+            padding: 45px;
+            width: 450px;
             text-align: center;
-            animation: pulseGlow 2s infinite alternate;
+            background: #030303;
         }
+
         .loading-bar-container {
-            width: 100%;
-            height: 6px;
-            background: #111;
-            border: 1px solid var(--neon-cyan);
-            margin-top: 20px;
-            border-radius: 3px;
-            overflow: hidden;
+            width: 100%; height: 3px; background: #111;
+            border: 1px solid #222; margin-top: 25px; overflow: hidden;
         }
         .loading-bar {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
-            box-shadow: 0 0 12px var(--neon-cyan);
-            transition: width 0.15s linear;
+            width: 0%; height: 100%;
+            background: #ffffff;
+            box-shadow: 0 0 15px #fff;
+            transition: width 0.04s linear;
         }
 
-        .container { max-width: 1300px; margin: 0 auto; position: relative; z-index: 2; }
+        .container { max-width: 1400px; margin: 0 auto; position: relative; z-index: 2; }
 
-        /* Giriş Paneli */
         #loginSection {
-            max-width: 450px;
-            margin: 100px auto;
-            background: var(--panel-bg);
-            border: 1px solid var(--neon-cyan);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 0 35px rgba(0, 240, 255, 0.25), inset 0 0 20px rgba(0, 240, 255, 0.05);
-            backdrop-filter: blur(12px);
-            text-align: center;
-            animation: pulseGlow 4s infinite alternate, slideUp 1s ease;
+            max-width: 440px; margin: 140px auto; padding: 45px; text-align: center;
+            animation: strictAppear 0.5s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes strictAppear {
+            from { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); }
+            to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
         }
 
-        @keyframes pulseGlow {
-            0% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.2); border-color: rgba(0, 240, 255, 0.4); }
-            100% { box-shadow: 0 0 45px rgba(255, 0, 127, 0.4); border-color: rgba(255, 0, 127, 0.7); }
-        }
-
-        h2 {
-            font-family: 'Orbitron', sans-serif;
-            color: var(--neon-cyan);
-            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+        h1, h2, h3 {
+            font-family: 'Syncopate', sans-serif;
             letter-spacing: 2px;
-            margin-top: 0;
-        }
-
-        input, select {
-            background: rgba(3, 7, 18, 0.9);
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            color: var(--neon-cyan);
-            padding: 10px 12px;
-            border-radius: 6px;
-            font-family: 'Share Tech Mono', monospace;
-            font-size: 15px;
-            width: 100%;
-            margin-bottom: 12px;
-            outline: none;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--neon-pink);
-            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
-            background: rgba(20, 5, 15, 0.9);
-            transform: scale(1.01);
-        }
-
-        button {
-            font-family: 'Orbitron', sans-serif;
-            background: linear-gradient(135deg, #00f0ff, #9d00ff);
-            color: #030712;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 800;
-            letter-spacing: 1px;
-            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
             text-transform: uppercase;
         }
 
-        button:hover {
-            background: linear-gradient(135deg, #ff007f, #00f0ff);
-            box-shadow: 0 0 25px rgba(255, 0, 127, 0.8);
-            transform: translateY(-3px) scale(1.02);
+        input, select {
+            background: #020202; border: 1px solid var(--border-color);
+            color: var(--accent); padding: 15px; border-radius: 2px;
+            font-family: 'Share Tech Mono', monospace; font-size: 15px; width: 100%; margin-bottom: 15px; outline: none;
+        }
+        input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
+            background: #060606;
         }
 
+        button {
+            font-family: 'Syncopate', sans-serif;
+            background: #dadada;
+            color: #000000; border: none; padding: 15px 20px; border-radius: 2px;
+            cursor: pointer; font-weight: 700; font-size: 11px; letter-spacing: 1.5px;
+            text-transform: uppercase; width: 100%;
+        }
+        button:hover {
+            background: #ffffff;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+            transform: translateY(-2px);
+        }
+        button:active { transform: translateY(1px); }
+
         .btn-danger {
-            background: linear-gradient(135deg, #ff0055, #ff007f) !important;
-            color: white !important;
-            box-shadow: 0 0 15px rgba(255, 0, 85, 0.4) !important;
+            background: #140202 !important;
+            color: var(--danger) !important;
+            border: 1px solid rgba(255, 42, 42, 0.35);
         }
         .btn-danger:hover {
-            box-shadow: 0 0 25px rgba(255, 0, 85, 0.9) !important;
+            background: var(--danger) !important;
+            color: #fff !important;
+            box-shadow: 0 0 25px rgba(255, 42, 42, 0.6);
         }
 
         header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: var(--panel-bg);
-            padding: 20px 30px;
-            border-radius: 8px;
-            border: 1px solid var(--neon-cyan);
-            margin-bottom: 25px;
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 0.8s ease;
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 22px 35px; margin-bottom: 25px;
+            animation: slideDown 0.4s ease;
+        }
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-15px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
+        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 25px; }
 
-        .stat-card {
-            background: var(--panel-bg);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid rgba(0, 240, 255, 0.3);
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            backdrop-filter: blur(10px);
-            animation: fadeIn 1s ease;
-        }
+        .stat-card { padding: 22px; text-align: center; }
+        .stat-card:hover { transform: translateY(-3px); }
+        .stat-card h3 { margin: 0; color: var(--text-muted); font-size: 10px; letter-spacing: 1.5px; }
+        .stat-card p { margin: 10px 0 0 0; color: var(--accent); font-size: 28px; font-family: 'Syncopate'; font-weight: 700; }
 
-        .stat-card:hover {
-            transform: translateY(-6px);
-            border-color: var(--neon-cyan);
-            box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
-        }
+        .grid-2 { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 25px; }
 
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; width: 4px; height: 100%;
-            background: var(--neon-cyan);
-            box-shadow: 0 0 10px var(--neon-cyan);
-        }
+        .panel-box { padding: 25px; margin-bottom: 25px; }
+        .panel-box h3 { font-size: 12px; color: var(--accent); border-bottom: 1px solid var(--border-color); padding-bottom: 12px; margin-top: 0; letter-spacing: 2px; }
 
-        .stat-card h3 { margin: 0; color: #8b949e; font-size: 13px; font-family: 'Orbitron'; }
-        .stat-card p { margin: 10px 0 0 0; color: var(--neon-cyan); font-size: 28px; font-family: 'Orbitron'; font-weight: 900; text-shadow: 0 0 12px rgba(0,240,255,0.6); }
+        .time-inputs-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 15px; }
+        .time-box label { display: block; font-size: 9px; color: var(--text-muted); margin-bottom: 4px; text-align: center; }
+        .time-box input { text-align: center; padding: 10px 2px; font-weight: bold; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
-
-        .panel-box {
-            background: var(--panel-bg);
-            padding: 25px;
-            border-radius: 8px;
-            border: 1px solid rgba(157, 0, 255, 0.3);
-            margin-bottom: 25px;
-            box-shadow: 0 0 25px rgba(157, 0, 255, 0.15);
-            backdrop-filter: blur(10px);
-            animation: fadeIn 1.2s ease;
-        }
-
-        .panel-box h3 {
-            font-family: 'Orbitron';
-            color: var(--neon-pink);
-            text-shadow: 0 0 10px rgba(255, 0, 127, 0.5);
-            margin-top: 0;
-            border-bottom: 1px dashed rgba(255, 0, 127, 0.3);
-            padding-bottom: 10px;
-        }
-
-        /* Özel Süre Grid Yapısı (Yıl - Ay - Gün - Saat - Saniye) */
-        .time-inputs-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
-        }
-        .time-box label {
-            display: block;
-            font-size: 10px;
-            color: var(--neon-cyan);
-            font-family: 'Orbitron';
-            margin-bottom: 4px;
-            text-align: center;
-        }
-        .time-box input {
-            text-align: center;
-            font-weight: bold;
-            padding: 8px 4px;
-        }
-
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(0, 240, 255, 0.15); }
-        th { color: var(--neon-cyan); font-family: 'Orbitron'; font-size: 12px; letter-spacing: 1px; }
-        tr:hover { background: rgba(0, 240, 255, 0.05); }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border-color); }
+        th { color: var(--text-muted); font-size: 10px; font-family: 'Syncopate'; letter-spacing: 1px; }
+        tr:hover { background: rgba(255, 255, 255, 0.015); }
 
         .log-terminal {
-            background: #010409;
-            color: var(--neon-green);
-            font-family: 'Share Tech Mono', monospace;
-            padding: 15px;
-            border-radius: 6px;
-            height: 380px;
-            overflow-y: auto;
-            border: 1px solid rgba(0, 255, 102, 0.3);
-            box-shadow: inset 0 0 20px rgba(0, 255, 102, 0.1);
-            font-size: 13px;
+            background: #010101; color: #888; font-family: 'Share Tech Mono', monospace;
+            padding: 16px; border-radius: 2px; height: 390px; overflow-y: auto;
+            border: 1px solid #161616; font-size: 12px; line-height: 1.5;
         }
+        .log-item { margin-bottom: 6px; border-bottom: 1px dotted #0d0d0d; padding-bottom: 4px; animation: logFade 0.2s ease; }
+        @keyframes logFade { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: translateX(0); } }
 
-        .log-item { margin-bottom: 6px; border-bottom: 1px dashed #112211; padding-bottom: 4px; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .btn-action { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); font-family: 'Share Tech Mono'; font-size: 11px; padding: 6px 10px; width: auto; margin-right: 4px; }
+        .btn-action:hover { border-color: var(--accent); background: rgba(255,255,255,0.06); color: #fff; transform: none; box-shadow: none; }
 
-        .btn-reset { color: var(--neon-cyan); background: none; border: none; cursor: pointer; font-weight: bold; font-family: 'Orbitron'; font-size: 11px; text-shadow: 0 0 5px rgba(0,240,255,0.5); }
-        .btn-reset:hover { color: #fff; text-shadow: 0 0 10px var(--neon-cyan); transform: scale(1.1); }
-        
-        .btn-del { color: var(--neon-pink); background: none; border: none; cursor: pointer; font-weight: bold; font-family: 'Orbitron'; font-size: 11px; margin-left: 10px; text-shadow: 0 0 5px rgba(255,0,127,0.5); }
-        .btn-del:hover { color: #fff; text-shadow: 0 0 10px var(--neon-pink); transform: scale(1.1); }
+        .btn-del-action { border-color: rgba(255,42,42,0.3); color: var(--danger); }
+        .btn-del-action:hover { background: rgba(255,42,42,0.1); border-color: var(--danger); color: var(--danger); transform: none; }
+
+        /* HAKKIMIZDA MODALI */
+        #aboutModal {
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.88);
+            backdrop-filter: blur(10px);
+            z-index: 200000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s;
+        }
+        #aboutModal.active { opacity: 1; visibility: visible; }
+        .about-content-box {
+            width: 900px; max-height: 85vh; overflow-y: auto; padding: 45px;
+            background: #040404; border: 1px solid var(--border-hover);
+            box-shadow: 0 25px 60px rgba(0,0,0,0.95);
+            position: relative;
+        }
+        .about-content-box h2 { font-size: 16px; color: #fff; margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 12px; }
+        .about-content-box h3 { font-size: 12px; color: #aaa; margin-top: 25px; margin-bottom: 10px; border-left: 2px solid #fff; padding-left: 8px; }
+        .about-content-box p, .about-content-box li { font-size: 13px; color: #888; line-height: 1.6; }
+        .about-content-box ul { padding-left: 18px; }
+        .close-modal-btn {
+            position: absolute; top: 20px; right: 25px; background: transparent; border: 1px solid var(--border-color);
+            color: #aaa; font-family: 'Syncopate'; font-size: 11px; cursor: pointer; width: auto; padding: 6px 12px;
+        }
+        .close-modal-btn:hover { color: #fff; background: rgba(255,255,255,0.1); border-color: #fff; box-shadow: none; transform: none; }
 
         .hidden { display: none !important; }
-        ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #030712; }
-        ::-webkit-scrollbar-thumb { background: var(--neon-cyan); border-radius: 3px; box-shadow: 0 0 10px var(--neon-cyan); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #020202; }
+        ::-webkit-scrollbar-thumb { background: #222; }
     </style>
 </head>
 <body>
 
-    <!-- AÇILIŞ (BOOT) EKRANI -->
+    <div class="watermark-syvex">POWERED BY SYVEX</div>
+
+    <!-- HAKKIMIZDA MODALI -->
+    <div id="aboutModal">
+        <div class="about-content-box strict-panel">
+            <button class="close-modal-btn" onclick="toggleAboutModal()">[X] KAPAT</button>
+            <h2>NEON SOFTWARE // KURUMSAL BİLGİ BANKASI</h2>
+            
+            <h3>1. Biz Kimiz?</h3>
+            <p><strong>NEON SOFTWARE</strong>, dijital güvenlik, uçtan uca şifreli lisanslama ve donanım doğrulama (HWID) ekosistemidir. Geleneksel güvenlik açıklarını ortadan kaldıran yeni nesil bir komuta merkezidir.</p>
+
+            <h3>2. Yetkilendirme Anahtarları (Admin Keys)</h3>
+            <p>Sisteme tam yetki ile giriş yapabilmek için özel olarak tanımlanmış şu anahtarlar kullanılabilir: <strong>SYVEX</strong>, <strong>BQWET</strong>, <strong>UFC</strong> ve <strong>NEONBEST31</strong>[cite: 2].</p>
+
+            <h3>3. Gizlilik ve Güvenlik Altyapısı</h3>
+            <p>Canlı log akışlarında IP adresleri şifrelenerek (maskelenerek) gösterilir. Bu sayede hem tam denetim sağlanır hem de veri gizliliği en üst düzeyde tutulur[cite: 2].</p>
+
+            <h3>4. API ve Lisans Mimarisi</h3>
+            <p>Üretilen tüm lisanslar <code>NEON-XXXX-XXXX-XXXX</code> formatında doğrudan API sunucusuna kaydedilir ve süre kısıtlamaları saniyesine kadar takip edilir[cite: 2].</p>
+        </div>
+    </div>
+
+    <!-- BOOT EKRANI -->
     <div id="bootScreen">
-        <div class="boot-box">
-            <h3 style="font-family:'Orbitron'; color:var(--neon-cyan); margin-top:0; text-shadow:0 0 10px var(--neon-cyan);">NEON KERNEL BOOT</h3>
-            <p id="bootStatusText" style="font-size: 14px; margin: 10px 0;">Sistem modülleri yükleniyor...</p>
+        <div class="boot-box strict-panel">
+            <h3 style="font-size:11px; letter-spacing:3px; margin-top:0; color:#fff;">NEON SOFTWARE KERNEL V7</h3>
+            <p id="bootStatusText" style="font-size: 11px; color: var(--text-muted); margin: 15px 0;">Çoklu anahtar doğrulama modülü yükleniyor...</p>
             <div class="loading-bar-container">
                 <div class="loading-bar" id="loadingBar"></div>
             </div>
@@ -323,46 +298,51 @@
 
 <div class="container">
 
-    <!-- Giriş Ekranı -->
-    <div id="loginSection" class="hidden">
-        <h2>NEON TERMINAL</h2>
-        <p style="color: #8b949e; margin-bottom: 25px; font-size: 14px;">Güvenli Yönetim Arayüzüne Bağlanın</p>
-        <input type="password" id="adminKeyInput" placeholder="ADMIN KEY (NEONBEST31)" onkeydown="if(event.key === 'Enter') girisYap()">
-        <button onclick="girisYap()" style="width: 100%;">Sisteme Sız (Connect)</button>
-        <p id="loginError" style="color: var(--neon-pink); margin-top: 15px; text-shadow: 0 0 5px rgba(255,0,127,0.5);"></p>
+    <!-- GİRİŞ EKRANI -->
+    <div id="loginSection" class="strict-panel hidden">
+        <h2 style="font-size: 15px; margin-bottom: 5px;">NEON SOFTWARE YETKİ</h2>
+        <p style="color: var(--text-muted); margin-bottom: 25px; font-size: 11px;">Geçerli Admin Key giriniz (SYVEX, BQWET, UFC, NEONBEST31)[cite: 2].</p>
+        <input type="password" id="adminKeyInput" placeholder="ADMIN KEY (Örn: SYVEX)" onkeydown="if(event.key === 'Enter') girisYap()">
+        <button onclick="girisYap()">Komuta Merkezine Gir</button>
+        <button onclick="toggleAboutModal()" style="margin-top: 10px; background: transparent; border: 1px solid var(--border-color); color: #aaa;">Hakkımızda / Bilgi</button>
+        <p id="loginError" style="color: var(--danger); margin-top: 15px; font-size: 11px;"></p>
     </div>
 
-    <!-- Yönetim Paneli -->
+    <!-- YÖNETİM MERKEZİ -->
     <div id="panelSection" class="hidden">
-        <header>
-            <h2 style="margin:0; font-size: 20px;">⚡ NEON CORE // COMMAND CENTER (Canlı 2s)</h2>
-            <button class="btn-danger" onclick="cikisYap()">Bağlantıyı Kes</button>
+        <header class="strict-panel">
+            <div style="display: flex; align-items: center; gap: 15px;">
+                <h2 style="margin:0; font-size: 13px; letter-spacing: 2px;">NEON SOFTWARE // COMMAND CENTER</h2>
+                <button onclick="toggleAboutModal()" class="btn-action" style="padding: 6px 12px; font-size: 10px;">HAKKIMIZDA</button>
+            </div>
+            <button class="btn-danger" style="width: auto; padding: 10px 16px;" onclick="cikisYap()">Bağlantıyı Kes</button>
         </header>
 
-        <!-- İstatistik Kartları -->
         <div class="stats-grid">
-            <div class="stat-card">
+            <div class="stat-card strict-panel">
                 <h3>TOPLAM LİSANS</h3>
                 <p id="statTotalKeys">0</p>
             </div>
-            <div class="stat-card" style="border-color: var(--neon-pink);">
-                <h3 style="color: var(--neon-pink);">AKTİF HWID KİLİDİ</h3>
-                <p id="statActiveHwid" style="color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5);">0</p>
+            <div class="stat-card strict-panel">
+                <h3>AKTİF HWID</h3>
+                <p id="statActiveHwid">0</p>
             </div>
-            <div class="stat-card" style="border-color: var(--neon-green);">
-                <h3 style="color: var(--neon-green);">TOPLAM İSTEK (LOG)</h3>
-                <p id="statTotalReq" style="color: var(--neon-green); text-shadow: 0 0 10px rgba(0,255,102,0.5);">0</p>
+            <div class="stat-card strict-panel">
+                <h3>İSTEKLER</h3>
+                <p id="statTotalReq">0</p>
+            </div>
+            <div class="stat-card strict-panel">
+                <h3>SİSTEM DURUMU</h3>
+                <p style="color: var(--success); font-size: 20px; margin-top: 14px;">ONLINE</p>
             </div>
         </div>
 
         <div class="grid-2">
-            <!-- Sol Taraf: Lisans Üretme ve Detaylı Süre Seçici -->
             <div>
-                <div class="panel-box">
-                    <h3>Yeni Lisans Üret (Özel Süre)</h3>
-                    <input type="text" id="newKey" readonly style="background: rgba(0,240,255,0.05); cursor: not-allowed; font-weight: bold; color: var(--neon-cyan);">
+                <div class="panel-box strict-panel">
+                    <h3>NEON-XXXX Formatında Lisans Üretimi</h3>
                     
-                    <label style="font-size: 11px; color: var(--neon-cyan); display:block; margin-bottom:6px; font-family:'Orbitron';">SÜRE YAPISI (YIL // AY // GÜN // SAAT // SANİYE)</label>
+                    <label style="font-size: 9px; color: var(--text-muted); display:block; margin-bottom:6px; font-family:'Syncopate';">SÜRE YAPISI (YIL / AY / GÜN / SAAT / SANİYE)</label>
                     <div class="time-inputs-grid">
                         <div class="time-box"><label>YIL</label><input type="number" id="tYears" value="0" min="0"></div>
                         <div class="time-box"><label>AY</label><input type="number" id="tMonths" value="0" min="0"></div>
@@ -371,11 +351,11 @@
                         <div class="time-box"><label>SANİYE</label><input type="number" id="tSeconds" value="0" min="0"></div>
                     </div>
 
-                    <button onclick="keyEkle()" style="width: 100%; margin-top: 5px;">Key Oluştur ve Kaydet</button>
+                    <button onclick="keyEkle()">API ile Lisans Oluştur</button>
                 </div>
 
-                <div class="panel-box">
-                    <h3>Aktif Veritabanı (Keys)</h3>
+                <div class="panel-box strict-panel">
+                    <h3>Veritabanı Lisans Listesi</h3>
                     <div style="max-height: 250px; overflow-y: auto;">
                         <table>
                             <thead>
@@ -383,7 +363,7 @@
                                     <th>ANAHTAR</th>
                                     <th>SÜRE</th>
                                     <th>HWID</th>
-                                    <th>İŞLEM</th>
+                                    <th>İŞLEMLER</th>
                                 </tr>
                             </thead>
                             <tbody id="keyList">
@@ -394,11 +374,10 @@
                 </div>
             </div>
 
-            <!-- Sağ Taraf: Canlı Log Terminali -->
             <div>
-                <div class="panel-box" style="border-color: var(--neon-green); box-shadow: 0 0 25px rgba(0, 255, 102, 0.15);">
-                    <h3 style="color: var(--neon-green); border-bottom-color: rgba(0,255,102,0.3); text-shadow: 0 0 10px rgba(0,255,102,0.5);">Canlı Ağ İstekleri (Live Terminal)</h3>
-                    <p style="font-size: 12px; color: #8b949e; margin-bottom: 10px;">Loader doğrulama ve API istekleri her 2 saniyede bir güncellenir.</p>
+                <div class="panel-box strict-panel">
+                    <h3>Canlı Sistem Logları (IP Maskeli)</h3>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">Güvenlik nedeniyle IP'lerin son kısımları şifrelenmiştir[cite: 2].</p>
                     <div class="log-terminal" id="logTerminal">
                         <!-- Loglar -->
                     </div>
@@ -410,51 +389,104 @@
 </div>
 
 <script>
-    // Açılış Animasyonu Simülasyonu
+    // MOUSE VFX PARÇACIK EFEKTİ
+    document.addEventListener('mousemove', function(e) {
+        let dot = document.createElement('div');
+        dot.className = 'vfx-dot';
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+        document.body.appendChild(dot);
+
+        setTimeout(() => {
+            dot.style.transform = 'translate(-50%, -50%) scale(0.2)';
+            dot.style.opacity = '0';
+        }, 30);
+
+        setTimeout(() => {
+            dot.remove();
+        }, 350);
+    });
+
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    function playSfx(type) {
+        if (audioCtx.state === 'suspended') { audioCtx.resume(); }
+        let osc = audioCtx.createOscillator();
+        let gainNode = audioCtx.createGain();
+        osc.connect(gainNode);
+        gainNode.connect(audioCtx.destination);
+        let now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'square';
+            osc.frequency.setValueAtTime(280, now);
+            osc.frequency.exponentialRampToValueAtTime(70, now + 0.04);
+            gainNode.gain.setValueAtTime(0.05, now);
+            gainNode.gain.linearRampToValueAtTime(0.001, now + 0.04);
+            osc.start(now);
+            osc.stop(now + 0.04);
+        } else if (type === 'success') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(400, now);
+            osc.frequency.setValueAtTime(800, now + 0.06);
+            gainNode.gain.setValueAtTime(0.06, now);
+            gainNode.gain.linearRampToValueAtTime(0.001, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        } else if (type === 'error') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(110, now);
+            osc.frequency.setValueAtTime(55, now + 0.1);
+            gainNode.gain.setValueAtTime(0.08, now);
+            gainNode.gain.linearRampToValueAtTime(0.001, now + 0.15);
+            osc.start(now);
+            osc.stop(now + 0.15);
+        }
+    }
+
+    document.addEventListener('click', (e) => {
+        if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') {
+            playSfx('click');
+        }
+    });
+
+    function toggleAboutModal() {
+        playSfx('click');
+        let modal = document.getElementById('aboutModal');
+        modal.classList.toggle('active');
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
         let bar = document.getElementById('loadingBar');
         let status = document.getElementById('bootStatusText');
         let width = 0;
 
-        let steps = [
-            { w: 25, text: "Güvenlik protokolleri yükleniyor..." },
-            { w: 55, text: "Kriptografik anahtarlar çözülüyor..." },
-            { w: 85, text: "Neon çekirdeği (Core) başlatılıyor..." },
-            { w: 100, text: "Bağlantı kuruldu. Sistem aktif." }
-        ];
-
         let interval = setInterval(() => {
-            width += 3;
+            width += 6;
             bar.style.width = width + '%';
-            
-            if (width === 30) status.innerText = steps[0].text;
-            if (width === 60) status.innerText = steps[1].text;
-            if (width === 90) status.innerText = steps[2].text;
+            if (width === 48) status.innerText = "Güvenlik katmanı aktifleşiyor...";
+            if (width === 84) status.innerText = "Anahtar veritabanı senkronize ediliyor...";
 
             if (width >= 100) {
                 clearInterval(interval);
-                status.innerText = steps[3].text;
+                status.innerText = "Sistem hazır.";
+                playSfx('success');
                 setTimeout(() => {
                     document.getElementById('bootScreen').classList.add('fade-out');
                     document.getElementById('loginSection').classList.remove('hidden');
-                }, 400);
+                }, 300);
             }
         }, 15);
     });
 
     const API_URL = "https://neonsoftwarecrackme.onrender.com/api.php";
-    const ADMIN_TOKEN = "NEONBEST31";
+    // İzin verilen geçerli admin keyleri
+    const VALID_ADMIN_KEYS = ["SYVEX", "BQWET", "UFC", "NEONBEST31"];[cite: 2]
+    let currentAdminToken = "NEONBEST31";
     let autoRefreshTimer = null;
 
-    function generateNeonKey() {
-        const p1 = Math.floor(1000 + Math.random() * 9000);
-        const p2 = Math.floor(1000 + Math.random() * 9000);
-        const p3 = Math.floor(1000 + Math.random() * 9000);
-        return `NEON-${p1}-${p2}-${p3}`;
-    }
-
     async function sendApiRequest(action, extraParams = {}) {
-        let params = { admin_token: ADMIN_TOKEN, action: action, ...extraParams };
+        let params = { admin_token: currentAdminToken, action: action, ...extraParams };
         try {
             let res = await fetch(API_URL, {
                 method: 'POST',
@@ -463,30 +495,41 @@
             });
             return await res.json();
         } catch (err) {
-            console.error("API Bağlantı Hatası:", err);
+            console.error("API Hatası:", err);
             return null;
         }
     }
 
+    // IP adresinin son kısmını şifreleyen/maskeleyen fonksiyon
+    function maskIP(ip) {
+        if (!ip) return "127.0.***";
+        let parts = ip.split('.');
+        if (parts.length === 4) {
+            return `${parts[0]}.${parts[1]}.***.***`;
+        }
+        return ip.substring(0, 6) + "****";
+    }
+
     async function girisYap() {
-        let val = document.getElementById('adminKeyInput').value;
-        if (val === ADMIN_TOKEN) {
+        let val = document.getElementById('adminKeyInput').value.trim().toUpperCase();
+        if (VALID_ADMIN_KEYS.includes(val)) {
+            currentAdminToken = val; // Girilen geçerli keyi token olarak ata
+            playSfx('success');
             let data = await sendApiRequest('admin_get_all');
             document.getElementById('loginSection').classList.add('hidden');
             document.getElementById('panelSection').classList.remove('hidden');
-            document.getElementById('newKey').value = generateNeonKey();
             
             if (data && data.status === 'success') {
                 paneliDoldur(data);
             } else {
                 paneliDoldur({
                     licenses: [
-                        { id: 1, license_key: "NEON-1453-2023-9999", expiry_date: "1 Yıl 0 Ay 30 Gün", hwid: "TEST-HWID-XYZ-123" },
-                        { id: 2, license_key: "NEON-7777-8888-9999", expiry_date: "30 Gün 5 Saat", hwid: "" }
+                        { id: 1, license_key: "NEON-A1B2-C3D4-E5F6", expiry_date: "30 Gün", hwid: "LOCKED-HWID-01" },
+                        { id: 2, license_key: "NEON-9876-5432-1098", expiry_date: "1 Yıl", hwid: "" }
                     ],
                     logs: [
-                        { date: "2026-09-22 19:44:00", ip: "127.0.0.1", action: "login", status: "success" },
-                        { date: "2026-09-22 19:44:05", ip: "192.168.1.50", action: "validate", status: "success" }
+                        { date: "2026-09-22 21:00:00", ip: "192.168.1.55", action: "auth_pass", status: "success" },
+                        { date: "2026-09-22 21:00:05", ip: "10.0.4.12", action: "validate", status: "success" }
                     ]
                 });
             }
@@ -498,11 +541,13 @@
                 }
             }, 2000);
         } else {
-            document.getElementById('loginError').innerText = "HATA: Geçersiz Admin Anahtarı!";
+            playSfx('error');
+            document.getElementById('loginError').innerText = "ERİŞİM REDDEDİLDİ: Geçersiz Admin Key!";
         }
     }
 
     function cikisYap() {
+        playSfx('click');
         clearInterval(autoRefreshTimer);
         document.getElementById('panelSection').classList.add('hidden');
         document.getElementById('loginSection').classList.remove('hidden');
@@ -519,19 +564,20 @@
         tbody.innerHTML = "";
 
         if (licenses.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: #8b949e;">Kayıtlı lisans bulunmuyor.</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color: var(--text-muted);">Kayıt bulunmuyor.</td></tr>`;
         } else {
             licenses.forEach(l => {
-                let hwidText = l.hwid ? `<span style="color: var(--neon-pink);" title="${l.hwid}">[KİLİTLİ]</span>` : '<span style="color: #8b949e;">[BOŞTA]</span>';
+                let hwidText = l.hwid ? `<span style="color: #fff;" title="${l.hwid}">[KİLİTLİ]</span>` : '<span style="color: var(--text-muted);">[BOŞTA]</span>';
                 let kalanSureStr = l.expiry_date || 'Sınırsız';
 
                 let row = `<tr>
-                    <td style="color: var(--neon-cyan); font-weight: bold;">${l.license_key}</td>
+                    <td style="color: #fff; font-weight: bold; font-family: monospace;">${l.license_key}</td>
                     <td>${kalanSureStr}</td>
                     <td>${hwidText}</td>
                     <td>
-                        <button class="btn-reset" onclick="hwidSifirla(${l.id})">SIFIRLA</button>
-                        <button class="btn-del" onclick="keySil(${l.id})">SİL</button>
+                        <button class="btn-action" onclick="navigator.clipboard.writeText('${l.license_key}'); alert('Key kopyalandı!');">KOPYALA</button>
+                        <button class="btn-action" onclick="hwidSifirla(${l.id})">SIFIRLA</button>
+                        <button class="btn-action btn-del-action" onclick="keySil(${l.id})">SİL</button>
                     </td>
                 </tr>`;
                 tbody.innerHTML += row;
@@ -545,14 +591,15 @@
         const terminal = document.getElementById('logTerminal');
         terminal.innerHTML = "";
         if (logs.length === 0) {
-            terminal.innerHTML = `<div style="color: #8b949e;">Henüz log kaydı bulunmuyor...</div>`;
+            terminal.innerHTML = `<div style="color: var(--text-muted);">Log kaydı yok...</div>`;
         } else {
             logs.forEach(log => {
-                let color = log.status === 'success' ? '#00ff66' : '#ff0055';
+                let color = log.status === 'success' ? '#ffffff' : 'var(--danger)';
+                let maskedIp = maskIP(log.ip); // IP'nin sonunu şifreliyoruz[cite: 2]
                 let logLine = `<div class="log-item">
-                    <span style="color: #6e7681;">[${log.date}]</span> 
-                    <span style="color: #d2a8ff;">IP: ${log.ip}</span> 
-                    <span style="color: var(--neon-cyan);">[${log.action}]</span> ➔ 
+                    <span style="color: #444;">[${log.date}]</span> 
+                    <span style="color: #777;">IP: ${maskedIp}</span> 
+                    <span style="color: #fff;">[${log.action}]</span> ➔ 
                     <span style="color: ${color};">${log.status.toUpperCase()}</span>
                 </div>`;
                 terminal.innerHTML += logLine;
@@ -561,16 +608,18 @@
     }
 
     async function hwidSifirla(id) {
-        if (confirm(`Bu lisansın donanım kilidi (HWID) sıfırlansın mı?`)) {
+        if (confirm(`Donanım kilidi (HWID) sıfırlansın mı?`)) {
+            playSfx('success');
             await sendApiRequest('admin_reset_hwid', { id: id });
-            alert("HWID başarıyla sıfırlandı!");
+            alert("HWID başarıyla sıfırlandı.");
         }
     }
 
     async function keySil(id) {
-        if (confirm(`Bu lisans veritabanından tamamen silinsin mi?`)) {
+        if (confirm(`Lisans sistemden kalıcı olarak silinsin mi?`)) {
+            playSfx('error');
             await sendApiRequest('admin_delete_license', { id: id });
-            alert("Lisans silindi!");
+            alert("Lisans silindi.");
         }
     }
 
@@ -581,18 +630,17 @@
         let h = parseInt(document.getElementById('tHours').value) || 0;
         let s = parseInt(document.getElementById('tSeconds').value) || 0;
 
-        // Toplam günü hesaplama mantığı (Yıl * 365 + Ay * 30 + Gün + Saat çevrimi vs.)
         let totalDays = (y * 365) + (m * 30) + d + (h / 24) + (s / 86400);
         if (totalDays <= 0) totalDays = 1;
 
+        playSfx('success');
         await sendApiRequest('admin_generate_keys', {
             prefix: "NEON",
             count: 1,
             days: totalDays
         });
 
-        alert(`Yeni lisans (${y} Yıl, ${m} Ay, ${d} Gün, ${h} Saat, ${s} Saniye) formatıyla başarıyla oluşturuldu!`);
-        document.getElementById('newKey').value = generateNeonKey();
+        alert(`NEON SOFTWARE API: Yeni NEON-XXXX-XXXX-XXXX lisansı başarıyla oluşturuldu.`);
     }
 </script>
 
