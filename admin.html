@@ -2,50 +2,41 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <title>Neon Security - Admin Paneli</title>
+    <title>Neon Security Panel</title>
     <style>
         body { background: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: auto; background: #1e293b; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
         h1 { color: #38bdf8; text-align: center; }
         .box { background: #334155; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
         input, button { padding: 8px 12px; margin: 5px 0; border-radius: 4px; border: none; font-size: 14px; }
-        input { background: #0f172a; color: #fff; border: 1px solid #475569; width: calc(100% - 20px); max-width: 300px; }
-        button { background: #2563eb; color: #white; cursor: pointer; font-weight: bold; }
+        input { background: #0f172a; color: #fff; border: 1px solid #475569; width: calc(100% - 20px); max-width: 300px; display: block; }
+        button { background: #2563eb; color: #fff; cursor: pointer; font-weight: bold; }
         button:hover { background: #1d4ed8; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th, td { border: 1px solid #475569; padding: 8px; text-align: left; font-size: 13px; }
         th { background: #0f172a; color: #38bdf8; }
         .danger { background: #dc2626; }
         .danger:hover { background: #b91c1c; }
+        .live-indicator { float: right; font-size: 12px; color: #4ade80; margin-top: 10px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>Neon Security Panel</h1>
+    <h1>Neon Security Panel <span class="live-indicator">● Canlı (2s)</span></h1>
 
-    <!-- Yetkilendirme Ayarı -->
-    <div class="box">
-        <h3>Bağlantı Ayarları</h3>
-        <label>API URL:</label><br>
-        <input type="text" id="apiUrl" value="https://neonsoftwarecrackme.onrender.com/api.php"><br>
-        <label>Admin Token:</label><br>
-        <input type="password" id="adminToken" value="ADMIN_GIZLI_TOKEN_123">
-        <br><button onclick="loadData()">Verileri Yenile</button>
-    </div>
-
-    <!-- Lisans Üretme -->
+    <!-- Yeni Lisans Üret -->
     <div class="box">
         <h3>Yeni Lisans Üret</h3>
-        <input type="text" id="genPrefix" value="NEON" placeholder="Örn: NEON"><br>
-        <input type="number" id="genCount" value="1" placeholder="Adet"><br>
-        <input type="number" id="genDays" value="30" placeholder="Gün Süresi"><br>
+        <input type="text" id="genPrefix" value="NEON" placeholder="Örn: NEON">
+        <input type="number" id="genCount" value="1" placeholder="Adet">
+        <input type="number" id="genDays" value="30" placeholder="Gün Süresi">
         <br><button onclick="generateKeys()">Key Üret</button>
     </div>
 
     <!-- Lisans Listesi -->
     <div class="box">
-        <h3>Lisanslar</h3>
+        <h3>Lisanslar ve Aktif Durum</h3>
         <table>
             <thead>
                 <tr>
@@ -63,26 +54,43 @@
             </tbody>
         </table>
     </div>
+
+    <!-- Canlı Loglar -->
+    <div class="box">
+        <h3>Canlı Sistem Logları</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Zaman</th>
+                    <th>IP</th>
+                    <th>İşlem</th>
+                    <th>Durum</th>
+                    <th>Detay</th>
+                </tr>
+            </thead>
+            <tbody id="logTable">
+                <tr><td colspan="5" style="text-align:center;">Loglar yükleniyor...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
-async function sendRequest(actionData) {
-    const url = document.getElementById('apiUrl').value;
-    const token = document.getElementById('adminToken').value;
-    
-    actionData.admin_token = token;
+// --- SABİT AYARLAR (Kodun içine gömülü) ---
+const API_URL = "https://neonsoftwarecrackme.onrender.com/api.php";
+const ADMIN_TOKEN = "ADMIN_GIZLI_TOKEN_123";
 
+async function sendRequest(actionData) {
+    actionData.admin_token = ADMIN_TOKEN;
     try {
-        let response = await fetch(url, {
+        let response = await fetch(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(actionData)
         });
-        let result = await response.json();
-        return result;
+        return await response.json();
     } catch (err) {
-        alert("Sunucuya bağlanılamadı! URL veya CORS hatası.");
-        console.error(err);
+        console.error("Bağlantı hatası:", err);
         return null;
     }
 }
@@ -91,9 +99,9 @@ async function loadData() {
     let res = await sendRequest({ action: 'admin_get_all' });
     if (!res || res.status !== 'success') return;
 
+    // Lisansları Tabloya Bas
     let tbody = document.getElementById('licenseTable');
     tbody.innerHTML = '';
-
     res.licenses.forEach(l => {
         let tr = document.createElement('tr');
         tr.innerHTML = `
@@ -110,6 +118,21 @@ async function loadData() {
         `;
         tbody.appendChild(tr);
     });
+
+    // Logları Tabloya Bas
+    let logTbody = document.getElementById('logTable');
+    logTbody.innerHTML = '';
+    res.logs.forEach(log => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${log.date}</td>
+            <td>${log.ip}</td>
+            <td>${log.action}</td>
+            <td>${log.status}</td>
+            <td>${log.details}</td>
+        `;
+        logTbody.appendChild(tr);
+    });
 }
 
 async function generateKeys() {
@@ -125,27 +148,27 @@ async function generateKeys() {
     });
 
     if (res && res.status === 'success') {
-        alert(count + " adet key başarıyla üretildi!");
         loadData();
     } else {
-        alert("Hata: " + (res ? res.message : "Bilinmeyen hata"));
+        alert("Key üretilemedi!");
     }
 }
 
 async function resetHwid(id) {
-    if(!confirm("Bu lisansın HWID kilidini sıfırlamak istiyor musunuz?")) return;
     await sendRequest({ action: 'admin_reset_hwid', id: id });
     loadData();
 }
 
 async function deleteKey(id) {
-    if(!confirm("Bu lisansı tamamen silmek istiyor musunuz?")) return;
     await sendRequest({ action: 'admin_delete_license', id: id });
     loadData();
 }
 
-// Sayfa açıldığında verileri otomatik çek
-window.onload = loadData;
+// Sayfa açıldığında ilk yükleme
+loadData();
+
+// Her 2 saniyede bir (2000 ms) verileri ve logları otomatik güncelle
+setInterval(loadData, 2000);
 </script>
 
 </body>
