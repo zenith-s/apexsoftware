@@ -8,9 +8,8 @@ header('Content-Type: application/json; charset=utf-8');
 // --- VERİTABANI BAĞLANTISI (MySQL Örneği - Dilerseniz SQLite yapabilirsiniz) ---
 $host = 'localhost';
 $db   = 'neon_security';
-$user = 'root';
-$pass = 'sifreniz';
-$charset = 'utf8mb4';
+$user = 'root'; // Kendi MySQL kullanıcı adınız
+$pass = 'sifreniz'; // Kendi MySQL şifreniz
 
 $dsn = "mysql:host=$host;dbname=$db;charset=$charset";
 $options = [
