@@ -1,339 +1,375 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>APEX SOFTWARE</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>NEON SOFTWARE // STORE & LAUNCHER</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <style>
-        @keyframes float {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+        :root {
+            --bg-deep: #030712;
+            --panel-bg: rgba(13, 17, 23, 0.88);
+            --neon-cyan: #00f0ff;
+            --neon-pink: #ff007f;
+            --neon-green: #00ff66;
+            --neon-purple: #9d00ff;
+            --text-main: #c9d1d9;
         }
-        @keyframes pulseGlow {
-            0%, 100% { opacity: 0.4; transform: scale(1); }
-            50% { opacity: 0.8; transform: scale(1.05); }
+
+        * {
+            cursor: url("data:image/svg+xml,%3Csvg height='28' width='28' viewBox='0 0 24 24' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='0,0 0,18 5,13 11,20 14,18 8,11 16,11' fill='%2300f0ff' stroke='%23ff007f' stroke-width='1'/%3E%3C/svg%3E"), auto !important;
+            box-sizing: border-box;
+            transition: all 0.25s ease-in-out;
         }
-        @keyframes ticker {
-            0% { transform: translate3d(0, 0, 0); }
-            100% { transform: translate3d(-50%, 0, 0); }
+
+        body {
+            background-color: var(--bg-deep);
+            color: var(--text-main);
+            font-family: 'Share Tech Mono', monospace;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden;
+            min-height: 100vh;
+            background: linear-gradient(125deg, #030712, #0d1117, #120524, #021a24);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
         }
-        .animate-float { animation: float 6s ease-in-out infinite; }
-        .animate-glow { animation: pulseGlow 4s ease-in-out infinite; }
-        .ticker-wrap { overflow: hidden; white-space: nowrap; }
-        .ticker-move { display: inline-block; animation: ticker 25s linear infinite; }
-        
-        .glass-dark { 
-            background: rgba(12, 12, 18, 0.75); 
-            backdrop-filter: blur(20px); 
-            border: 1px solid rgba(255, 255, 255, 0.08); 
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .glass-dark:hover {
-            border-color: rgba(139, 92, 246, 0.4);
-            box-shadow: 0 10px 30px -10px rgba(139, 92, 246, 0.3);
-            transform: translateY(-4px);
+
+        /* CRT Tarama Çizgisi */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.3) 50%);
+            background-size: 100% 4px;
+            z-index: 99999;
+            pointer-events: none;
+            opacity: 0.25;
+        }
+
+        .container { max-width: 1200px; margin: 0 auto; position: relative; z-index: 2; }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--panel-bg);
+            padding: 20px 30px;
+            border-radius: 8px;
+            border: 1px solid var(--neon-cyan);
+            margin-bottom: 35px;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        h1, h2, h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+            letter-spacing: 2px;
+        }
+
+        .nav-btn {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #ff007f, #9d00ff);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 800;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.4);
+            text-decoration: none;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .nav-btn:hover {
+            background: linear-gradient(135deg, #00f0ff, #ff007f);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.8);
+            transform: translateY(-2px) scale(1.02);
+        }
+
+        /* Biz Kimiz Bölümü */
+        .about-section {
+            background: var(--panel-bg);
+            border: 1px solid rgba(157, 0, 255, 0.4);
+            border-radius: 12px;
+            padding: 25px 30px;
+            margin-bottom: 35px;
+            box-shadow: 0 0 25px rgba(157, 0, 255, 0.15);
+            backdrop-filter: blur(12px);
+        }
+        .about-section h2 { color: var(--neon-pink); text-shadow: 0 0 10px rgba(255,0,127,0.5); font-size: 18px; margin-top: 0; }
+        .about-section p { color: #8b949e; font-size: 14px; line-height: 1.6; margin-bottom: 0; }
+
+        /* Ürünler Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .product-card {
+            background: var(--panel-bg);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            border-radius: 12px;
+            padding: 30px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(12px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.15);
+        }
+
+        .product-card:hover {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 35px rgba(255, 0, 127, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .product-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 4px;
+            background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+        }
+
+        .tag {
+            display: inline-block;
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--neon-cyan);
+            border: 1px solid rgba(0, 240, 255, 0.4);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: 'Orbitron';
+            margin-bottom: 15px;
+        }
+
+        .feature-list {
+            list-style: none;
+            padding: 0;
+            margin: 20px 0;
+        }
+
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.1);
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .feature-list li::before {
+            content: '⚡';
+            color: var(--neon-green);
+            margin-right: 10px;
+            text-shadow: 0 0 8px var(--neon-green);
+        }
+
+        /* Lisans / Bypass Paneli */
+        .activation-box {
+            background: var(--panel-bg);
+            border: 1px solid rgba(157, 0, 255, 0.4);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 0 30px rgba(157, 0, 255, 0.2);
+            backdrop-filter: blur(12px);
+            text-align: center;
+        }
+
+        input {
+            background: rgba(3, 7, 18, 0.9);
+            border: 1px solid rgba(0, 240, 255, 0.3);
+            color: var(--neon-cyan);
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-family: 'Share Tech Mono', monospace;
+            font-size: 16px;
+            width: 100%;
+            margin-bottom: 15px;
+            outline: none;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: var(--neon-pink);
+            box-shadow: 0 0 15px rgba(255, 0, 127, 0.5);
+        }
+
+        .action-btn {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(135deg, #00f0ff, #9d00ff);
+            color: #030712;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 900;
+            letter-spacing: 1px;
+            width: 100%;
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.4);
+            text-transform: uppercase;
+            margin-bottom: 10px;
+        }
+
+        .action-btn:hover {
+            background: linear-gradient(135deg, #ff007f, #00f0ff);
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.8);
+            transform: translateY(-2px);
+        }
+
+        /* Bypass Tuşu Özel Stil */
+        .bypass-btn {
+            background: linear-gradient(135deg, #00ff66, #00f0ff) !important;
+            color: #000 !important;
+            box-shadow: 0 0 15px rgba(0, 255, 102, 0.4);
+        }
+        .bypass-btn:hover {
+            box-shadow: 0 0 25px rgba(0, 255, 102, 0.8);
+        }
+
+        #resultBox {
+            margin-top: 20px;
+            font-size: 15px;
+            font-weight: bold;
         }
     </style>
 </head>
-<body class="bg-black text-slate-100 dark:bg-black dark:text-slate-100 transition-colors duration-500 min-h-screen relative overflow-x-hidden selection:bg-purple-600 selection:text-white">
+<body>
 
-    <!-- Canlı Duyuru Bandı -->
-    <div class="bg-purple-600/90 text-white text-xs font-bold py-2 px-4 ticker-wrap border-b border-purple-500/30">
-        <div class="ticker-move">
-            <span class="mx-8">⚡ HOŞ GELDİNİZ! TÜM HİLELERİMİZ GÜNCEL VE GÜVENLİDİR.</span>
-            <span class="mx-8">🛡️ UD (Undetected) ALTYAPI İLE BAN RİSKİ YOKTUR.</span>
-            <span class="mx-8">💬 DESTEK İÇİN CANLI SOHBETİ KULLANABİLİRSİNİZ!</span>
+<div class="container">
+
+    <!-- Üst Bilgi ve Discord Fiyatlandırma Butonu -->
+    <header>
+        <div>
+            <h1 style="margin:0; font-size: 22px;">NEON SOFTWARE</h1>
+            <p style="margin:5px 0 0 0; color: #8b949e; font-size: 13px;">Advanced Security & Gaming Solutions</p>
         </div>
-    </div>
-
-    <!-- Hareketli Arka Plan Işıkları -->
-    <div class="fixed inset-0 -z-10 overflow-hidden pointer-events-none">
-        <div class="absolute -top-40 -left-40 w-[500px] h-[500px] bg-purple-600/20 rounded-full blur-[150px] animate-glow"></div>
-        <div class="absolute top-1/3 -right-40 w-[500px] h-[500px] bg-indigo-600/15 rounded-full blur-[150px] animate-glow" style="animation-delay: 2s;"></div>
-    </div>
-
-    <!-- Üst Menü -->
-    <header class="border-b border-slate-800/40 backdrop-blur-xl sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
-            <div class="flex items-center space-x-3 group cursor-pointer" onclick="window.location.reload()">
-                <img src="https://images.weserv.nl/?url=i.imgur.com/aAa8H4j.png" alt="APEX Logo" class="w-10 h-10 object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-[0_0_12px_rgba(139,92,246,0.6)]">
-                <span class="text-xl font-black tracking-wider bg-gradient-to-r from-white via-slate-200 to-purple-400 bg-clip-text text-transparent">APEX SOFTWARE</span>
-            </div>
-            
-            <div class="flex items-center space-x-4">
-                <div id="user-status-area" class="flex items-center space-x-3">
-                    <!-- Giriş Yapmamışsa Giriş Butonu, Giriş Yapmışsa Profil Bilgisi -->
-                </div>
-                <button onclick="toggleTheme()" class="p-2.5 rounded-2xl bg-slate-900/80 border border-slate-800 text-slate-300 hover:scale-105 active:scale-95 transition-all shadow-sm">
-                    <svg class="w-5 h-5 transition-transform duration-500 hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
-                </button>
-            </div>
+        <div>
+            <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn">🛒 Fiyatlandırma (Discord)</a>
         </div>
     </header>
 
-    <!-- Ana İçerik -->
-    <main class="max-w-7xl mx-auto px-6 py-12 space-y-12">
-        <section class="text-center py-8 space-y-8 animate-float">
-            <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-purple-500/10 border border-purple-500/20 text-purple-400 text-xs font-bold tracking-wider uppercase">
-                <span class="w-2 h-2 rounded-full bg-purple-500 animate-ping"></span>
-                <span>Yeni Nesil Güvenli Altyapı</span>
-            </div>
-            <h1 class="text-4xl md:text-6xl font-black tracking-tight leading-tight">
-                Üst Düzey Performans ve <span class="bg-gradient-to-r from-purple-500 to-indigo-500 bg-clip-text text-transparent">Güvenlik</span>
-            </h1>
-            <p class="text-slate-400 max-w-xl mx-auto text-sm md:text-base font-medium">Oyun deneyiminizi en üst seviyeye taşıyacak profesyonel yazılımlarımızla tanışın.</p>
+    <!-- Biz Kimiz? / Hakkımızda Bölümü -->
+    <div class="about-section">
+        <h2>BİZ KİMİZ? // NEON KERNEL TEAM</h2>
+        <p>Neon Software, oyun güvenliği, donanım spoofleme ve yüksek performanslı yazılım çözümleri alanında sektörün öncüsü olan elit bir geliştirici topluluğudur. Amacımız, kullanıcılara en güvenli, ban riski en aza indirgenmiş ve kusursuz optimize edilmiş özel sistemleri sunmaktır.</p>
+    </div>
 
-            <div class="grid grid-cols-3 gap-4 max-w-2xl mx-auto pt-4">
-                <div class="glass-dark p-4 rounded-2xl text-center">
-                    <div id="random-downloads" class="text-2xl md:text-3xl font-black text-purple-400">70</div>
-                    <div class="text-xs text-slate-400 font-semibold mt-1">Toplam İndirme</div>
-                </div>
-                <div class="glass-dark p-4 rounded-2xl text-center">
-                    <div class="text-2xl md:text-3xl font-black text-purple-400">%99.8</div>
-                    <div class="text-xs text-slate-400 font-semibold mt-1">Güvenilirlik</div>
-                </div>
-                <div class="glass-dark p-4 rounded-2xl text-center">
-                    <div class="text-2xl md:text-3xl font-black text-purple-400">7/24</div>
-                    <div class="text-xs text-slate-400 font-semibold mt-1">Aktif Destek</div>
-                </div>
-            </div>
-        </section>
+    <!-- Ürünler Vitrini -->
+    <div class="products-grid">
+        <!-- Ürün 1 -->
+        <div class="product-card">
+            <span class="tag">HARDWARE SPOOFING</span>
+            <h2>PERM SPOOFER</h2>
+            <p style="color: #8b949e; font-size: 14px;">Anakart ve donanım banlarınızı kalıcı olarak kaldıran profesyonel temizleme aracı.</p>
+            <ul class="feature-list">
+                <li>WINDOWS 10 & 11 SUPPORT</li>
+                <li>BIOS UP / OPT (Otomatik Destek)</li>
+                <li>Kalıcı (Permanent) Çözüm</li>
+            </ul>
+            <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn" style="width:100%; text-align:center; display:block; margin-top:20px;">Satın Al / Fiyat Öğren</a>
+        </div>
 
-        <!-- Ürünler Bölümü -->
-        <section class="space-y-6">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h2 class="text-2xl font-bold flex items-center space-x-3">
-                    <span class="w-3 h-3 bg-purple-500 rounded-full shadow-[0_0_10px_#8b5cf6]"></span>
-                    <span>Aktif Ürünler / Hileler</span>
-                </h2>
-                <div class="w-full md:w-80">
-                    <input type="text" id="search-input" oninput="filterProducts()" placeholder="Hile ara..." class="w-full px-4 py-3 bg-slate-900/80 border border-slate-800 rounded-2xl focus:outline-none focus:border-purple-500 text-sm transition-all shadow-inner">
-                </div>
-            </div>
-            <div id="product-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-        </section>
-    </main>
-
-    <!-- Canlı Destek / Sohbet Alanı Sabit Buton -->
-    <button onclick="openChatModal()" class="fixed bottom-6 right-6 z-50 flex items-center space-x-2 bg-purple-600 hover:bg-purple-500 text-white px-5 py-3.5 rounded-full shadow-[0_10px_25px_rgba(139,92,246,0.4)] transition-all hover:scale-110 active:scale-95 font-bold text-sm">
-        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-        <span>Canlı Destek Sohbeti</span>
-    </button>
-
-    <!-- Kullanıcı Kayıt / Giriş Modalı -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900/90 border border-slate-800 max-w-md w-full p-8 rounded-3xl space-y-6 shadow-2xl">
-            <div class="text-center space-y-2">
-                <h3 class="text-2xl font-black tracking-wider text-white">Sohbete Katıl</h3>
-                <p class="text-slate-400 text-xs">Gizli profilinizle mesajlaşmak için bir Rumuz ve Şifre belirleyin.</p>
-            </div>
-            <div class="space-y-4">
-                <input type="text" id="reg-nick" placeholder="Rumuz (Nick)" class="w-full p-4 bg-black/60 border border-slate-800 rounded-2xl focus:outline-none focus:border-purple-500 text-sm">
-                <input type="password" id="reg-pass" placeholder="Şifre" class="w-full p-4 bg-black/60 border border-slate-800 rounded-2xl focus:outline-none focus:border-purple-500 text-sm">
-            </div>
-            <div class="flex space-x-3">
-                <button onclick="registerOrLogin()" class="flex-1 py-3.5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-purple-600/30">Giriş / Kayıt Ol</button>
-                <button onclick="closeAuthModal()" class="px-5 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold transition-all">İptal</button>
-            </div>
+        <!-- Ürün 2 -->
+        <div class="product-card">
+            <span class="tag">GAME ENHANCEMENT</span>
+            <h2>VALORANT LEGIT INTERNAL</h2>
+            <p style="color: #8b949e; font-size: 14px;">Yüksek güvenlikli, optimize edilmiş ve ban riskini minimuma indiren dahili yazılım.</p>
+            <ul class="feature-list">
+                <li>VALORANT LEGIT INTERNAL</li>
+                <li>Gelişmiş Bypass Teknolojisi</li>
+                <li>Yüksek FPS Performansı</li>
+            </ul>
+            <a href="https://dsc.gg/neonsoftware" target="_blank" class="nav-btn" style="width:100%; text-align:center; display:block; margin-top:20px;">Satın Al / Fiyat Öğren</a>
         </div>
     </div>
 
-    <!-- Sohbet Odası Modalı -->
-    <div id="chat-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900/95 border border-slate-800 max-w-2xl w-full h-[600px] p-6 rounded-3xl flex flex-col justify-between shadow-2xl">
-            <div class="flex justify-between items-center border-b border-slate-800 pb-4">
-                <div class="flex items-center space-x-2">
-                    <span class="w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
-                    <h3 class="font-bold text-white text-lg">APEX Canlı Destek & Topluluk</h3>
-                </div>
-                <button onclick="closeChatModal()" class="text-slate-400 hover:text-white font-bold text-lg">✕</button>
-            </div>
-            
-            <div id="chat-messages" class="flex-1 overflow-y-auto space-y-3 py-4 pr-2 text-sm"></div>
-
-            <div id="chat-input-area" class="border-t border-slate-800 pt-4 flex gap-2">
-                <input type="text" id="chat-msg-input" placeholder="Mesajınızı yazın..." class="flex-1 p-3.5 bg-black/60 border border-slate-800 rounded-2xl focus:outline-none focus:border-purple-500 text-sm">
-                <button onclick="sendMessage()" class="px-6 py-3.5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold transition-all">Gönder</button>
-            </div>
-            <div id="chat-closed-notice" class="hidden text-center text-red-400 text-xs py-3 font-semibold">
-                ⚠️ Destek sistemi şu an admin tarafından kapatılmıştır.
-            </div>
-        </div>
+    <!-- Lisans Doğrulama ve Bypass Paneli -->
+    <div class="activation-box">
+        <h2>LOADER AKTİVASYON</h2>
+        <p style="color: #8b949e; font-size: 13px; margin-bottom: 20px;">Lisans anahtarınızı girin veya key sormadan direkt bypass ile başlatın.</p>
+        
+        <input type="text" id="licenseKeyInput" placeholder="NEON-XXXX-XXXX-XXXX">
+        
+        <button class="action-btn" onclick="lisansDogrula()">Lisansı Doğrula</button>
+        <!-- İstediğin Key İstemeyen / Bypass Tuşu -->
+        <button class="action-btn bypass-btn" onclick="bypassBaslat()">⚡ BYPASS // KEY İSTEMEDEN BAŞLAT</button>
+        
+        <div id="resultBox"></div>
     </div>
 
-    <!-- Update Modalı -->
-    <div id="update-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-900/90 border border-slate-800 max-w-md w-full p-8 rounded-3xl text-center space-y-6 shadow-2xl">
-            <div class="w-16 h-16 bg-purple-500/10 border border-purple-500/30 rounded-2xl flex items-center justify-center mx-auto text-purple-400 shadow-[0_0_20px_rgba(139,92,246,0.3)] animate-bounce">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-            </div>
-            <div class="space-y-2">
-                <h3 class="text-2xl font-black tracking-wider text-white">UPDATE GELİYOR</h3>
-                <p class="text-slate-400 text-sm">Bu yazılım için şu an aktif bir güncelleme yapılmaktadır.</p>
-            </div>
-            <div class="flex space-x-4 pt-2">
-                <button onclick="closeModal()" class="flex-1 py-3.5 bg-slate-800 hover:bg-slate-700 text-white rounded-2xl font-bold transition-all">ÇIK</button>
-                <button onclick="forceDownload()" class="flex-1 py-3.5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold shadow-lg shadow-purple-600/30 transition-all">Yine de İndir</button>
-            </div>
-        </div>
-    </div>
+</div>
 
-    <script>
-        window.addEventListener('DOMContentLoaded', () => {
-            const randomNum = Math.floor(Math.random() * (85 - 65 + 1)) + 65;
-            document.getElementById('random-downloads').innerText = randomNum;
-            checkUserSession();
-            loadData();
-        });
+<script>
+    const API_URL = "https://neonsoftwarecrackme.onrender.com/api.php";
 
-        function getCurrentUser() {
-            return JSON.parse(localStorage.getItem('apex_current_user')) || null;
+    function getHwid() {
+        let hwid = localStorage.getItem('neon_client_hwid');
+        if (!hwid) {
+            hwid = 'WEB-HWID-' + Math.random().toString(36).substring(2, 15).toUpperCase();
+            localStorage.setItem('neon_client_hwid', hwid);
+        }
+        return hwid;
+    }
+
+    async function lisansDogrula() {
+        let key = document.getElementById('licenseKeyInput').value.trim();
+        let resultBox = document.getElementById('resultBox');
+
+        if (!key) {
+            resultBox.innerHTML = `<span style="color: var(--neon-pink);">Lütfen geçerli bir lisans anahtarı girin!</span>`;
+            return;
         }
 
-        function checkUserSession() {
-            const user = getCurrentUser();
-            const area = document.getElementById('user-status-area');
-            if(user) {
-                area.innerHTML = `
-                    <div class="flex items-center space-x-2 px-4 py-2 rounded-2xl bg-slate-900/80 border border-slate-800 text-xs font-bold">
-                        <span class="text-purple-400">@${user.nick}</span>
-                        <span class="px-2 py-0.5 bg-purple-600/20 text-purple-300 rounded-md border border-purple-500/30">${user.role}</span>
-                        <button onclick="logoutUser()" class="text-red-400 hover:text-red-300 ml-2">Çıkış</button>
-                    </div>
-                `;
-            } else {
-                area.innerHTML = `
-                    <button onclick="openAuthModal()" class="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-bold rounded-2xl shadow-md transition-all">Sohbete Katıl</button>
-                `;
-            }
-        }
+        resultBox.innerHTML = `<span style="color: var(--neon-cyan);">Bağlantı kuruluyor ve anahtar doğrulanıyor...</span>`;
 
-        function openAuthModal() { document.getElementById('auth-modal').classList.remove('hidden'); }
-        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
-        function logoutUser() { localStorage.removeItem('apex_current_user'); checkUserSession(); }
-
-        function registerOrLogin() {
-            const nick = document.getElementById('reg-nick').value.trim();
-            const pass = document.getElementById('reg-pass').value.trim();
-            if(!nick || !pass) { alert('Lütfen rumuz ve şifre girin!'); return; }
-
-            let users = JSON.parse(localStorage.getItem('apex_users')) || [];
-            let existing = users.find(u => u.nick === nick);
-
-            if(existing) {
-                if(existing.pass !== pass) { alert('Hatalı şifre!'); return; }
-                localStorage.setItem('apex_current_user', JSON.stringify(existing));
-            } else {
-                const newUser = { nick, pass, role: 'Member' };
-                users.push(newUser);
-                localStorage.setItem('apex_users', JSON.stringify(users));
-                localStorage.setItem('apex_current_user', JSON.stringify(newUser));
-            }
-            closeAuthModal();
-            checkUserSession();
-            alert('Başarıyla giriş yapıldı!');
-        }
-
-        function openChatModal() {
-            const user = getCurrentUser();
-            if(!user) { openAuthModal(); return; }
-
-            const settings = JSON.parse(localStorage.getItem('apex_settings')) || { chatOpen: true };
-            if(!settings.chatOpen) {
-                document.getElementById('chat-input-area').classList.add('hidden');
-                document.getElementById('chat-closed-notice').classList.remove('hidden');
-            } else {
-                document.getElementById('chat-input-area').classList.remove('hidden');
-                document.getElementById('chat-closed-notice').classList.add('hidden');
-            }
-
-            document.getElementById('chat-modal').classList.remove('hidden');
-            renderMessages();
-        }
-
-        function closeChatModal() { document.getElementById('chat-modal').classList.add('hidden'); }
-
-        function renderMessages() {
-            const msgs = JSON.parse(localStorage.getItem('apex_messages')) || [];
-            const container = document.getElementById('chat-messages');
-            if(msgs.length === 0) {
-                container.innerHTML = '<p class="text-slate-500 text-center py-10">Henüz mesaj yok. İlk mesajı sen yaz!</p>';
-                return;
-            }
-            container.innerHTML = msgs.map(m => `
-                <div class="p-3 bg-black/40 border border-slate-800/80 rounded-2xl">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="font-bold text-purple-400 text-xs">@${m.nick} <span class="px-1.5 py-0.5 bg-slate-800 text-[10px] rounded text-slate-300 ml-1">${m.role}</span></span>
-                        <span class="text-[10px] text-slate-500">${m.time}</span>
-                    </div>
-                    <p class="text-slate-200 text-sm">${m.text}</p>
-                </div>
-            `).join('');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function sendMessage() {
-            const settings = JSON.parse(localStorage.getItem('apex_settings')) || { chatOpen: true };
-            if(!settings.chatOpen) { alert('Destek sistemi kapalı!'); return; }
-
-            const input = document.getElementById('chat-msg-input');
-            const text = input.value.trim();
-            if(!text) return;
-
-            const user = getCurrentUser();
-            const msgs = JSON.parse(localStorage.getItem('apex_messages')) || [];
-            msgs.push({
-                nick: user.nick,
-                role: user.role,
-                text: text,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        try {
+            let response = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'validate',
+                    license_key: key,
+                    hwid: getHwid()
+                })
             });
-            localStorage.setItem('apex_messages', JSON.stringify(msgs));
-            input.value = '';
-            renderMessages();
-        }
 
-        let selectedDownloadLink = '';
-        function loadData(filterText = '') {
-            const products = JSON.parse(localStorage.getItem('apex_products')) || [];
-            const grid = document.getElementById('product-grid');
-            const filtered = products.filter(p => p.name.toLowerCase().includes(filterText.toLowerCase()));
+            let data = await response.json();
 
-            if(filtered.length === 0) {
-                grid.innerHTML = '<div class="col-span-3 text-center py-16 text-slate-500 glass-dark rounded-3xl">Ürün bulunamadı.</div>';
-                return;
+            if (data.status === 'success') {
+                resultBox.innerHTML = `<span style="color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);">[BAŞARILI] Lisans Doğrulandı! Loader başlatılıyor...</span>`;
+            } else {
+                let errMessage = data.message || "Geçersiz veya süresi dolmuş anahtar!";
+                resultBox.innerHTML = `<span style="color: var(--neon-pink); text-shadow: 0 0 10px var(--neon-pink);">[HATA] ${errMessage}</span>`;
             }
-
-            grid.innerHTML = filtered.map(p => `
-                <div class="glass-dark rounded-3xl overflow-hidden flex flex-col justify-between group">
-                    <div>
-                        <div class="h-52 overflow-hidden relative">
-                            <img src="${p.image}" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60"></div>
-                            ${p.isUpdating ? '<span class="absolute top-4 right-4 bg-purple-600 text-white text-xs px-3.5 py-1.5 rounded-full font-black tracking-wide shadow-lg shadow-purple-600/50 animate-pulse">UPDATE VAR</span>' : ''}
-                        </div>
-                        <div class="p-6 space-y-3">
-                            <h3 class="text-xl font-bold text-white group-hover:text-purple-500 transition-colors">${p.name}</h3>
-                            <p class="text-sm text-slate-400 leading-relaxed">${p.desc}</p>
-                        </div>
-                    </div>
-                    <div class="p-6 pt-0">
-                        <button onclick="handleDownload('${p.link}', ${p.isUpdating})" class="w-full py-3.5 bg-purple-600 hover:bg-purple-500 text-white rounded-2xl font-bold transition-all shadow-lg shadow-purple-600/25 active:scale-95">İndir</button>
-                    </div>
-                </div>
-            `).join('');
+        } catch (err) {
+            console.error("API Bağlantı Hatası:", err);
+            resultBox.innerHTML = `<span style="color: var(--neon-pink);">API sunucusuna ulaşılamadı!</span>`;
         }
+    }
 
-        function filterProducts() { loadData(document.getElementById('search-input').value); }
-        function handleDownload(link, isUpdating) {
-            selectedDownloadLink = link;
-            if (isUpdating) { document.getElementById('update-modal').classList.remove('hidden'); }
-            else { window.location.href = link; }
-        }
-        function closeModal() { document.getElementById('update-modal').classList.add('hidden'); }
-        function forceDownload() { window.location.href = selectedDownloadLink; }
-        function toggleTheme() { document.documentElement.classList.toggle('dark'); }
-    </script>
+    // Key istemeyen özel Bypass fonksiyonu
+    function bypassBaslat() {
+        let resultBox = document.getElementById('resultBox');
+        resultBox.innerHTML = `<span style="color: var(--neon-cyan);">Güvenlik katmanı devre dışı bırakılıyor...</span>`;
+        
+        setTimeout(() => {
+            resultBox.innerHTML = `<span style="color: var(--neon-green); text-shadow: 0 0 10px var(--neon-green);">[BYPASS AKTİF] Lisans kontrolü atlandı! Sistem başarıyla yüklendi.</span>`;
+        }, 1000);
+    }
+</script>
+
 </body>
 </html>
