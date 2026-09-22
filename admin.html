@@ -1,397 +1,152 @@
 <!DOCTYPE html>
-<html lang="tr" class="dark">
+<html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEON COMMAND CENTER - Ultra Admin Suite</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = { darkMode: 'class' }
-    </script>
+    <title>Neon Security - Admin Paneli</title>
     <style>
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-        .animate-fade { animation: fadeIn 0.3s ease-out forwards; }
+        body { background: #0f172a; color: #f8fafc; font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        .container { max-width: 1000px; margin: auto; background: #1e293b; padding: 20px; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+        h1 { color: #38bdf8; text-align: center; }
+        .box { background: #334155; padding: 15px; margin-bottom: 15px; border-radius: 6px; }
+        input, button { padding: 8px 12px; margin: 5px 0; border-radius: 4px; border: none; font-size: 14px; }
+        input { background: #0f172a; color: #fff; border: 1px solid #475569; width: calc(100% - 20px); max-width: 300px; }
+        button { background: #2563eb; color: #white; cursor: pointer; font-weight: bold; }
+        button:hover { background: #1d4ed8; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #475569; padding: 8px; text-align: left; font-size: 13px; }
+        th { background: #0f172a; color: #38bdf8; }
+        .danger { background: #dc2626; }
+        .danger:hover { background: #b91c1c; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col font-sans selection:bg-cyan-500 selection:text-black">
+<body>
 
-    <!-- Üst Navbar -->
-    <header class="bg-slate-900/80 backdrop-blur-md border-b border-slate-800 sticky top-0 z-50 px-6 py-4 flex justify-between items-center shadow-xl">
-        <div class="flex items-center space-x-3">
-            <div class="relative">
-                <div class="bg-cyan-500 w-4 h-4 rounded-full animate-ping absolute opacity-75"></div>
-                <div class="bg-cyan-400 w-4 h-4 rounded-full relative"></div>
-            </div>
-            <h1 class="text-xl font-black tracking-wider bg-gradient-to-r from-cyan-400 to-indigo-500 bg-clip-text text-transparent">NEON SUITE <span class="text-xs font-normal text-slate-400">v3.0 Ultimate</span></h1>
-        </div>
-        <div class="flex items-center space-x-3">
-            <span id="systemStatus" class="px-3 py-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-mono rounded-full flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> Sunucu Bağlı
-            </span>
-            <button onclick="fetchAllData()" class="bg-cyan-600 hover:bg-cyan-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition shadow-lg shadow-cyan-900/20 active:scale-95">Verileri Yenile</button>
-        </div>
-    </header>
+<div class="container">
+    <h1>Neon Security Panel</h1>
 
-    <!-- Ana İçerik Konteyneri -->
-    <main class="flex-1 max-w-7xl mx-auto w-full p-6 space-y-6">
-
-        <!-- İstatistik Kartları -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Toplam Lisans</div>
-                <div id="statTotalKeys" class="text-3xl font-black text-cyan-400 mt-2">0</div>
-                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🔑</div>
-            </div>
-            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Aktif Oturumlar</div>
-                <div id="statActiveKeys" class="text-3xl font-black text-emerald-400 mt-2">0</div>
-                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">💻</div>
-            </div>
-            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Yasaklı HWID</div>
-                <div id="statHwidBans" class="text-3xl font-black text-rose-400 mt-2">0</div>
-                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🛡️</div>
-            </div>
-            <div class="bg-slate-900/60 border border-slate-800/80 rounded-2xl p-5 shadow-lg relative overflow-hidden">
-                <div class="text-slate-400 text-xs font-medium uppercase tracking-wider">Yasaklı IP</div>
-                <div id="statIpBans" class="text-3xl font-black text-amber-400 mt-2">0</div>
-                <div class="absolute -right-4 -bottom-4 text-slate-800/40 text-7xl font-bold select-none">🌐</div>
-            </div>
-        </div>
-
-        <!-- Sekme Butonları -->
-        <div class="flex space-x-2 border-b border-slate-800 pb-2 overflow-x-auto">
-            <button onclick="switchTab('licenses')" id="btnTab-licenses" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-600 text-white shadow-md">Lisans Yönetimi</button>
-            <button onclick="switchTab('generator')" id="btnTab-generator" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Key Üretici</button>
-            <button onclick="switchTab('bans')" id="btnTab-bans" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Ban Listeleri</button>
-            <button onclick="switchTab('logs')" id="btnTab-logs" class="px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white">Canlı İstek Logları</button>
-        </div>
-
-        <!-- SEKME 1: LİSANS YÖNETİMİ -->
-        <div id="tab-licenses" class="space-y-4 animate-fade">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                <div class="flex flex-col sm:flex-row justify-between items-center gap-4 mb-4">
-                    <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider">Kayıtlı Lisanslar ve Cihaz Eşleşmeleri</h3>
-                    <input type="text" id="searchKey" onkeyup="filterLicenses()" placeholder="Key veya HWID ara..." class="bg-slate-950 border border-slate-800 text-xs rounded-xl px-4 py-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 w-full sm:w-64">
-                </div>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto rounded-xl border border-slate-800/60">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
-                            <tr>
-                                <th class="p-3.5">ID</th>
-                                <th class="p-3.5">Lisans Anahtarı</th>
-                                <th class="p-3.5">HWID (Donanım)</th>
-                                <th class="p-3.5">Son IP</th>
-                                <th class="p-3.5">Bitiş Tarihi</th>
-                                <th class="p-3.5">Durum</th>
-                                <th class="p-3.5 text-right">İşlemler</th>
-                            </tr>
-                        </thead>
-                        <tbody id="licensesTableBody" class="divide-y divide-slate-800/60">
-                            <!-- JS dolduracak -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEKME 2: KEY ÜRETİCİ -->
-        <div id="tab-generator" class="space-y-4 animate-fade hidden">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 shadow-xl max-w-xl mx-auto">
-                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-4">Toplu Lisans Anahtarı Üret</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Ön Ek (Prefix)</label>
-                        <input type="text" id="genPrefix" value="NEON" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 uppercase">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Adet</label>
-                        <input type="number" id="genCount" value="1" min="1" max="50" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-slate-400 mb-1">Süre (Gün)</label>
-                        <select id="genDays" class="w-full bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500">
-                            <option value="1">1 Günlük (Trial)</option>
-                            <option value="7">7 Günlük (Haftalık)</option>
-                            <option value="30" selected>30 Günlük (Aylık)</option>
-                            <option value="365">365 Günlük (Yıllık)</option>
-                            <option value="0">Sınırsız (Lifetime)</option>
-                        </select>
-                    </div>
-                    <button onclick="generateKeys()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl transition shadow-lg shadow-emerald-900/20 text-xs">Anahtarları Üret</button>
-                </div>
-                <div id="generatedResultBox" class="hidden mt-6 bg-slate-950 p-4 rounded-xl border border-emerald-500/30 max-h-48 overflow-y-auto font-mono text-xs text-emerald-400 space-y-1"></div>
-            </div>
-        </div>
-
-        <!-- SEKME 3: BAN LİSTELERİ -->
-        <div id="tab-bans" class="space-y-6 animate-fade hidden">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- HWID Banlar -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                    <h3 class="text-sm font-bold text-rose-400 uppercase tracking-wider mb-3">Yasaklı Donanımlar (HWID Bans)</h3>
-                    <div class="overflow-x-auto max-h-72 overflow-y-auto rounded-xl border border-slate-800/60">
-                        <table class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-950 text-slate-400 uppercase">
-                                <tr><th class="p-3">HWID</th><th class="p-3">Tarih</th><th class="p-3 text-right">İşlem</th></tr>
-                            </thead>
-                            <tbody id="hwidBansBody" class="divide-y divide-slate-800/60"></tbody>
-                        </table>
-                    </div>
-                </div>
-                <!-- IP Banlar -->
-                <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                    <h3 class="text-sm font-bold text-amber-400 uppercase tracking-wider mb-3">Yasaklı IP Adresleri (IP Bans)</h3>
-                    <div class="flex gap-2 mb-3">
-                        <input type="text" id="manualIpInput" placeholder="Örn: 192.168.1.50" class="flex-1 bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500">
-                        <button onclick="banIpManual()" class="bg-amber-600 hover:bg-amber-500 text-white px-4 py-2 rounded-xl text-xs font-bold transition">IP Banla</button>
-                    </div>
-                    <div class="overflow-x-auto max-h-56 overflow-y-auto rounded-xl border border-slate-800/60">
-                        <table class="w-full text-left text-xs text-slate-300">
-                            <thead class="bg-slate-950 text-slate-400 uppercase">
-                                <tr><th class="p-3">IP Adresi</th><th class="p-3">Tarih</th><th class="p-3 text-right">İşlem</th></tr>
-                            </thead>
-                            <tbody id="ipBansBody" class="divide-y divide-slate-800/60"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SEKME 4: CANLI LOGLAR -->
-        <div id="tab-logs" class="space-y-4 animate-fade hidden">
-            <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
-                <h3 class="text-sm font-bold text-cyan-400 uppercase tracking-wider mb-3">Canlı İstek ve Aktivite Akışı</h3>
-                <div class="overflow-x-auto max-h-[500px] overflow-y-auto rounded-xl border border-slate-800/60">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-950 text-slate-400 uppercase sticky top-0">
-                            <tr>
-                                <th class="p-3">Zaman</th>
-                                <th class="p-3">IP Adresi</th>
-                                <th class="p-3">İşlem (Action)</th>
-                                <th class="p-3">Durum</th>
-                                <th class="p-3">Detay</th>
-                            </tr>
-                        </thead>
-                        <tbody id="logsTableBody" class="divide-y divide-slate-800/60"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-    </main>
-
-    <!-- Bildirim Toast Alanı -->
-    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 border border-cyan-500/40 text-cyan-300 px-5 py-3 rounded-2xl shadow-2xl transition-all duration-300 transform translate-y-20 opacity-0 pointer-events-none z-50 text-xs font-semibold flex items-center gap-2">
-        <span id="toastMsg">İşlem başarılı!</span>
+    <!-- Yetkilendirme Ayarı -->
+    <div class="box">
+        <h3>Bağlantı Ayarları</h3>
+        <label>API URL:</label><br>
+        <input type="text" id="apiUrl" value="https://neonsoftwarecrackme.onrender.com/api.php"><br>
+        <label>Admin Token:</label><br>
+        <input type="password" id="adminToken" value="ADMIN_GIZLI_TOKEN_123">
+        <br><button onclick="loadData()">Verileri Yenile</button>
     </div>
 
-    <script>
-        const API_URL = 'api.php';
-        const ADMIN_TOKEN = 'ADMIN_GIZLI_TOKEN_123'; // api.php içindeki token ile aynı olmalı
-        let globalLicensesData = [];
+    <!-- Lisans Üretme -->
+    <div class="box">
+        <h3>Yeni Lisans Üret</h3>
+        <input type="text" id="genPrefix" value="NEON" placeholder="Örn: NEON"><br>
+        <input type="number" id="genCount" value="1" placeholder="Adet"><br>
+        <input type="number" id="genDays" value="30" placeholder="Gün Süresi"><br>
+        <br><button onclick="generateKeys()">Key Üret</button>
+    </div>
 
-        function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            toast.classList.remove('translate-y-20', 'opacity-0');
-            setTimeout(() => {
-                toast.classList.add('translate-y-20', 'opacity-0');
-            }, 3000);
-        }
+    <!-- Lisans Listesi -->
+    <div class="box">
+        <h3>Lisanslar</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Key</th>
+                    <th>HWID</th>
+                    <th>Son IP</th>
+                    <th>Durum</th>
+                    <th>Bitiş Tarihi</th>
+                    <th>İşlemler</th>
+                </tr>
+            </thead>
+            <tbody id="licenseTable">
+                <tr><td colspan="7" style="text-align:center;">Veriler yükleniyor...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 
-        function switchTab(tabName) {
-            ['licenses', 'generator', 'bans', 'logs'].forEach(t => {
-                document.getElementById('tab-' + t).classList.add('hidden');
-                document.getElementById('btnTab-' + t).className = "px-5 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 hover:text-white";
-            });
-            document.getElementById('tab-' + tabName).classList.remove('hidden');
-            document.getElementById('btnTab-' + tabName).className = "px-5 py-2.5 rounded-xl text-xs font-bold transition bg-cyan-600 text-white shadow-md";
-        }
+<script>
+async function sendRequest(actionData) {
+    const url = document.getElementById('apiUrl').value;
+    const token = document.getElementById('adminToken').value;
+    
+    actionData.admin_token = token;
 
-        async function fetchAllData() {
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'admin_get_all', admin_token: ADMIN_TOKEN })
-                });
-                const data = await res.json();
-                if(data.status === 'success') {
-                    globalLicensesData = data.licenses;
-                    renderLicenses(data.licenses);
-                    renderBans(data.hwid_bans, data.ip_bans);
-                    renderLogs(data.logs);
+    try {
+        let response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(actionData)
+        });
+        let result = await response.json();
+        return result;
+    } catch (err) {
+        alert("Sunucuya bağlanılamadı! URL veya CORS hatası.");
+        console.error(err);
+        return null;
+    }
+}
 
-                    // İstatistikleri Güncelle
-                    document.getElementById('statTotalKeys').innerText = data.licenses.length;
-                    document.getElementById('statActiveKeys').innerText = data.licenses.filter(l => l.status === 'active').length;
-                    document.getElementById('statHwidBans').innerText = data.hwid_bans.length;
-                    document.getElementById('statIpBans').innerText = data.ip_bans.length;
-                }
-            } catch(e) {
-                showToast("Sunucu verileri alınamadı!");
-            }
-        }
+async function loadData() {
+    let res = await sendRequest({ action: 'admin_get_all' });
+    if (!res || res.status !== 'success') return;
 
-        function renderLicenses(licenses) {
-            let html = '';
-            licenses.forEach(l => {
-                let badgeColor = 'bg-slate-800 text-slate-400';
-                if(l.status === 'active') badgeColor = 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30';
-                if(l.status === 'banned') badgeColor = 'bg-rose-500/20 text-rose-400 border border-rose-500/30';
-                if(l.status === 'expired') badgeColor = 'bg-amber-500/20 text-amber-400 border border-amber-500/30';
-                if(l.status === 'unused') badgeColor = 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30';
+    let tbody = document.getElementById('licenseTable');
+    tbody.innerHTML = '';
 
-                html += `<tr class="hover:bg-slate-900/40 transition">
-                    <td class="p-3.5">${l.id}</td>
-                    <td class="p-3.5 font-mono text-cyan-300 font-semibold">${l.license_key}</td>
-                    <td class="p-3.5 font-mono text-slate-400">${l.hwid || '<span class="text-slate-600">Kayıtsız / Boş</span>'}</td>
-                    <td class="p-3.5 text-slate-400">${l.last_ip || '-'}</td>
-                    <td class="p-3.5 text-slate-400">${l.expiry_date || 'Sınırsız'}</td>
-                    <td class="p-3.5"><span class="px-2.5 py-1 rounded-lg text-[10px] font-bold ${badgeColor}">${l.status}</span></td>
-                    <td class="p-3.5 text-right space-x-2">
-                        ${l.hwid ? `<button onclick="resetHwid(${l.id})" class="text-amber-400 hover:underline font-medium">HWID Sıfırla</button>` : ''}
-                        ${l.hwid ? `<button onclick="banHwid('${l.hwid}')" class="text-rose-400 hover:underline font-medium">HWID Banla</button>` : ''}
-                        <button onclick="deleteLicense(${l.id})" class="text-slate-500 hover:text-rose-400 font-medium">Sil</button>
-                    </td>
-                </tr>`;
-            });
-            document.getElementById('licensesTableBody').innerHTML = html || '<tr><td colspan="7" class="p-6 text-center text-slate-500">Kayıtlı lisans bulunamadı.</td></tr>';
-        }
+    res.licenses.forEach(l => {
+        let tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${l.id}</td>
+            <td><b>${l.license_key}</b></td>
+            <td>${l.hwid || 'Bağlı Değil'}</td>
+            <td>${l.last_ip || '-'}</td>
+            <td>${l.status}</td>
+            <td>${l.expiry_date || 'Sınırsız'}</td>
+            <td>
+                <button onclick="resetHwid(${l.id})">HWID Sıfırla</button>
+                <button class="danger" onclick="deleteKey(${l.id})">Sil</button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
-        function filterLicenses() {
-            const query = document.getElementById('searchKey').value.toLowerCase();
-            const filtered = globalLicensesData.filter(l => 
-                l.license_key.toLowerCase().includes(query) || 
-                (l.hwid && l.hwid.toLowerCase().includes(query))
-            );
-            renderLicenses(filtered);
-        }
+async function generateKeys() {
+    let prefix = document.getElementById('genPrefix').value;
+    let count = parseInt(document.getElementById('genCount').value);
+    let days = parseInt(document.getElementById('genDays').value);
 
-        async function generateKeys() {
-            const prefix = document.getElementById('genPrefix').value;
-            const count = document.getElementById('genCount').value;
-            const days = document.getElementById('genDays').value;
+    let res = await sendRequest({
+        action: 'admin_generate_keys',
+        prefix: prefix,
+        count: count,
+        days: days
+    });
 
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_generate_keys', prefix, count, days, admin_token: ADMIN_TOKEN })
-            });
-            const data = await res.json();
-            if(data.status === 'success') {
-                showToast(`${count} adet lisans başarıyla üretildi!`);
-                const box = document.getElementById('generatedResultBox');
-                box.classList.remove('hidden');
-                box.innerHTML = data.keys.join('<br>');
-                fetchAllData();
-            }
-        }
+    if (res && res.status === 'success') {
+        alert(count + " adet key başarıyla üretildi!");
+        loadData();
+    } else {
+        alert("Hata: " + (res ? res.message : "Bilinmeyen hata"));
+    }
+}
 
-        async function resetHwid(id) {
-            if(!confirm("Bu lisansın HWID kilidini sıfırlamak istediğinize emin misiniz?")) return;
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_reset_hwid', id, admin_token: ADMIN_TOKEN })
-            });
-            showToast("HWID başarıyla sıfırlandı.");
-            fetchAllData();
-        }
+async function resetHwid(id) {
+    if(!confirm("Bu lisansın HWID kilidini sıfırlamak istiyor musunuz?")) return;
+    await sendRequest({ action: 'admin_reset_hwid', id: id });
+    loadData();
+}
 
-        async function deleteLicense(id) {
-            if(!confirm("Bu lisansı tamamen silmek istiyor musunuz?")) return;
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_delete_license', id, admin_token: ADMIN_TOKEN })
-            });
-            showToast("Lisans silindi.");
-            fetchAllData();
-        }
+async function deleteKey(id) {
+    if(!confirm("Bu lisansı tamamen silmek istiyor musunuz?")) return;
+    await sendRequest({ action: 'admin_delete_license', id: id });
+    loadData();
+}
 
-        async function banHwid(hwid) {
-            if(!confirm("Bu donanımı (HWID) kalıcı olarak banlamak istiyor musunuz?")) return;
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_ban_hwid', hwid, admin_token: ADMIN_TOKEN })
-            });
-            showToast("HWID banlandı.");
-            fetchAllData();
-        }
+// Sayfa açıldığında verileri otomatik çek
+window.onload = loadData;
+</script>
 
-        async function removeHwidBan(id) {
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_remove_hwid_ban', id, admin_token: ADMIN_TOKEN })
-            });
-            showToast("HWID banı kaldırıldı.");
-            fetchAllData();
-        }
-
-        async function banIpManual() {
-            const ip = document.getElementById('manualIpInput').value;
-            if(!ip) return alert("Lütfen bir IP adresi girin!");
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_ban_ip', ip, admin_token: ADMIN_TOKEN })
-            });
-            document.getElementById('manualIpInput').value = '';
-            showToast("IP adresi yasaklandı.");
-            fetchAllData();
-        }
-
-        async function removeIpBan(id) {
-            await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'admin_remove_ip_ban', id, admin_token: ADMIN_TOKEN })
-            });
-            showToast("IP banı kaldırıldı.");
-            fetchAllData();
-        }
-
-        function renderBans(hwidBans, ipBans) {
-            let hHtml = '';
-            hwidBans.forEach(b => {
-                hHtml += `<tr><td class="p-3 font-mono text-rose-400">${b.hwid}</td><td class="p-3 text-slate-500">${b.date}</td><td class="p-3 text-right"><button onclick="removeHwidBan(${b.id})" class="text-cyan-400 hover:underline">Kaldır</button></td></tr>`;
-            });
-            document.getElementById('hwidBansBody').innerHTML = hHtml || '<tr><td colspan="3" class="p-3 text-center text-slate-500">Banlı HWID yok.</td></tr>';
-
-            let iHtml = '';
-            ipBans.forEach(b => {
-                iHtml += `<tr><td class="p-3 font-mono text-amber-400">${b.ip}</td><td class="p-3 text-slate-500">${b.date}</td><td class="p-3 text-right"><button onclick="removeIpBan(${b.id})" class="text-cyan-400 hover:underline">Kaldır</button></td></tr>`;
-            });
-            document.getElementById('ipBansBody').innerHTML = iHtml || '<tr><td colspan="3" class="p-3 text-center text-slate-500">Banlı IP yok.</td></tr>';
-        }
-
-        function renderLogs(logs) {
-            let html = '';
-            logs.forEach(l => {
-                let badge = 'bg-slate-800 text-slate-300';
-                if(l.status === 'success') badge = 'bg-emerald-500/20 text-emerald-400';
-                if(l.status === 'error') badge = 'bg-rose-500/20 text-rose-400';
-                if(l.status === 'banned') badge = 'bg-amber-500/20 text-amber-400';
-
-                html += `<tr class="hover:bg-slate-900/40">
-                    <td class="p-3 text-slate-500 font-mono">${l.date}</td>
-                    <td class="p-3 font-mono text-slate-300">${l.ip}</td>
-                    <td class="p-3 text-cyan-300 font-semibold">${l.action}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${badge}">${l.status}</span></td>
-                    <td class="p-3 text-slate-400">${l.details}</td>
-                </tr>`;
-            });
-            document.getElementById('logsTableBody').innerHTML = html || '<tr><td colspan="5" class="p-4 text-center text-slate-500">Log kaydı yok.</td></tr>';
-        }
-
-        window.onload = () => {
-            fetchAllData();
-            setInterval(fetchAllData, 10000);
-        };
-    </script>
 </body>
 </html>
