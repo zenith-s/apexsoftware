@@ -1,15 +1,19 @@
 FROM php:8.2-apache
 
-# Gerekli PHP eklentilerini kur (PDO SQLite vs.)
+# Gerekli uzantıları kur ve etkinleştir
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Apache mod_rewrite aktif et
+# Apache Rewrite modülünü aç
 RUN a2enmod rewrite
 
-# Proje dosyalarını apache dizinine kopyala
+# Çalışma dizinini ayarla
+WORKDIR /var/www/html
+
+# Dosyaları kopyala
 COPY . /var/www/html/
 
-# İzinleri ayarla
-RUN chown -R www-data:www-data /var/www/html
+# İzinleri ver
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 755 /var/www/html
 
 EXPOSE 80
