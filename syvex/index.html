@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SYVEX | Link Bio</title>
+<meta name="description" content="SYVEX Link Bio">
+
+<!-- Üst dizine çıkıp assets klasörünü bulur -->
+<link rel="stylesheet" href="../assets/fa/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Plus+Jakarta+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body, html { width: 100%; height: 100%; font-family: 'Plus Jakarta Sans', sans-serif; overflow: hidden; background: #050505; color: #fff; }
+
+  /* Arka Plan Video */
+  .bg-video {
+    position: fixed;
+    top: 50%; left: 50%;
+    min-width: 100%; min-height: 100%;
+    width: 100vw; height: 100vh;
+    z-index: -3;
+    transform: translate(-50%, -50%) scale(1.15);
+    object-fit: cover;
+    filter: blur(12px) brightness(0.45);
+  }
+
+  .bg-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.92) 100%);
+    z-index: -2;
+  }
+
+  #snow-canvas {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  /* Click to Enter Ekranı */
+  #enter-screen {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.98);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+    cursor: pointer;
+    transition: opacity 0.5s ease, visibility 0.5s ease;
+  }
+
+  #enter-screen h2 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: 6px;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: linear-gradient(45deg, #fff, #555, #fff);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shineText 3s linear infinite, bounceText 2s ease-in-out infinite alternate;
+    pointer-events: none;
+  }
+
+  @keyframes shineText {
+    to { background-position: 200% center; }
+  }
+
+  @keyframes bounceText {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-8px); }
+  }
+
+  #enter-screen p {
+    font-size: 0.85rem;
+    color: #777;
+    margin-top: 15px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    pointer-events: none;
+  }
+
+  /* Ana İçerik Konteyner */
+  .container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    flex-direction: column;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(30px);
+    transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+  }
+
+  .container.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Sabit, Şık Cam Kart Tasarımı */
+  .card {
+    background: rgba(18, 18, 18, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    padding: 40px 30px;
+    border-radius: 28px;
+    text-align: center;
+    width: 360px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.15);
+  }
+
+  .avatar {
+    width: 105px;
+    height: 105px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .avatar:hover {
+    transform: scale(1.08) rotate(3deg);
+  }
+
+  h1 {
+    font-family: 'Orbitron', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    margin-bottom: 6px;
+    letter-spacing: 2px;
+    background: linear-gradient(to right, #fff, #888);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  p.role {
+    font-size: 0.85rem;
+    color: #999;
+    margin-bottom: 25px;
+    font-weight: 500;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .social {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+  }
+
+  .social a {
+    color: #fff;
+    font-size: 1.3rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    width: 52px;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 16px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    text-decoration: none;
+  }
+
+  .social a:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.4);
+    transform: translateY(-6px) scale(1.05);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.5);
+  }
+
+  /* Ses Kontrol Butonu */
+  #audio-control {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    background: rgba(18, 18, 18, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 0.85rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-weight: 500;
+    backdrop-filter: blur(15px);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  #audio-control:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.08) translateY(-2px);
+  }
+
+  .pulse-anim {
+    animation: iconPulse 1.5s infinite;
+  }
+
+  @keyframes iconPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+</style>
+</head>
+<body>
+
+  <canvas id="snow-canvas"></canvas>
+
+  <!-- Click to Enter Ekranı -->
+  <div id="enter-screen" onclick="siteyiAc()">
+    <h2>Click to Enter</h2>
+    <p>SYVEX EXPERIENCE</p>
+  </div>
+
+  <!-- Arka Plan Video (Doğrudan Web/Catbox Linki) -->
+  <video class="bg-video" id="bg-video" loop playsinline autoplay muted crossorigin="anonymous">
+    <source src="BURAYA_VIDEO_LINKINI_YAPISTIR.mp4" type="video/mp4">
+    Tarayıcınız video etiketini desteklemiyor.
+  </video>
+
+  <div class="bg-overlay"></div>
+
+  <!-- Ses Kontrol Butonu -->
+  <button id="audio-control" onclick="toggleAudio()">
+    <i class="fas fa-volume-high pulse-anim" id="audio-icon"></i> <span id="audio-text">Video Sesi: Açık</span>
+  </button>
+
+  <!-- Ana Kart -->
+  <div class="container" id="main-container">
+    <div class="card">
+      <!-- Üst dizine çıkıp profil resmini bulur -->
+      <img src="../assets/img/profile.webp" class="avatar" alt="SYVEX Profil">
+      <h1>SYVEX</h1>
+      <p class="role">Software & System Developer</p>
+
+      <div class="social">
+        <a href="https://www.tiktok.com/@syvexxa" target="_blank" rel="noopener" title="TikTok"><i class="fab fa-tiktok"></i></a>
+        <a href="https://dsc.gg/neonsoftware" target="_blank" rel="noopener" title="Discord"><i class="fab fa-discord"></i></a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Kar Efekti
+    const canvas = document.getElementById('snow-canvas');
+    const ctx = canvas.getContext('2d');
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const snowflakes = [];
+    for (let i = 0; i < 85; i++) {
+      snowflakes.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        radius: Math.random() * 3 + 1,
+        density: Math.random() * 20,
+        speed: Math.random() * 1 + 0.5
+      });
+    }
+
+    function drawSnow() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+      ctx.beginPath();
+      for (let i = 0; i < snowflakes.length; i++) {
+        let f = snowflakes[i];
+        ctx.moveTo(f.x, f.y);
+        ctx.arc(f.x, f.y, f.radius, 0, Math.PI * 2, true);
+      }
+      ctx.fill();
+      updateSnow();
+    }
+
+    let angle = 0;
+    function updateSnow() {
+      angle += 0.01;
+      for (let i = 0; i < snowflakes.length; i++) {
+        let f = snowflakes[i];
+        f.y += f.speed;
+        f.x += Math.sin(angle + f.density) * 0.5;
+        if (f.y > canvas.height) {
+          snowflakes[i] = { x: Math.random() * canvas.width, y: -10, radius: f.radius, density: f.density, speed: f.speed };
+        }
+      }
+    }
+    setInterval(drawSnow, 25);
+
+    // Açılış ve Video Tetikleme
+    let isPlaying = true;
+    const enterScreen = document.getElementById('enter-screen');
+    const mainContainer = document.getElementById('main-container');
+    const bgVideo = document.getElementById('bg-video');
+
+    function siteyiAc() {
+      enterScreen.style.opacity = '0';
+      enterScreen.style.visibility = 'hidden';
+      setTimeout(() => {
+        enterScreen.style.display = 'none';
+      }, 500);
+
+      mainContainer.classList.add('show');
+
+      bgVideo.muted = false;
+      bgVideo.play().catch(() => {
+        bgVideo.muted = true;
+        bgVideo.play().catch(() => {});
+        isPlaying = false;
+        document.getElementById('audio-text').innerText = 'Video Sesi: Kapalı';
+        document.getElementById('audio-icon').className = 'fas fa-volume-xmark';
+      });
+    }
+
+    function toggleAudio() {
+      if (isPlaying) {
+        bgVideo.muted = true;
+        document.getElementById('audio-text').innerText = 'Video Sesi: Kapalı';
+        document.getElementById('audio-icon').className = 'fas fa-volume-xmark';
+        isPlaying = false;
+      } else {
+        bgVideo.muted = false;
+        document.getElementById('audio-text').innerText = 'Video Sesi: Açık';
+        document.getElementById('audio-icon').className = 'fas fa-volume-high pulse-anim';
+        isPlaying = true;
+      }
+    }
+  </script>
+</body>
+</html>
