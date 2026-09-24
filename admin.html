@@ -7,14 +7,15 @@
     <style>
         :root {
             --bg-base: #010101;
-            --panel-bg: rgba(6, 6, 6, 0.94);
-            --border-color: rgba(255, 255, 255, 0.1);
-            --border-hover: rgba(255, 255, 255, 0.4);
+            --panel-bg: rgba(6, 6, 6, 0.92);
+            --border-color: rgba(255, 255, 255, 0.12);
+            --border-hover: rgba(255, 255, 255, 0.45);
             --text-main: #eaeaea;
-            --text-muted: #6e6e6e;
+            --text-muted: #737373;
             --accent: #ffffff;
             --danger: #ff2a2a;
             --success: #2aff7f;
+            --neon-glow: 0 0 20px rgba(255, 255, 255, 0.15);
         }
 
         * {
@@ -30,22 +31,30 @@
             padding: 25px;
             overflow-x: hidden;
             min-height: 100vh;
-            background-image: 
-                radial-gradient(circle at 50% 50%, #0c0c0c 0%, #010101 100%),
-                linear-gradient(rgba(255,255,255,0.015) 1px, transparent 1px);
-            background-size: 100% 100%, 100% 3px;
         }
 
+        /* VFX Canvas Arka Planı */
+        #vfxCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* Scanline Overlay */
         body::after {
             content: " ";
             display: block;
             position: fixed;
             top: 0; left: 0; bottom: 0; right: 0;
-            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.55) 50%);
-            background-size: 100% 2px;
+            background: linear-gradient(rgba(0,0,0,0) 50%, rgba(0, 0, 0, 0.6) 50%);
+            background-size: 100% 3px;
             z-index: 99999;
             pointer-events: none;
-            opacity: 0.3;
+            opacity: 0.25;
         }
 
         .watermark-syvex {
@@ -55,22 +64,22 @@
             font-family: 'Syncopate', sans-serif;
             font-size: 9px;
             letter-spacing: 3px;
-            color: rgba(255, 255, 255, 0.25);
+            color: rgba(255, 255, 255, 0.3);
             z-index: 100000;
             pointer-events: none;
             text-transform: uppercase;
-            border-left: 2px solid rgba(255, 255, 255, 0.2);
+            border-left: 2px solid rgba(255, 255, 255, 0.3);
             padding-left: 8px;
         }
 
         .strict-panel {
             background: var(--panel-bg);
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(15px);
             border: 1px solid var(--border-color);
             border-radius: 4px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95);
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.95), var(--neon-glow);
             position: relative;
-            overflow: hidden;
+            z-index: 2;
         }
 
         .strict-panel:hover {
@@ -91,7 +100,7 @@
         #bootScreen.fade-out { opacity: 0; visibility: hidden; }
 
         .boot-box {
-            border: 1px solid #222;
+            border: 1px solid #333;
             padding: 45px;
             width: 450px;
             text-align: center;
@@ -100,7 +109,7 @@
 
         .loading-bar-container {
             width: 100%; height: 3px; background: #111;
-            border: 1px solid #222; margin-top: 25px; overflow: hidden;
+            border: 1px solid #333; margin-top: 25px; overflow: hidden;
         }
         .loading-bar {
             width: 0%; height: 100%;
@@ -122,26 +131,26 @@
         }
 
         input, select {
-            background: #020202; border: 1px solid var(--border-color);
+            background: #030303; border: 1px solid var(--border-color);
             color: var(--accent); padding: 15px; border-radius: 2px;
             font-family: 'Share Tech Mono', monospace; font-size: 15px; width: 100%; margin-bottom: 15px; outline: none;
         }
         input:focus {
             border-color: var(--accent);
-            box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
-            background: #060606;
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.25);
+            background: #080808;
         }
 
         button {
             font-family: 'Syncopate', sans-serif;
-            background: #dadada;
+            background: #e0e0e0;
             color: #000000; border: none; padding: 15px 20px; border-radius: 2px;
             cursor: pointer; font-weight: 700; font-size: 11px; letter-spacing: 1.5px;
             text-transform: uppercase; width: 100%;
         }
         button:hover {
             background: #ffffff;
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.35);
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.45);
             transform: translateY(-2px);
         }
 
@@ -178,27 +187,30 @@
         th { color: var(--text-muted); font-size: 10px; font-family: 'Syncopate'; }
 
         .log-terminal {
-            background: #010101; color: #888; font-family: 'Share Tech Mono', monospace;
+            background: #020202; color: #999; font-family: 'Share Tech Mono', monospace;
             padding: 16px; border-radius: 2px; height: 320px; overflow-y: auto;
-            border: 1px solid #161616; font-size: 12px; line-height: 1.5;
+            border: 1px solid #1a1a1a; font-size: 12px; line-height: 1.5;
         }
-        .log-item { margin-bottom: 6px; border-bottom: 1px dotted #0d0d0d; padding-bottom: 4px; }
+        .log-item { margin-bottom: 6px; border-bottom: 1px dotted #111; padding-bottom: 4px; }
 
         .btn-action { background: transparent; border: 1px solid var(--border-color); color: var(--text-main); font-family: 'Share Tech Mono'; font-size: 11px; padding: 6px 10px; width: auto; margin-right: 4px; }
-        .btn-action:hover { border-color: var(--accent); background: rgba(255,255,255,0.06); color: #fff; transform: none; }
-        .btn-del-action { border-color: rgba(255,42,42,0.3); color: var(--danger); }
+        .btn-action:hover { border-color: var(--accent); background: rgba(255,255,255,0.08); color: #fff; transform: none; }
+        .btn-del-action { border-color: rgba(255,42,42,0.4); color: var(--danger); }
 
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <div class="watermark-syvex">POWERED BY SYVEX</div>
+    <!-- VFX Canvas Arka Plan Efekti -->
+    <canvas id="vfxCanvas"></canvas>
+
+    <div class="watermark-syvex">POWERED BY SYVEX // V7 KERNEL</div>
 
     <div id="bootScreen">
         <div class="boot-box strict-panel">
             <h3 style="font-size:11px; letter-spacing:3px; margin-top:0; color:#fff;">NEON SOFTWARE KERNEL V7</h3>
-            <p id="bootStatusText" style="font-size: 11px; color: var(--text-muted); margin: 15px 0;">Sistem modülleri yükleniyor...</p>
+            <p id="bootStatusText" style="font-size: 11px; color: var(--text-muted); margin: 15px 0;">Sistem modülleri ve VFX motoru başlatılıyor...</p>
             <div class="loading-bar-container">
                 <div class="loading-bar" id="loadingBar"></div>
             </div>
@@ -230,9 +242,9 @@
 
         <div class="grid-2">
             <div>
-                <!-- Lisans Üretme Paneli -->
+                <!-- Lisans Üretme Paneli (Yıl, Ay, Gün, Saat, Saniye Aktif) -->
                 <div class="panel-box strict-panel">
-                    <h3>NEON-XXXX Lisans Üretimi</h3>
+                    <h3>NEON-XXXX Lisans Üretimi (Süre Sistemi Aktif)</h3>
                     <div class="time-inputs-grid">
                         <div class="time-box"><label>YIL</label><input type="number" id="tYears" value="0"></div>
                         <div class="time-box"><label>AY</label><input type="number" id="tMonths" value="0"></div>
@@ -248,15 +260,15 @@
                     <h3>SİSTEM GÜNCELLEMESİ (UPDATE GETİR)</h3>
                     <p style="font-size:11px; color:var(--text-muted); margin-bottom:12px;">Yeni .exe veya .cpp güncelleme dosyasını seçip sisteme yükleyin.</p>
                     <input type="text" id="updateVersion" placeholder="Sürüm Kodu (Örn: v1.2.0)" value="v1.2.0">
-                    <input type="file" id="updateFile" style="padding:10px; background:#020202; margin-bottom:15px; color:#fff;">
+                    <input type="file" id="updateFile" style="padding:10px; background:#030303; margin-bottom:15px; color:#fff;">
                     <button onclick="updateGetirYukle()" style="background: #fff; color: #000;">UPDATE GETİR & YÜKLE</button>
                 </div>
 
                 <div class="panel-box strict-panel">
                     <h3>Veritabanı Lisans Listesi</h3>
-                    <div style="max-height: 200px; overflow-y: auto;">
+                    <div style="max-height: 220px; overflow-y: auto;">
                         <table>
-                            <thead><tr><th>ANAHTAR</th><th>SÜRE</th><th>HWID</th><th>İŞLEMLER</th></tr></thead>
+                            <thead><tr><th>ANAHTAR</th><th>BİTİŞ SÜRESİ</th><th>HWID</th><th>İŞLEMLER</th></tr></thead>
                             <tbody id="keyList"></tbody>
                         </table>
                     </div>
@@ -266,7 +278,7 @@
             <div>
                 <div class="panel-box strict-panel">
                     <h3>Canlı Sistem Logları & Sürüm Kontrolü</h3>
-                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">API ve Panel sürüm uyumsuzlukları loglara yansıtılır.</p>
+                    <p style="font-size: 11px; color: var(--text-muted); margin-bottom: 12px;">API, HWID eşleşmeleri ve sürüm uyumsuzlukları loglanır.</p>
                     <div class="log-terminal" id="logTerminal"></div>
                 </div>
             </div>
@@ -275,26 +287,93 @@
 </div>
 
 <script>
-    window.addEventListener('DOMContentLoaded', () => {
+    // --- VFX KANVAS MOTORU (Matris / Siber Parçacık Efekti) ---
+    const canvas = document.getElementById('vfxCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    for (let i = 0; i < 65; i++) {
+        particles.push({
+            x: Math.random() * canvas.width,
+            y: Math.random() * canvas.height,
+            vx: (Math.random() - 0.5) * 0.6,
+            vy: (Math.random() - 0.5) * 0.6,
+            size: Math.random() * 1.5 + 0.5
+        });
+    }
+
+    function animateVFX() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.35)';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+
+        particles.forEach((p, index) => {
+            p.x += p.vx;
+            p.y += p.vy;
+
+            if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
+            if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
+
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fill();
+
+            for (let j = index + 1; j < particles.length; j++) {
+                let p2 = particles[j];
+                let dist = Math.hypot(p.x - p2.x, p.y - p2.y);
+                if (dist < 120) {
+                    ctx.beginPath();
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p2.x, p2.y);
+                    ctx.stroke();
+                }
+            }
+        });
+        requestAnimationFrame(animateVFX);
+    }
+    animateVFX();
+
+    // --- SİSTEM BAŞLANGIÇ VE OTURUM YÖNETİMİ ---
+    const API_URL = "api.php";
+    const PANEL_VERSION = "v1.2.0";
+    const VALID_ADMIN_KEYS = ["SYVEX", "BQWET", "UFC", "NEONBEST31"];
+    let currentAdminToken = sessionStorage.getItem('neon_admin_token') || "NEONBEST31";
+    let autoRefreshTimer = null;
+
+    window.addEventListener('DOMContentLoaded', async () => {
         let bar = document.getElementById('loadingBar');
-        let status = document.getElementById('bootStatusText');
         let width = 0;
-        let interval = setInterval(() => {
-            width += 15;
+        let interval = setInterval(async () => {
+            width += 20;
             bar.style.width = width + '%';
             if (width >= 100) {
                 clearInterval(interval);
                 document.getElementById('bootScreen').classList.add('fade-out');
-                document.getElementById('loginSection').classList.remove('hidden');
+
+                // F5 atıldığında oturumun gitmemesi için token doğrulaması
+                if (VALID_ADMIN_KEYS.includes(currentAdminToken)) {
+                    let data = await sendApiRequest('admin_get_all');
+                    if (data && data.status === 'success') {
+                        document.getElementById('loginSection').classList.add('hidden');
+                        document.getElementById('panelSection').classList.remove('hidden');
+                        paneliDoldur(data);
+                        baslatCanliYenileme();
+                    } else {
+                        document.getElementById('loginSection').classList.remove('hidden');
+                    }
+                } else {
+                    document.getElementById('loginSection').classList.remove('hidden');
+                }
             }
         }, 30);
     });
-
-    const API_URL = "https://neonsoftwarecrackme.onrender.com/api.php";
-    const PANEL_VERSION = "v1.2.0"; // Panel sürümü
-    const VALID_ADMIN_KEYS = ["SYVEX", "BQWET", "UFC", "NEONBEST31"];
-    let currentAdminToken = "NEONBEST31";
-    let autoRefreshTimer = null;
 
     async function sendApiRequest(action, extraParams = {}) {
         let params = { admin_token: currentAdminToken, action: action, panel_version: PANEL_VERSION, ...extraParams };
@@ -314,17 +393,15 @@
     async function girisYap() {
         let val = document.getElementById('adminKeyInput').value.trim().toUpperCase();
         if (VALID_ADMIN_KEYS.includes(val)) {
-            currentAdminToken = val; 
+            currentAdminToken = val;
+            sessionStorage.setItem('neon_admin_token', val); // F5 sorununu çözen oturum kaydı
             let data = await sendApiRequest('admin_get_all');
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('panelSection').classList.remove('hidden');
-            
-            if (data) paneliDoldur(data);
-
-            autoRefreshTimer = setInterval(async () => {
-                let freshData = await sendApiRequest('admin_get_all');
-                if (freshData) paneliDoldur(freshData);
-            }, 3000);
+            if (data) {
+                document.getElementById('loginSection').classList.add('hidden');
+                document.getElementById('panelSection').classList.remove('hidden');
+                paneliDoldur(data);
+                baslatCanliYenileme();
+            }
         } else {
             document.getElementById('loginError').innerText = "ERİŞİM REDDEDİLDİ: Geçersiz Admin Key!";
         }
@@ -332,8 +409,17 @@
 
     function cikisYap() {
         clearInterval(autoRefreshTimer);
+        sessionStorage.removeItem('neon_admin_token');
         document.getElementById('panelSection').classList.add('hidden');
         document.getElementById('loginSection').classList.remove('hidden');
+    }
+
+    function baslatCanliYenileme() {
+        if (autoRefreshTimer) clearInterval(autoRefreshTimer);
+        autoRefreshTimer = setInterval(async () => {
+            let freshData = await sendApiRequest('admin_get_all');
+            if (freshData) paneliDoldur(freshData);
+        }, 3000);
     }
 
     function paneliDoldur(data) {
@@ -341,11 +427,11 @@
         let logs = data.logs || [];
         
         document.getElementById('statTotalKeys').innerText = licenses.length;
-        document.getElementById('statActiveHwid').innerText = licenses.filter(l => l.hwid).length;
+        document.getElementById('statActiveHwid').innerText = licenses.filter(l => l.hwid && l.hwid !== '').length;
         document.getElementById('statTotalReq').innerText = logs.length;
 
         const tbody = document.getElementById('keyList');
-        tbody.innerHTML = licenses.length === 0 ? `<tr><td colspan="4" style="text-align:center;">Kayıt yok.</td></tr>` : '';
+        tbody.innerHTML = licenses.length === 0 ? `<tr><td colspan="4" style="text-align:center;">Veritabanında kayıtlı lisans yok.</td></tr>` : '';
         licenses.forEach(l => {
             tbody.innerHTML += `<tr>
                 <td style="color:#fff; font-weight:bold;">${l.license_key}</td>
@@ -363,8 +449,8 @@
         logs.forEach(log => {
             let color = log.status === 'success' ? '#fff' : 'var(--danger)';
             terminal.innerHTML += `<div class="log-item">
-                <span style="color:#444;">[${log.date}]</span> 
-                <span style="color:#777;">IP: ${log.ip}</span> 
+                <span style="color:#555;">[${log.date}]</span> 
+                <span style="color:#888;">IP: ${log.ip}</span> 
                 <span style="color:#fff;">[${log.action}]</span> ➔ 
                 <span style="color:${color};">${log.status.toUpperCase()}</span>
                 ${log.version_warning ? `<br><span style="color:var(--danger); font-size:10px;">⚠️ ${log.version_warning}</span>` : ''}
@@ -376,7 +462,7 @@
         let fileInput = document.getElementById('updateFile');
         let versionInput = document.getElementById('updateVersion').value;
         if (fileInput.files.length === 0) {
-            alert("Lütfen yüklenecek bir .exe veya .cpp dosyası seçin!");
+            alert("Lütfen yüklenecek .exe veya .cpp dosyası seçin!");
             return;
         }
         let file = fileInput.files[0];
@@ -389,7 +475,7 @@
                 file_content: base64Data
             });
             if (res && res.status === 'success') {
-                alert("UPDATE GETİR: Güncelleme başarıyla API'ye yüklendi ve loglara işlendi!");
+                alert("GÜNCELLEME BAŞARILI: Dosya yüklendi ve loglandı!");
             } else {
                 alert("Güncelleme yüklenirken hata oluştu.");
             }
@@ -397,12 +483,41 @@
         reader.readAsDataURL(file);
     }
 
-    async function hwidSifirla(id) { await sendApiRequest('admin_reset_hwid', { id: id }); alert("İşlem başarılı."); }
-    async function keySil(id) { await sendApiRequest('admin_delete_license', { id: id }); alert("Silindi."); }
+    async function hwidSifirla(id) {
+        await sendApiRequest('admin_reset_hwid', { id: id });
+        let data = await sendApiRequest('admin_get_all');
+        if(data) paneliDoldur(data);
+    }
+
+    async function keySil(id) {
+        await sendApiRequest('admin_delete_license', { id: id });
+        let data = await sendApiRequest('admin_get_all');
+        if(data) paneliDoldur(data);
+    }
+
     async function keyEkle() {
-        let days = parseInt(document.getElementById('tDays').value) || 30;
-        await sendApiRequest('admin_generate_keys', { prefix: "NEON", count: 1, days: days });
-        alert("Yeni lisans oluşturuldu.");
+        let years = parseInt(document.getElementById('tYears').value) || 0;
+        let months = parseInt(document.getElementById('tMonths').value) || 0;
+        let days = parseInt(document.getElementById('tDays').value) || 0;
+        let hours = parseInt(document.getElementById('tHours').value) || 0;
+        let seconds = parseInt(document.getElementById('tSeconds').value) || 0;
+
+        let res = await sendApiRequest('admin_generate_keys', { 
+            count: 1, 
+            years: years, 
+            months: months, 
+            days: days, 
+            hours: hours, 
+            seconds: seconds 
+        });
+
+        if (res && res.status === 'success') {
+            let data = await sendApiRequest('admin_get_all');
+            if (data) paneliDoldur(data);
+            alert("Yeni lisans başarıyla oluşturuldu.");
+        } else {
+            alert("Lisans üretilirken hata oluştu.");
+        }
     }
 </script>
 </body>
