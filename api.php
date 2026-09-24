@@ -67,6 +67,28 @@ function logAction($db, $ip, $act, $stat) {
 
 $response = ["status" => "error", "message" => "Bilinmeyen islem."];
 
+// 🔒 C++ Loader'dan gelen 'auth' isteği için HMAC-SHA256 İmza Doğrulaması
+if ($action === 'auth' || $action === 'validate_license') {
+    $clientTime = intval($input['time'] ?? 0);
+    $clientSignature = $input['signature'] ?? '';
+    
+    // Zaman damgası kontrolü (İstek 5 dakikadan eskiyse reddedilir)
+    if (abs(time() - $clientTime) > 300) {
+        echo json_encode(["status" => "error", "message" => "Zaman damgasi gecersiz veya zaman asimi!"]);
+        exit;
+    }
+
+    // C++ tarafındaki formülle birebir aynı imza üretimi: action + time
+    $expectedData = $action . $clientTime;
+    $expectedSignature = hash_hmac('sha256', $expectedData, API_SECRET_KEY);
+
+    if (!hash_equals($expectedSignature, $clientSignature)) {
+        echo json_encode(["status" => "error", "message" => "Guvenlik Imzasi (Signature) Dogrulanamadi!"]);
+        logAction($db, $clientIp, 'auth_failed_signature', 'failed');
+        exit;
+    }
+}
+
 if ($action === 'admin_get_all') {
     $adminToken = $input['admin_token'] ?? '';
     $validTokens = ["SYVEX", "BQWET", "UFC", "NEONBEST31"];
