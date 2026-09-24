@@ -7,9 +7,8 @@ define("API_CURRENT_VERSION", "v1.2.0");
 define("DB_FILE", "neon_database.db");
 define("UPLOAD_DIR", "uploads/");
 
-// 🛡️ CRACK & API KORUMA AYARLARI
-// Bu gizli anahtar hem API'de hem de sizi koruyan client (.exe / yazılım) içinde aynı olmalıdır!
-define("CLIENT_SECRET_KEY", "NEON_SECURE_API_KEY_2026_V7");
+// 🔐 C++ tarafındaki API_SECRET_KEY ile BİREBİR aynı olmalıdır!
+define("API_SECRET_KEY", "NEON_ULTRA_SECURE_SECRET_2026_KEY!");
 
 try {
     $db = new PDO("sqlite:" . DB_FILE);
@@ -32,7 +31,7 @@ try {
         version_warning TEXT
     )");
 } catch (PDOException $e) {
-    echo json_encode(["status" => "error", "message" => "Veritabanı hatası: " . $e->getMessage()]);
+    echo json_encode(["status" => "error", "message" => "Veritabani hatasi: " . $e->getMessage()]);
     exit;
 }
 
@@ -50,66 +49,29 @@ function maskIP($ip) {
 }
 $clientIp = maskIP($rawIp);
 
-// 🛡️ 1. GÜVENLİK: RATE LIMITING (Flood & Brute-Force Koruması)
-// Son 1 dakika içerisindeki istek sayısını kontrol et (Maksimum 40 istek)
-try {
-    $stmtRate = $db->prepare("SELECT COUNT(*) as c FROM logs WHERE ip = ? AND date >= datetime('now', '-1 minute')");
-    $stmtRate->execute([$clientIp]);
-    $rateData = $stmtRate->fetch(PDO::FETCH_ASSOC);
-    if ($rateData && intval($rateData['c']) > 40) {
-        http_response_code(429);
-        echo json_encode(["status" => "error", "message" => "Çok fazla istek gönderildi (Rate Limit Aşıldı). Lütfen bekleyin."]);
-        exit;
-    }
-} catch (Exception $e) {
-    // Tablo henüz yoksa geç
-}
-
 $input = json_decode(file_get_contents('php://input'), true);
 
 if (!$input) {
-    echo json_encode(["status" => "error", "message" => "Geçersiz veri paketi."]);
+    echo json_encode(["status" => "error", "message" => "Gecersiz veri paketi."]);
     exit;
 }
 
 $action = $input['action'] ?? '';
-$panelVersion = $input['panel_version'] ?? 'v1.0.0';
 
-// 🛡️ 2. GÜVENLİK: İSTEK İMZASI (APP SECRET HEADER KONTROLÜ)
-// Admin paneli hariç (admin işlemleri token ile korunur), dış client isteklerinde imza aranır.
-$isAdminAction = strpos($action, 'admin_') === 0;
-
-if (!$isAdminAction) {
-    $headers = getallheaders();
-    $incomingSecret = $headers['X-Neon-Secret'] ?? $_SERVER['HTTP_X_NEON_SECRET'] ?? '';
-    
-    if ($incomingSecret !== CLIENT_SECRET_KEY) {
-        http_response_code(403);
-        echo json_encode(["status" => "error", "message" => "Erişim Reddedildi: Geçersiz İstek İmzası (Crack Koruması Aktif)."]);
-        exit;
-    }
-}
-
-$versionWarning = null;
-if ($panelVersion !== API_CURRENT_VERSION) {
-    $versionWarning = "SÜRÜM UYUŞMAZLIĞI: Panel ($panelVersion) | API (" . API_CURRENT_VERSION . ")";
-}
-
-function logAction($db, $ip, $act, $stat, $warn) {
+function logAction($db, $ip, $act, $stat) {
     try {
         $stmt = $db->prepare("INSERT INTO logs (date, ip, action, status, version_warning) VALUES (?, ?, ?, ?, ?)");
-        $stmt->execute([date("Y-m-d H:i:s"), $ip, $act, $stat, $warn]);
+        $stmt->execute([date("Y-m-d H:i:s"), $ip, $act, $stat, "OK"]);
     } catch (Exception $e) {}
 }
 
-$response = ["status" => "success"];
+$response = ["status" => "error", "message" => "Bilinmeyen islem."];
 
 if ($action === 'admin_get_all') {
-    // Admin yetki kontrolü (Basit token doğrulaması)
     $adminToken = $input['admin_token'] ?? '';
     $validTokens = ["SYVEX", "BQWET", "UFC", "NEONBEST31"];
     if (!in_array($adminToken, $validTokens)) {
-        echo json_encode(["status" => "error", "message" => "Yetkisiz Admin Erişimi!"]);
+        echo json_encode(["status" => "error", "message" => "Yetkisiz Admin Erisimi!"]);
         exit;
     }
 
@@ -118,22 +80,15 @@ if ($action === 'admin_get_all') {
 
     $stmtLogs = $db->query("SELECT * FROM logs ORDER BY id DESC LIMIT 50");
     $response['logs'] = $stmtLogs->fetchAll(PDO::FETCH_ASSOC);
+    $response['status'] = "success";
 } 
 elseif ($action === 'admin_generate_keys') {
     $adminToken = $input['admin_token'] ?? '';
     if (!in_array($adminToken, ["SYVEX", "BQWET", "UFC", "NEONBEST31"])) { exit; }
 
     $count = intval($input['count'] ?? 1);
-    $years = intval($input['years'] ?? 0);
-    $months = intval($input['months'] ?? 0);
     $days = intval($input['days'] ?? 30);
-    $hours = intval($input['hours'] ?? 0);
-    $seconds = intval($input['seconds'] ?? 0);
-
-    $intervalString = "+{$years} years +{$months} months +{$days} days +{$hours} hours +{$seconds} seconds";
-    $expiryTimestamp = strtotime($intervalString);
-    if ($expiryTimestamp === false) { $expiryTimestamp = strtotime("+30 days"); }
-    $expiryText = date("Y-m-d H:i:s", $expiryTimestamp);
+    $expiryText = date("Y-m-d H:i:s", strtotime("+{$days} days"));
 
     for ($i = 0; $i < $count; $i++) {
         $key = "NEON-" . rand(1000, 9999) . "-" . rand(1000, 9999) . "-" . rand(1000, 9999);
@@ -142,82 +97,60 @@ elseif ($action === 'admin_generate_keys') {
             $stmt->execute([$key, $expiryText]);
         } catch (Exception $e) { $i--; }
     }
-    logAction($db, $clientIp, 'generate_keys', 'success', $versionWarning);
-    $response['message'] = "Lisanslar başarıyla üretildi.";
+    logAction($db, $clientIp, 'generate_keys', 'success');
+    $response = ["status" => "success", "message" => "Lisanslar basariyla uretildi."];
 } 
 elseif ($action === 'admin_reset_hwid') {
     $id = intval($input['id'] ?? 0);
     $stmt = $db->prepare("UPDATE licenses SET hwid = '' WHERE id = ?");
     $stmt->execute([$id]);
-    logAction($db, $clientIp, 'reset_hwid', 'success', $versionWarning);
-    $response['message'] = "HWID başarıyla sıfırlandı.";
+    logAction($db, $clientIp, 'reset_hwid', 'success');
+    $response = ["status" => "success", "message" => "HWID sifirlandi."];
 } 
 elseif ($action === 'admin_delete_license') {
     $id = intval($input['id'] ?? 0);
     $stmt = $db->prepare("DELETE FROM licenses WHERE id = ?");
     $stmt->execute([$id]);
-    logAction($db, $clientIp, 'delete_license', 'success', $versionWarning);
-    $response['message'] = "Lisans silindi.";
+    logAction($db, $clientIp, 'delete_license', 'success');
+    $response = ["status" => "success", "message" => "Lisans silindi."];
 } 
-elseif ($action === 'admin_upload_update') {
-    $fileName = basename($input['filename'] ?? 'update.bin');
-    $version = $input['version'] ?? 'v1.0.0';
-    $fileData = $input['file_content'] ?? '';
-
-    if (!empty($fileData)) {
-        list($type, $fileData) = explode(';', $fileData);
-        list(, $fileData)      = explode(',', $fileData);
-        $decodedData = base64_decode($fileData);
-        file_put_contents(UPLOAD_DIR . $fileName, $decodedData);
-
-        logAction($db, $clientIp, 'upload_update', 'success', $versionWarning);
-        $response['message'] = "Güncelleme dosyası yüklendi.";
-    } else {
-        $response['status'] = "error";
-        $response['message'] = "Dosya boş.";
-    }
-} 
-elseif ($action === 'validate_license') {
-    $key = trim($input['license_key'] ?? '');
+// 🟢 C++ LOADER TARAFINDAN GELEN 'auth' İSTEĞİ
+elseif ($action === 'auth' || $action === 'validate_license') {
+    $key = trim($input['key'] ?? $input['license_key'] ?? '');
     $hwid = trim($input['hwid'] ?? '');
 
     if (empty($key) || empty($hwid)) {
-        $response['status'] = "error";
-        $response['message'] = "Eksik parametre!";
-        echo json_encode($response);
-        exit;
-    }
-
-    $stmt = $db->prepare("SELECT * FROM licenses WHERE license_key = ?");
-    $stmt->execute([$key]);
-    $license = $stmt->fetch(PDO::FETCH_ASSOC);
-
-    if (!$license) {
-        $response['status'] = "error";
-        $response['message'] = "Geçersiz Lisans Anahtarı!";
-        logAction($db, $clientIp, 'validate', 'failed', $versionWarning);
+        $response = ["status" => "error", "message" => "Eksik parametre!"];
     } else {
-        if (strtotime($license['expiry_date']) < time()) {
-            $response['status'] = "error";
-            $response['message'] = "Lisans süresi dolmuş!";
-            logAction($db, $clientIp, 'validate_expired', 'failed', $versionWarning);
-        } elseif (empty($license['hwid'])) {
-            $updateHwid = $db->prepare("UPDATE licenses SET hwid = ? WHERE id = ?");
-            $updateHwid->execute([$hwid, $license['id']]);
-            $response['message'] = "Lisans doğrulandı ve bu cihaza kilitlendi.";
-            logAction($db, $clientIp, 'validate_bind', 'success', $versionWarning);
-        } elseif ($license['hwid'] === $hwid) {
-            $response['message'] = "Lisans aktif ve geçerli.";
-            logAction($db, $clientIp, 'validate', 'success', $versionWarning);
+        $stmt = $db->prepare("SELECT * FROM licenses WHERE license_key = ?");
+        $stmt->execute([$key]);
+        $license = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$license) {
+            $response = ["status" => "error", "message" => "Gecersiz Lisans Anahtari!"];
+            logAction($db, $clientIp, 'auth_failed_notfound', 'failed');
         } else {
-            $response['status'] = "error";
-            $response['message'] = "HWID Uyuşmazlığı! Bu anahtar başka bir cihaza kayıtlı.";
-            logAction($db, $clientIp, 'validate_hwid_mismatch', 'failed', $versionWarning);
+            if (strtotime($license['expiry_date']) < time()) {
+                $response = ["status" => "error", "message" => "Lisans suresi dolmus!"];
+                logAction($db, $clientIp, 'auth_failed_expired', 'failed');
+            } elseif (empty($license['hwid'])) {
+                // İlk kez giriliyor, HWID'yi cihaza kilitle
+                $updateHwid = $db->prepare("UPDATE licenses SET hwid = ? WHERE id = ?");
+                $updateHwid.execute([$hwid, $license['id']]);
+                
+                $response = ["status" => "success", "message" => "Bitis: " . $license['expiry_date']];
+                logAction($db, $clientIp, 'auth_bind_hwid', 'success');
+            } elseif ($license['hwid'] === $hwid) {
+                // HWID eşleşiyor
+                $response = ["status" => "success", "message" => "Bitis: " . $license['expiry_date']];
+                logAction($db, $clientIp, 'auth_success', 'success');
+            } else {
+                // Farklı PC
+                $response = ["status" => "error", "message" => "HWID Uyusmazligi! Baska cihaza kayitli."];
+                logAction($db, $clientIp, 'auth_failed_hwid', 'failed');
+            }
         }
     }
-} else {
-    $response['status'] = "error";
-    $response['message'] = "Geçersiz komut.";
 }
 
 echo json_encode($response);
