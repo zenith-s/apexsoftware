@@ -27,7 +27,7 @@
 </head>
 <body class="bg-[#090909] text-gray-200" oncontextmenu="return false;">
 
-    <!-- GİRİŞ & KAYIT EKRANI (Gerçek Mail Zorunlu & Temp Mail Engelli) -->
+    <!-- GİRİŞ & KAYIT EKRANI -->
     <div id="auth-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
         <div class="bg-[#121212] p-8 rounded-3xl border border-[#262626] neon-border w-full max-w-md text-center fade-in shadow-2xl relative">
             <div class="inline-block p-4 rounded-2xl bg-black border border-[#FFD700] mb-4 shadow-[0_0_20px_rgba(255,215,0,0.3)]">
@@ -94,7 +94,7 @@
         </div>
     </div>
 
-    <!-- ANA DASHBOARD (Turkcord Birebir Arayüz) -->
+    <!-- ANA DASHBOARD -->
     <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-700 pointer-events-none">
         
         <!-- Sol İkon Barı -->
@@ -123,9 +123,6 @@
                 <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#161616] text-[#FFD700] font-semibold text-xs border border-[#333]"><i class="fa-solid fa-podcast text-xs"></i> Canlı yayınlar</a>
                 <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-chart-bar text-xs"></i> Genel sayılar</a>
                 <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-fire text-xs"></i> En aktif sunucular</a>
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-users text-xs"></i> En aktif üyeler</a>
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-gamepad text-xs"></i> En çok oynananlar</a>
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-radio text-xs"></i> Radyo</a>
             </div>
         </div>
 
@@ -133,14 +130,11 @@
         <div class="flex-1 flex flex-col bg-[#0c0c0c] overflow-y-auto p-8 gap-6">
             <div class="bg-[#121212] border border-[#222] rounded-3xl p-6 flex items-center justify-between shadow-xl relative">
                 <div>
-                    <p class="text-xs text-gray-400 mb-1">Günaydın,</p>
+                    <p class="text-xs text-gray-400 mb-1">Hoş geldin,</p>
                     <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
                         <span id="welcome-username" class="text-[#FFD700] neon-glow">Kullanıcı</span> 👋
                     </h2>
                     <p class="text-xs text-gray-400 mt-2">NeonCord Home — tüm sunucuların nabzı, tek ekranda.</p>
-                </div>
-                <div class="bg-black/60 border border-[#262626] px-4 py-3 rounded-2xl text-center">
-                    <div class="text-xs text-green-400 font-bold flex items-center gap-1.5 justify-center"><i class="fa-solid fa-circle text-[6px] animate-ping"></i> <span id="online-count">1</span> kişi çevrimiçi</div>
                 </div>
             </div>
 
@@ -150,7 +144,7 @@
                     <button onclick="openEventModal()" class="text-xs btn-yellow px-3 py-1.5 rounded-xl"><i class="fa-solid fa-plus mr-1"></i> Etkinlik Oluştur</button>
                 </div>
                 <div id="events-grid" class="grid grid-cols-2 gap-4">
-                    <!-- Dinamik etkinlikler buraya dolacak -->
+                    <!-- Dinamik etkinlikler -->
                 </div>
             </div>
         </div>
@@ -179,11 +173,12 @@
                 document.getElementById('auth-user').setAttribute('required', 'true');
             }
         }
-        switchTab('login'); // Başlangıç login
+        switchTab('login');
 
         function openEventModal() { document.getElementById('event-modal').classList.remove('hidden'); }
         function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
 
+        // Doğru api.php yolu (index.html ile aynı dizinde olmalı)
         const API_URL = 'api.php';
 
         document.getElementById('auth-form').onsubmit = async (e) => {
@@ -217,7 +212,7 @@
                     errorDiv.textContent = result.message;
                 }
             } catch (err) {
-                errorDiv.textContent = "Sunucu bağlantı hatası!";
+                errorDiv.textContent = "Sunucu bağlantı hatası! api.php dosyasını kontrol et.";
             }
         };
 
@@ -238,7 +233,7 @@
             if (data.success) {
                 closeEventModal();
                 loadEvents();
-                alert("Etkinlik başarıyla oluşturuldu ve Discord Webhook'a iletildi! (12 saat sonra otomatik silinecek)");
+                alert("Etkinlik başarıyla oluşturuldu ve Discord Webhook'a iletildi!");
             } else {
                 errDiv.textContent = data.message;
             }
@@ -258,7 +253,7 @@
                     grid.innerHTML += `
                         <div class="bg-[#121212] border border-[#222] hover:border-[#FFD700]/50 transition-all rounded-3xl p-5 flex flex-col justify-between h-44 shadow-lg">
                             <div class="flex justify-between items-center">
-                                <span class="bg-red-600/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1">
+                                <span class="bg-red-600/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
                                     <i class="fa-solid fa-circle text-[4px]"></i> ${ev.is_private == 1 ? 'Gizli (Private) Sunucu' : 'Aktif Etkinlik'}
                                 </span>
                                 <span class="text-gray-400 text-[10px]">Kalan: ${ev.remaining_hours} sa</span>
@@ -268,7 +263,7 @@
                                 <p class="text-[11px] text-gray-400 mt-1">${ev.description}</p>
                             </div>
                             <div class="text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-[#1a1a1a] pt-3">
-                                <i class="fa-solid fa-user-shield text-[#FFD700]"></i> Oluşturan IP / ID Korumalı
+                                <i class="fa-solid fa-user-shield text-[#FFD700]"></i> Güvenli IP Doğrulandı
                             </div>
                         </div>
                     `;
