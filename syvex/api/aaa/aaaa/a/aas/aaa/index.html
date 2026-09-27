@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonCord - Güvenli & Full Animasyonlu</title>
+    <title>NeonCord - Sunucu & Hesap Yönetimi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -30,7 +30,7 @@
                 <i class="fa-solid fa-bolt text-4xl text-[#FFD700] animate-bounce"></i>
             </div>
             <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord</h1>
-            <p class="text-gray-400 text-xs mb-6">XOR Korumalı & Otomatik Moderasyonlu Özel Platform</p>
+            <p class="text-gray-400 text-xs mb-6">Hesap Geçmişi & Özel Sunucu Kurma Destekli</p>
             
             <form id="auth-form" class="space-y-4 text-left">
                 <div>
@@ -57,16 +57,35 @@
         </div>
     </div>
 
+    <!-- SUNUCU OLUŞTURMA MODALI -->
+    <div id="server-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-sm text-center fade-in">
+            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Yeni Sunucu / Oda Kur</h3>
+            <p class="text-xs text-gray-400 mb-4">Özel davet linkin otomatik olarak oluşturulacaktır.</p>
+            <input type="text" id="server-name-input" placeholder="Sunucu Adı (Örn: CS2 Topluluk)" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
+            <div id="invite-result" class="text-xs text-green-400 font-mono bg-black/50 p-2 rounded-lg mb-4 hidden"></div>
+            <div class="flex gap-2">
+                <button type="button" id="close-server-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm font-bold hover:bg-[#333]">İptal</button>
+                <button type="button" id="submit-server-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Oluştur</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ANA UYGULAMA -->
     <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-500 pointer-events-none">
         <div class="w-64 bg-[#070707] border-r border-[#222] flex flex-col justify-between p-4">
             <div>
-                <div class="flex items-center gap-2 pb-4 mb-4 border-b border-[#222]">
-                    <i class="fa-solid fa-bolt text-[#FFD700] text-xl"></i>
-                    <h2 class="text-lg font-bold text-[#FFD700] neon-glow">NeonCord</h2>
+                <div class="flex items-center justify-between pb-4 mb-4 border-b border-[#222]">
+                    <div class="flex items-center gap-2">
+                        <i class="fa-solid fa-bolt text-[#FFD700] text-xl"></i>
+                        <h2 class="text-lg font-bold text-[#FFD700] neon-glow">NeonCord</h2>
+                    </div>
+                    <button id="open-server-modal-btn" class="text-gray-400 hover:text-[#FFD700] transition-colors p-1" title="Sunucu Oluştur">
+                        <i class="fa-solid fa-plus text-sm"></i>
+                    </button>
                 </div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kanallar</div>
-                <div class="space-y-1">
+                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kanallar & Sunucular</div>
+                <div id="channels-list" class="space-y-1">
                     <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1a1a1a] text-[#FFD700] font-semibold cursor-pointer border border-[#333]">
                         <i class="fa-solid fa-hashtag"></i> genel-sohbet
                     </div>
@@ -80,7 +99,7 @@
                 <div class="overflow-hidden">
                     <div id="display-username" class="text-sm font-bold text-white truncate">Misafir</div>
                     <div class="text-[10px] text-green-400 flex items-center gap-1">
-                        <i class="fa-solid fa-circle text-[6px]"></i> XOR Korumalı Bağlantı
+                        <i class="fa-solid fa-circle text-[6px]"></i> Sunucu Kayıtlı
                     </div>
                 </div>
             </div>
@@ -97,7 +116,7 @@
             </div>
 
             <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <div class="text-center text-gray-500 text-xs my-2">--- Güvenli Sohbet Alanı ---</div>
+                <div class="text-center text-gray-500 text-xs my-2">--- Hesap Geçmişi Yüklendi ---</div>
             </div>
 
             <div class="p-4 bg-[#090909] border-t border-[#222]">
@@ -114,7 +133,6 @@
 
     <script>
         const API_URL = 'api.php';
-        // Özel XOR tabanlı client token üretimi
         const CLIENT_TOKEN = btoa('NeonCordValidClient');
 
         const authOverlay = document.getElementById('auth-overlay');
@@ -126,6 +144,14 @@
         const chatMessages = document.getElementById('chat-messages');
         const timeoutBanner = document.getElementById('timeout-banner');
         const timeoutTimer = document.getElementById('timeout-timer');
+        
+        const serverModal = document.getElementById('server-modal');
+        const openServerModalBtn = document.getElementById('open-server-modal-btn');
+        const closeServerModal = document.getElementById('close-server-modal');
+        const submitServerBtn = document.getElementById('submit-server-btn');
+        const serverNameInput = document.getElementById('server-name-input');
+        const inviteResult = document.getElementById('invite-result');
+        const channelsList = document.getElementById('channels-list');
 
         let currentUser = null;
         let isTimedOut = false;
@@ -136,7 +162,7 @@
             const password = document.getElementById('auth-pass').value;
             const avatar = document.getElementById('auth-avatar').value.trim();
 
-            authError.textContent = "XOR doğrulaması yapılıyor...";
+            authError.textContent = "Hesap verileri yükleniyor...";
 
             try {
                 const response = await fetch(API_URL, {
@@ -155,6 +181,20 @@
                         document.getElementById('user-avatar-box').innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
                     }
 
+                    // Hesap geçmişindeki mesajları ekrana bas
+                    if (currentUser.messages && currentUser.messages.length > 0) {
+                        currentUser.messages.forEach(m => {
+                            appendMessageHTML(currentUser.username, currentUser.avatar, m.text, m.time);
+                        });
+                    }
+
+                    // Sunucuları listeye ekle
+                    if (currentUser.servers && currentUser.servers.length > 0) {
+                        currentUser.servers.forEach(s => {
+                            addServerToList(s.name);
+                        });
+                    }
+
                     authOverlay.classList.add('opacity-0', 'transition-opacity', 'duration-500');
                     setTimeout(() => {
                         authOverlay.style.display = 'none';
@@ -166,9 +206,41 @@
                 }
             } catch (err) {
                 console.error(err);
-                authError.textContent = "API'ye bağlanırken hata oluştu!";
+                authError.textContent = "Sunucu bağlantı hatası!";
             }
         });
+
+        // Sunucu Kurma Modal Kontrolleri
+        openServerModalBtn.addEventListener('click', () => serverModal.classList.remove('hidden'));
+        closeServerModal.addEventListener('click', () => { serverModal.classList.add('hidden'); inviteResult.classList.add('hidden'); serverNameInput.value = ''; });
+
+        submitServerBtn.addEventListener('click', async () => {
+            const serverName = serverNameInput.value.trim();
+            if (!serverName) return;
+
+            try {
+                const res = await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'create_server', username: currentUser.username, server_name: serverName, token: CLIENT_TOKEN })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    inviteResult.textContent = "Davet Linki: " + data.invite;
+                    inviteResult.classList.remove('hidden');
+                    addServerToList(serverName);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+
+        function addServerToList(name) {
+            const html = `<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-gray-300 font-semibold cursor-pointer border border-[#222]">
+                <i class="fa-solid fa-server text-[#FFD700]"></i> ${escapeHtml(name)}
+            </div>`;
+            channelsList.insertAdjacentHTML('beforeend', html);
+        }
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -181,7 +253,7 @@
                 const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'check_message', message: text, token: CLIENT_TOKEN })
+                    body: JSON.stringify({ action: 'save_message', username: currentUser.username, message: text, token: CLIENT_TOKEN })
                 });
                 const modResult = await res.json();
 
@@ -190,18 +262,19 @@
                     chatInput.value = '';
                     return;
                 }
+
+                if (modResult.success) {
+                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    appendMessageHTML(currentUser.username, currentUser.avatar, text, time);
+                    chatInput.value = '';
+                }
             } catch (err) {
                 console.error(err);
             }
-
-            appendMessage(currentUser.username, currentUser.avatar, text);
-            chatInput.value = '';
         });
 
-        function appendMessage(username, avatar, text) {
-            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        function appendMessageHTML(username, avatar, text, time) {
             const initial = username.charAt(0).toUpperCase();
-            
             let avHTML = `<div class="w-9 h-9 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center overflow-hidden border border-[#333] flex-shrink-0">${initial}</div>`;
             if (avatar) {
                 avHTML = `<div class="w-9 h-9 rounded-full overflow-hidden border border-[#333] flex-shrink-0"><img src="${avatar}" class="w-full h-full object-cover"></div>`;
