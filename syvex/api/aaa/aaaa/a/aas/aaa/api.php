@@ -1,4 +1,5 @@
 <?php
+session_start();
 header('Content-Type: application/json; charset=utf-8');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
@@ -9,143 +10,279 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-$input = json_decode(file_get_contents('php://input'), true);
-$expectedToken = base64_encode('NeonCordSecureClient');
+$input = json_decode(file_get_contents('php://input'), true);$action = $input['action'] ?? '';$dbFile = 'database.json';
 
-if (!isset($input['token']) || $input['token'] !== $expectedToken) {
-    echo json_encode(['success' => false, 'message' => 'Yetkisiz erişim.']);
-    exit;
-}
+// Discord Webhook URL'ni buraya yaz
+$webhookUrl = 'BURAYA_DISCORD_WEBHOOK_URL_YAZ';
 
-$action = $input['action'] ?? '';
-$dbFile = 'neoncord_database.json';
-
+// Veritabanı başlatma
 if (!file_exists($dbFile)) {
-    file_put_contents($dbFile, json_encode(['users' => [], 'events' => []]));
+    file_put_contents(
+        $dbFile,
+        json_encode([
+            'users' => [],
+            'events' => [],
+            'ip_logs' => [],
+        ])
+    );
 }
-
 $db = json_decode(file_get_contents($dbFile), true);
 
-// Geçici (Temp Mail) Uzantı Engelleme Listesi
-function isTempMail($email) {
-    $tempDomains = [
-        'tempmail.com', '10minutemail.com', 'guerrillamail.com', 'trashmail.com',
-        'sharklasers.com', 'getairmail.com', 'dispostable.com', 'mailinator.com',
-        'yopmail.com', 'temp-mail.org', 'fakeinbox.com', 'maildrop.cc'
-    ];
-    $domain = strtolower(substr(strrchr($email, "@"), 1));
-    return in_array($domain, $tempDomains);
+// Kullanıcı Gerçek IP Tespiti
+function getUserIP()
+{
+  foreach (
+      [
+          'HTTP_CLIENT_IP',
+          'HTTP_X_FORWARDED_FOR',
+          'HTTP_X_FORWARDED',
+          'HTTP_X_CLUSTER_CLIENT_IP',
+          'HTTP_FORWARDED_FOR',
+          'HTTP_FORWARDED',
+          'REMOTE_ADDR',
+      ]
+      as $key
+  ) {
+    if (array_key_exists($key,$_SERVER) === true) {
+      foreach (explode(',', $_SERVER[$key]) as$ip) {
+        $ip = trim($ip);
+        if (
+            filter_var(
+                $ip,
+                FILTER_VALIDATE_IP,
+                FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE
+            ) !== false
+        ) {
+          return $ip;
+        }
+      }
+    }
+  }
+  return $_SERVER['REMOTE_ADDR'] ?? '127.0.0.1';
 }
 
-// KAYIT OLMA İŞLEMİ
+$userIP = getUserIP();
+
+// Anti-VPN / Proxy Basit Kontrolü (Hosting ve Bilinen Datacenter IP aralıkları engeli)
+$blockedSubnets = ['198.51.100.', '203.0.113.']; // Örnek proxy/vpn aralıkları
+foreach ($blockedSubnets as$subnet) {
+  if (strpos($userIP,$subnet) === 0) {
+    echo json_encode([
+        'success' => false,
+        'message' =>
+            'Güvenlik Uyarısı: VPN veya Proxy (Hosting IP) tespiti! Erişim engellendi.',
+    ]);
+    exit;
+  }
+}
+
+// Temp Mail Engelleme Listesi
+function isTempMail($email)
+{
+  $tempDomains = [
+      'tempmail.com',
+      '10minutemail.com',
+      'guerrillamail.com',
+      'mailinator.com',
+      'temp-mail.org',
+      'dispostable.com',
+      'trashmail.com',
+      'yopmail.com',
+  ];
+  $domain = strtolower(substr(strrchr($email, '@'), 1));
+  return in_array($domain,$tempDomains);
+}
+
+// 1. KAYIT OLMA (Mail Zorunlu & Temp Mail Engeli)
 if ($action === 'register') {
-    $email = trim(strtolower($input['email'] ?? ''));
-    $username = trim($input['username'] ?? '');
-    $password = $input['password'] ?? '';
+  $email = trim(strtolower($input['email'] ?? ''));
+  $username = trim($input['username'] ?? '');
+  $password =$input['password'] ?? '';
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        echo json_encode(['success' => false, 'message' => 'Geçerli bir e-posta adresi girmelisiniz.']);
-        exit;
-    }
-
-    if (isTempMail($email)) {
-        echo json_encode(['success' => false, 'message' => 'Geçici (temp-mail) e-posta servisleri kabul edilmemektedir. Gerçek e-posta kullanın!']);
-        exit;
-    }
-
-    if (empty($username) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Kullanıcı adı ve şifre zorunludur.']);
-        exit;
-    }
-
-    // Tek hesap / E-posta kontrolü
-    foreach ($db['users'] as $u) {
-        if ($u['email'] === $email) {
-            echo json_encode(['success' => false, 'message' => 'Bu e-posta adresi ile zaten bir hesap açılmış! Her kullanıcı sadece 1 hesap açabilir.']);
-            exit;
-        }
-        if (strtolower($u['username']) === strtolower($username)) {
-            echo json_encode(['success' => false, 'message' => 'Bu kullanıcı adı zaten alınmış.']);
-            exit;
-        }
-    }
-
-    $newUser = [
-        'email' => $email,
-        'username' => $username,
-        'password' => password_hash($password, PASSWORD_DEFAULT),
-        'created_at' => date('Y-m-d H:i:s')
-    ];
-
-    $db['users'][] = $newUser;
-    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
-
-    echo json_encode(['success' => true, 'user' => ['username' => $username, 'email' => $email]]);
+  if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Geçerli bir e-posta adresi girmelisiniz!',
+    ]);
     exit;
+  }
+
+  if (isTempMail($email)) {
+    echo json_encode([
+        'success' => false,
+        'message' =>
+            'Geçici (Temp) e-posta servisleri kesinlikle kabul edilmemektedir!',
+    ]);
+    exit;
+  }
+
+  if (empty($username) \vert{}\vert{} empty($password)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Tüm alanları doldurunuz.',
+    ]);
+    exit;
+  }
+
+  // Her IP adresinden sadece 1 hesap açma kuralı
+  foreach ($db['users'] as$u) {
+    if (isset($u['ip']) && $u['ip'] ===$userIP) {
+      echo json_encode([
+          'success' => false,
+          'message' => 'Bu IP adresinden zaten bir hesap oluşturulmuş!',
+      ]);
+      exit;
+    }
+    if (strtolower($u['email']) ===$email) {
+      echo json_encode([
+          'success' => false,
+          'message' => 'Bu e-posta adresi zaten kullanımda.',
+      ]);
+      exit;
+    }
+  }
+
+  $newUser = [
+      'email' => $email,
+      'username' => $username,
+      'password' => password_hash($password, PASSWORD_DEFAULT),
+      'ip' => $userIP,
+      'created_at' => time(),
+  ];
+
+  $db['users'][] =$newUser;
+  file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+
+  $_SESSION['user'] =$newUser;
+  echo json_encode(['success' => true, 'user' => $newUser]);
+  exit();
 }
 
-// GİRİŞ YAPMA İŞLEMİ
+// 2. GİRİŞ YAPMA
 if ($action === 'login') {
-    $email = trim(strtolower($input['email'] ?? ''));
-    $password = $input['password'] ?? '';
+  $email = trim(strtolower($input['email'] ?? ''));
+  $password =$input['password'] ?? '';
 
-    if (empty($email) || empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'E-posta ve şifre gereklidir.']);
-        exit;
+  $foundUser = null;
+  foreach ($db['users'] as$u) {
+    if (strtolower($u['email']) ===$email) {
+      $foundUser =$u;
+      break;
     }
+  }
 
-    $foundUser = null;
-    foreach ($db['users'] as $u) {
-        if ($u['email'] === $email) {
-            $foundUser = $u;
-            break;
-        }
-    }
-
-    if ($foundUser && password_verify($password, $foundUser['password'])) {
-        echo json_encode(['success' => true, 'user' => ['username' => $foundUser['username'], 'email' => $foundUser['email']]]);
-    } else {
-        echo json_encode(['success' => false, 'message' => 'E-posta veya şifre hatalı!']);
-    }
-    exit;
+  if ($foundUser && password_verify($password,$foundUser['password'])) {
+    $_SESSION['user'] =$foundUser;
+    echo json_encode(['success' => true, 'user' => $foundUser]);
+  } else {
+    echo json_encode([
+        'success' => false,
+        'message' => 'E-posta veya şifre hatalı!',
+    ]);
+  }
+  exit();
 }
 
-// GERÇEK ETKİNLİK / YAYIN OLUŞTURMA
+// 3. ETKİNLİK / SUNUCU OLUŞTURMA (IP Başına 1 Kez, 12 Saat Süreli, Webhook Bildirimli)
 if ($action === 'create_event') {
-    $username = trim($input['username'] ?? '');
-    $title = trim($input['title'] ?? '');
-    $category = trim($input['category'] ?? 'NeonCord • #Genel');
+  $name = trim($input['name'] ?? '');
+  $description = trim($input['description'] ?? '');
+  $isPrivate = intval($input['is_private'] ?? 0);
 
-    if (empty($title) || empty($username)) {
-        echo json_encode(['success' => false, 'message' => 'Etkinlik başlığı boş olamaz.']);
-        exit;
+  if (empty($name) \vert{}\vert{} empty($description)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Etkinlik adı ve açıklaması zorunludur.',
+    ]);
+    exit;
+  }
+
+  // 12 saati geçmiş etkinlikleri otomatik temizle
+  $currentTime = time();
+  $db['events'] = array_filter($db['events'], function ($ev) use ($currentTime
+  ) {
+    return $currentTime -$ev['created_at'] < 12 * 3600;
+  });
+
+  // Bu IP adresinden halihazırda aktif etkinlik var mı kontrol et
+  foreach ($db['events'] as$ev) {
+    if ($ev['ip'] ===$userIP) {
+      echo json_encode([
+          'success' => false,
+          'message' =>
+              'Zaten aktif bir etkinlik oluşturdunuz! Her IP için 1 etkinlik sınırı vardır ve 12 saat sonra yenisi açılabilir.',
+      ]);
+      exit;
     }
+  }
 
-    $newEvent = [
-        'id' => uniqid(),
-        'username' => $username,
-        'title' => htmlspecialchars($title),
-        'category' => htmlspecialchars($category),
-        'time' => date('H:i')
+  $newEvent = [
+      'id' => uniqid(),
+      'name' => htmlspecialchars($name),
+      'description' => htmlspecialchars($description),
+      'is_private' => $isPrivate,
+      'ip' => $userIP,
+      'created_at' => $currentTime,
+  ];
+
+  $db['events'][] =$newEvent;
+  file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+
+  // Discord Webhook Gönderimi (Kullanıcı ID / IP ve Detaylar)
+  if (!empty($webhookUrl) && $webhookUrl !== 'BURAYA_DISCORD_WEBHOOK_URL_YAZ') {$hookData = [
+        'content' => '@everyone Yeni Bir Etkinlik / Sunucu Oluşturuldu!',
+        'embeds' => [
+            [
+                'title' => $name,
+                'description' => $description,
+                'color' => 16766720,
+                'fields' => [
+                    [
+                        'name' => 'Gizlilik Durumu',
+                        'value' =>
+                            $isPrivate == 1
+                                ? '🔒 Private (Gizli)'
+                                : '🌍 Herkese Açık',
+                        'inline' => true,
+                    ],
+                    [
+                        'name' => 'Oluşturan IP / Sistem',
+                        'value' => '`' . $userIP . '`',
+                        'inline' => true,
+                    ],
+                ],
+                'timestamp' => date('c'),
+            ],
+        ],
     ];
 
-    // En başa ekle ki yeni oluşturanlar hemen önde görünsün
-    array_unshift($db['events'], $newEvent);
-    
-    // Maksimum 20 etkinlik tut
-    if (count($db['events']) > 20) {
-        array_pop($db['events']);
-    }
+    $ch = curl_init($webhookUrl);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($hookData));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+    curl_exec($ch);
+    curl_close($ch);
+  }
 
-    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
-    echo json_encode(['success' => true]);
-    exit;
+  echo json_encode(['success' => true]);
+  exit();
 }
 
-// ETKİNLİKLERİ LİSTELEME
+// 4. ETKİNLİKLERİ LİSTELEME
 if ($action === 'get_events') {
-    echo json_encode(['success' => true, 'events' => $db['events'] ?? []]);
-    exit;
+  $currentTime = time();$activeEvents = [];
+
+  foreach ($db['events'] as $ev) {$elapsed = $currentTime -$ev['created_at'];
+    if ($elapsed < 12 * 3600) {
+      $remainingHours = ceil((12 * 3600 -$elapsed) / 3600);
+      $ev['remaining_hours'] =$remainingHours;
+      $activeEvents[] =$ev;
+    }
+  }
+
+  echo json_encode(['success' => true, 'events' => $activeEvents]);
+  exit();
 }
 
 echo json_encode(['success' => false, 'message' => 'Geçersiz işlem.']);
