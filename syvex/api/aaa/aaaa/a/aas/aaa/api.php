@@ -1,164 +1,216 @@
 <?php
 header('Content-Type: application/json; charset=utf-8');
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Headers: Content-Type");
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST');
+header('Access-Control-Allow-Headers: Content-Type');
 
-$dbFile = 'users_db.json';$banFile = 'bans_db.json';
-
-if (!file_exists($dbFile)) file_put_contents($dbFile, json_encode([]));
-if (!file_exists($banFile)) file_put_contents($banFile, json_encode([]));
+// İstek metodu kontrolü
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    echo json_encode(['success' => false, 'message' => 'Geçersiz istek metodu.']);
+    exit;
+}
 
 $input = json_decode(file_get_contents('php://input'), true);
-$action =$input['action'] ?? '';
-$clientToken =$input['token'] ?? '';
 
+// Güvenlik token doğrulaması
 $expectedToken = base64_encode('NeonCordValidClient');
-if ($clientToken !==$expectedToken) {
-    echo json_encode(['success' => false, 'message' => 'Yetkisiz istemci hatası!']);
+if (!isset($input['token']) || $input['token'] !== $expectedToken) {
+    echo json_encode(['success' => false, 'message' => 'Yetkisiz erişim reddedildi.']);
     exit;
 }
 
-$userIP =$_SERVER['REMOTE_ADDR'] ?? 'Bilinmiyor';
+$action = $input['action'] ?? '';
+$dbFile = 'database.json';
 
-// Ban Kontrolü (IP Bazlı)
-$bans = json_decode(file_get_contents($banFile), true);
-foreach ($bans as$ban) {
-    if ($ban['ip'] ===$userIP) {
-        echo json_encode(['success' => false, 'message' => 'Bu sistemden kalıcı olarak banlandınız!']);
-        exit;
-    }
-}
-
-function sendDiscordWebhook($title,$description, $color = 16711680) {$webhookUrl = "https://discordapp.com/api/webhooks/1553741922697216150/nKxNowFM76FYPmF28FewnLRrw0JmBTfTU7pTmVHf2rJQ0iYI3M9FSQj-DENjXz4SwQmP";
-    $data = [
-        "username" => "NeonCord Güvenlik & KVKK Botu",
-        "avatar_url" => "https://i.imgur.com/716CCqO.png",
-        "embeds" => [[
-            "title" => "🚨 " . $title,
-            "description" => $description,
-            "color" => $color,
-            "timestamp" => date('c'),
-            "footer" => ["text" => "NeonCord Security & Log Sistemi"]
-        ]]
-    ];
-    $ch = curl_init($webhookUrl);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($data));
-    curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_exec($ch);
-    curl_close($ch);
-}
-
-function checkKVKKAndProfanity($text) {$kvkkKeywords = ['tc kimlik', 't.c.', 'iban', 'telefon numarası', 'kredi kartı', 'adres:', 'şifrem:'];
-    $badWords = ['amk', 'aq', 'sik', 'orospu', 'piç', 'oç', 'anan', 'sikik', 'yarak', 'taşak'];
-    $lowerText = mb_strtolower($text, 'UTF-8');
-
-    foreach ($kvkkKeywords as$kw) {
-        if (strpos($lowerText,$kw) !== false) {
-            sendDiscordWebhook("KVKK İhlali Tespit Edildi!", "**İhlal İçeriği:** ```$text```\n**IP:** `$GLOBALS[userIP]`");
-            return ['type' => 'kvkk', 'msg' => 'KVKK İhlali! Bu tür kişisel bilgiler paylaşılamaz ve loglandı!'];
-        }
-    }
-
-    foreach ($badWords as$word) {
-        if (strpos($lowerText,$word) !== false) {
-            return ['type' => 'profanity', 'msg' => 'Küfür veya +18 içerik tespit edildi!'];
-        }
-    }
-    return null;
-}
-
-$users = json_decode(file_get_contents($dbFile), true);
-
-if ($action === 'auth') {
-    $username = trim($input['username'] ?? '');
-    $password =$input['password'] ?? '';
-    
-    if (empty($username) \vert{}\vert{} empty($password)) {
-        echo json_encode(['success' => false, 'message' => 'Kullanıcı adı ve şifre zorunludur!']);
-        exit;
-    }
-
-    if (isset($users[$username])) {
-        if (password_verify($password, $users[$username]['password'])) {
-            echo json_encode(['success' => true, 'user' => $users[$username]]);
-        } else {
-            echo json_encode(['success' => false, 'message' => 'Hatalı şifre!']);
-        }
-    } else {
-        $users[$username] = [
-            'username' => $username,
-            'password' => password_hash($password, PASSWORD_DEFAULT),
-            'avatar' => $input['avatar'] ?? '',
+// Veritabanı dosyası yoksa başlat
+if (!file_exists($dbFile)) {
+    file_put_contents(
+        $dbFile,
+        json_encode([
+            'users' => [],
+            'servers' => [],
             'messages' => [],
-            'servers' => [['name' => 'Genel Sohbet', 'code' => 'genel']],
-            'friends' => [],
-            'bots' => []
-        ];
-        file_put_contents($dbFile, json_encode($users, JSON_PRETTY_PRINT));
-        echo json_encode(['success' => true, 'user' => $users[$username]]);
-    }
-    exit;
+            'bans' => [],
+            'timeouts' => [],
+        ])
+    );
 }
 
-if ($action === 'save_message') {
-    $username =$input['username'] ?? '';
-    $msg =$input['message'] ?? '';
-    $serverCode =$input['server'] ?? 'genel';
+$db = json_decode(file_get_contents($dbFile), true);
 
-    $check = checkKVKKAndProfanity($msg);
-    if ($check) {
-        echo json_encode(['muted' => true, 'message' => $check['msg']]);
-        exit;
+// Küfür / KVKK / Yasaklı Kelime Filtresi
+function checkContentFilter($text)
+{
+  $forbiddenWords = [
+      'kufur1',
+      'kufur2',
+      'discord.gg/',
+      't.me/',
+      'tc kimlik',
+      'telefon numaram',
+  ];
+  foreach ($forbiddenWords as $word) {
+    if (
+        stripos($text, $word) !== false ||
+        preg_match(
+            '/\b\d{11}\b/',
+            $text
+        ) // 11 haneli T.C. numarası tespiti
+    ) {
+      return true;
     }
-
-    // Moderasyon Komutu (/ban)
-    if (strpos($msg, '/ban ') === 0) {$targetUser = trim(str_replace('/ban ', '', $msg));$bans[] = ['ip' => $userIP, 'target' =>$targetUser, 'time' => time()];
-        file_put_contents($banFile, json_encode($bans, JSON_PRETTY_PRINT));
-        sendDiscordWebhook("Kullanıcı Banlandı (/ban)", "**Komutu Kullanan:** $username\n**Hedef:** $targetUser\n**IP:** $userIP", 16711680);
-        echo json_encode(['success' => true, 'banned' => true, 'message' => "$targetUser ve ilişkili IP engellendi!"]);
-        exit;
-    }
-
-    if (isset($users[$username])) {
-        $users[$username]['messages'][] = ['text' => $msg, 'server' =>$serverCode, 'time' => date('H:i')];
-        file_put_contents($dbFile, json_encode($users, JSON_PRETTY_PRINT));
-        echo json_encode(['muted' => false, 'success' => true]);
-    }
-    exit;
+  }
+  return false;
 }
 
+// 1. GİRİŞ / KAYIT İŞLEMİ
+if ($action === 'auth') {
+  $username = trim($input['username'] ?? '');
+  $password = $input['password'] ?? '';
+
+  if (empty($username) || empty($password)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Kullanıcı adı ve şifre zorunludur.',
+    ]);
+    exit;
+  }
+
+  // Banlı kullanıcı kontrolü
+  if (in_array(strtolower($username), array_map('strtolower', $db['bans']))) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Bu hesap sistemden kalıcı olarak yasaklanmıştır.',
+    ]);
+    exit;
+  }
+
+  $userFound = null;
+  foreach ($db['users'] as &$u) {
+    if (strtolower($u['username']) === strtolower($username)) {
+      $userFound = &$u;
+      break;
+    }
+  }
+
+  if ($userFound) {
+    // Giriş yapılıyor
+    if (password_verify($password, $userFound['password'])) {
+      echo json_encode(['success' => true, 'user' => $userFound]);
+    } else {
+      echo json_encode([
+          'success' => false,
+          'message' => 'Hatalı şifre girdiniz.',
+      ]);
+    }
+  } else {
+    // Yeni kayıt oluşturuluyor
+    $newUser = [
+        'username' => $username,
+        'password' => password_hash($password, PASSWORD_DEFAULT),
+        'created_at' => date('Y-m-d H:i:s'),
+    ];
+    $db['users'][] = $newUser;
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+    echo json_encode(['success' => true, 'user' => $newUser]);
+  }
+  exit();
+}
+
+// 2. SUNUCU / ODA OLUŞTURMA
 if ($action === 'create_server') {
-    $username =$input['username'] ?? '';
-    $serverName =$input['server_name'] ?? '';
-    if (isset($users[$username])) {$inviteCode = 'nc-' . substr(md5(rand()), 0, 6);
-        $users[$username]['servers'][] = ['name' => $serverName, 'code' =>$inviteCode];
-        file_put_contents($dbFile, json_encode($users, JSON_PRETTY_PRINT));
-        // Render üzerindeki tam klasör yoluna göre davet linki
-        echo json_encode(['success' => true, 'invite' => 'https://neonsoftwarecrackme.onrender.com/syvex/api/aaa/aaaa/a/aas/aaa/index.html?join=' . $inviteCode]);
-    }
+  $username = $input['username'] ?? '';
+  $serverName = trim($input['server_name'] ?? '');
+
+  if (empty($serverName)) {
+    echo json_encode([
+        'success' => false,
+        'message' => 'Sunucu adı boş olamaz.',
+    ]);
     exit;
+  }
+
+  $inviteCode = 'nc-' . substr(md5(uniqid()), 0, 8);
+  $db['servers'][] = [
+      'name' => $serverName,
+      'owner' => $username,
+      'invite' => $inviteCode,
+  ];
+  file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+
+  echo json_encode([
+      'success' => true,
+      'invite' => 'https://neoncord.com/invite/' . $inviteCode,
+  ]);
+  exit();
 }
 
-if ($action === 'add_friend') {
-    $username =$input['username'] ?? '';
-    $friendName =$input['friend_name'] ?? '';
-    if (isset($users[$username])) {$users[$username]['friends'][] =$friendName;
-        file_put_contents($dbFile, json_encode($users, JSON_PRETTY_PRINT));
-        echo json_encode(['success' => true]);
+// 3. MESAJ GÖNDERME & FİLTRELEME
+if ($action === 'save_message') {
+  $username = $input['username'] ?? '';
+  $messageText = trim($input['message'] ?? '');
+
+  // Timeout (Susturulma) kontrolü
+  if (isset($db['timeouts'][$username])) {
+    if (time() < $db['timeouts'][$username]) {
+      $remaining = ceil(($db['timeouts'][$username] - time()) / 60);
+      echo json_encode([
+          'success' => false,
+          'muted' => true,
+          'message' =>
+              "Susturuldunuz! Kalan süre: yaklaşık {$remaining} dakika.",
+      ]);
+      exit;
+    } else {
+      unset($db['timeouts'][$username]);
     }
-    exit;
+  }
+
+  // /ban komutu simülasyonu
+  if (strpos($messageText, '/ban') === 0) {
+    $parts = explode(' ', $messageText);
+    if (isset($parts[1])) {
+      $target = trim($parts[1]);
+      $db['bans'][] = $target;
+      file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+      echo json_encode([
+          'success' => true,
+          'message' => "{$target} sistemden banlandı.",
+      ]);
+      exit();
+    }
+  }
+
+  // Küfür veya KVKK / Hassas veri kontrolü
+  if (checkContentFilter($messageText)) {
+    // 5 dakika (300 saniye) timeout cezası ver
+    $db['timeouts'][$username] = time() + 300;
+    file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+
+    echo json_encode([
+        'success' => false,
+        'muted' => true,
+        'message' =>
+            'Uyarı: Küfür, hakaret veya KVKK / hassas veri paylaşımı tespit edildi! 5 dakika süreyle susturuldunuz.',
+    ]);
+    exit();
+  }
+
+  $db['messages'][] = [
+      'username' => $username,
+      'text' => htmlspecialchars($messageText),
+      'time' => date('H:i'),
+  ];
+
+  // Sadece son 100 mesajı tut
+  if (count($db['messages']) > 100) {
+    array_shift($db['messages']);
+  }
+
+  file_put_contents($dbFile, json_encode($db, JSON_PRETTY_PRINT));
+  echo json_encode(['success' => true]);
+  exit();
 }
 
-if ($action === 'create_bot') {
-    $username =$input['username'] ?? '';
-    $botName =$input['bot_name'] ?? '';
-    $template =$input['template'] ?? 'moderator';
-    if (isset($users[$username])) {$botData = ['name' => $botName, 'template' =>$template, 'status' => 'Aktif (Hazır Şablon)'];
-        $users[$username]['bots'][] =$botData;
-        file_put_contents($dbFile, json_encode($users, JSON_PRETTY_PRINT));
-        echo json_encode(['success' => true, 'bot' => $botData]);
-    }
-    exit;
-}
+echo json_encode(['success' => false, 'message' => 'Geçersiz aksiyon.']);
 ?>
