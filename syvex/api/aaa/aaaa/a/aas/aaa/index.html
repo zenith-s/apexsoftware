@@ -2,274 +2,111 @@
 <html lang="tr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonCord</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <title>NeonCord - Giriş / Kayıt</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-        :root { --bg-darker: #0b0b0b; --accent-yellow: #FFD700; }
-        
-        body, button, input, select { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%23FFD700' stroke='%23000' stroke-width='1'%3E%3Cpolygon points='5 3 19 12 12 14 9 21 5 3'/%3E%3C/svg%3E"), auto; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; user-select: none; }
-        
-        .fade-in { animation: fadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-
-        .neon-glow { text-shadow: 0 0 15px rgba(255, 215, 0, 0.7); }
-        .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 20px rgba(255, 215, 0, 0.2); }
-        .btn-yellow { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-weight: bold; transition: all 0.3s ease; }
-        .btn-yellow:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); transform: translateY(-1px); }
-
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 2px; }
+        body {
+            background-color: #0b0b0b;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color: #18191c;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+        .logo {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #faa61a;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 13px;
+            color: #b9bbbe;
+        }
+        input[type="text"], input[type="password"], input[type="email"] {
+            width: 100%;
+            padding: 10px;
+            background-color: #2f3136;
+            border: 1px solid #202225;
+            border-radius: 4px;
+            color: #fff;
+            box-sizing: border-box;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            font-size: 14px;
+            color: #b9bbbe;
+            cursor: pointer;
+        }
+        .checkbox-container input {
+            margin-right: 8px;
+            accent-color: #faa61a;
+            cursor: pointer;
+        }
+        .btn {
+            width: 100%;
+            padding: 10px;
+            background-color: #faa61a;
+            border: none;
+            border-radius: 4px;
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 15px;
+        }
+        .btn:hover {
+            background-color: #e59415;
+        }
+        #error-message {
+            color: #ed4245;
+            font-size: 13px;
+            margin-top: 10px;
+            text-align: center;
+        }
     </style>
 </head>
-<body class="bg-[#090909] text-gray-200" oncontextmenu="return false;">
+<body>
 
-    <!-- GİRİŞ & KAYIT EKRANI -->
-    <div id="auth-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
-        <div class="bg-[#121212] p-8 rounded-3xl border border-[#262626] neon-border w-full max-w-md text-center fade-in shadow-2xl relative">
-            <div class="inline-block p-4 rounded-2xl bg-black border border-[#FFD700] mb-4 shadow-[0_0_20px_rgba(255,215,0,0.3)]">
-                <i class="fa-solid fa-bolt text-3xl text-[#FFD700]"></i>
-            </div>
-            <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord</h1>
-            <p class="text-gray-400 text-xs mb-6">Güvenli Topluluk ve Etkinlik Platformu</p>
-            
-            <div class="flex bg-black p-1.5 rounded-2xl border border-[#222] mb-6">
-                <button type="button" onclick="switchTab('login')" id="tab-login-btn" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black">Giriş Yap</button>
-                <button type="button" onclick="switchTab('register')" id="tab-register-btn" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white">Kayıt Ol</button>
-            </div>
-
-            <form id="auth-form" class="space-y-3 text-left" onsubmit="return false;">
-                <div>
-                    <label class="text-[11px] text-gray-400 font-semibold mb-1 block">E-Posta Adresi (Temp Mail Engellidir)</label>
-                    <input type="email" id="auth-email" required placeholder="ornek@gmail.com" class="w-full bg-black border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all text-xs">
-                </div>
-                <div id="username-field-box">
-                    <label class="text-[11px] text-gray-400 font-semibold mb-1 block">Kullanıcı Adı</label>
-                    <input type="text" id="auth-user" placeholder="Kullanıcı adınız" class="w-full bg-black border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all text-xs">
-                </div>
-                <div>
-                    <label class="text-[11px] text-gray-400 font-semibold mb-1 block">Şifre</label>
-                    <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-black border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all text-xs">
-                </div>
-                <div id="auth-error" class="text-red-500 text-xs font-medium text-center h-4"></div>
-                <button type="submit" id="auth-submit-btn" class="w-full btn-yellow py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-xs mt-2">
-                    <span id="auth-btn-text">Sisteme Giriş Yap</span>
-                    <i class="fa-solid fa-arrow-right"></i>
-                </button>
-            </form>
+<div class="container">
+    <div class="logo">⚡ NeonCord</div>
+    
+    <form id="authForm" action="api.php" method="POST">
+        <div class="form-group">
+            <label>Kullanıcı Adı veya E-Posta</label>
+            <input type="text" name="identity" required placeholder="syvex veya syvex@gmail.com">
         </div>
-    </div>
-
-    <!-- ETKİNLİK / SUNUCU OLUŞTURMA MODALI -->
-    <div id="event-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-[#121212] p-6 rounded-3xl border border-[#333] neon-border w-full max-w-md text-center fade-in shadow-2xl">
-            <h3 class="text-lg font-bold text-[#FFD700] mb-2 neon-glow"><i class="fa-solid fa-calendar-plus mr-2"></i>Yeni Etkinlik / Sunucu Kur</h3>
-            <p class="text-[11px] text-gray-400 mb-4">Her IP adresinden 1 etkinlik oluşturulabilir. Otomatik olarak 12 saat sonra silinir.</p>
-            
-            <form id="event-form" class="space-y-3 text-left">
-                <div>
-                    <label class="text-[11px] text-gray-400 font-semibold mb-1 block">Etkinlik / Sunucu Adı</label>
-                    <input type="text" id="ev-name" required placeholder="Örn: CS2 Turnuvası" class="w-full bg-black border border-[#333] text-white px-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#FFD700]">
-                </div>
-                <div>
-                    <label class="text-[11px] text-gray-400 font-semibold mb-1 block">Açıklama</label>
-                    <textarea id="ev-desc" required placeholder="Etkinlik detayları..." class="w-full bg-black border border-[#333] text-white px-4 py-2.5 rounded-xl text-xs outline-none focus:border-[#FFD700] h-20 resize-none"></textarea>
-                </div>
-                <div class="flex items-center justify-between bg-black/50 p-3 rounded-xl border border-[#222]">
-                    <div>
-                        <span class="text-xs font-bold text-white block">Private (Gizli) Sunucu Yap</span>
-                        <span class="text-[10px] text-gray-400">Sadece davetiye kodu olanlar katılsın</span>
-                    </div>
-                    <input type="checkbox" id="ev-private" class="w-4 h-4 accent-[#FFD700] cursor-pointer">
-                </div>
-                <div id="ev-error" class="text-red-500 text-xs text-center"></div>
-                <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeEventModal()" class="flex-1 bg-[#222] hover:bg-[#333] text-gray-300 py-2.5 rounded-xl text-xs font-bold">İptal</button>
-                    <button type="submit" class="flex-1 btn-yellow py-2.5 rounded-xl text-xs font-bold">Oluştur ve Webhook Gönder</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- ANA DASHBOARD -->
-    <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-700 pointer-events-none">
         
-        <!-- Sol İkon Barı -->
-        <div class="w-18 bg-[#050505] border-r border-[#1a1a1a] flex flex-col items-center py-4 gap-4 justify-between z-20">
-            <div class="flex flex-col items-center gap-3">
-                <div class="w-12 h-12 rounded-2xl bg-[#FFD700] text-black font-black flex items-center justify-center text-lg shadow-[0_0_15px_rgba(255,215,0,0.5)]">
-                    <i class="fa-solid fa-bolt"></i>
-                </div>
-                <div class="w-8 h-[2px] bg-[#222] rounded-full"></div>
-                
-                <button class="w-12 h-12 rounded-2xl bg-[#141414] hover:bg-[#FFD700] hover:text-black text-gray-400 flex items-center justify-center transition-all cursor-pointer" title="Canlı Yayınlar"><i class="fa-solid fa-podcast text-sm"></i></button>
-                <button onclick="openEventModal()" class="w-12 h-12 rounded-2xl bg-[#141414] hover:bg-[#FFD700] hover:text-black text-gray-400 flex items-center justify-center transition-all cursor-pointer" title="Etkinlik / Sunucu Oluştur"><i class="fa-solid fa-plus text-sm"></i></button>
-            </div>
-            <div class="w-12 h-12 rounded-2xl bg-[#FFD700] text-black font-bold flex items-center justify-center text-sm border-2 border-[#FFD700]" id="user-initial-icon">?</div>
+        <div class="form-group">
+            <label>Şifre</label>
+            <input type="password" name="password" required placeholder="••••••••••••">
         </div>
 
-        <!-- Bölümler Menüsü -->
-        <div class="w-64 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col p-5">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-sm font-extrabold text-[#FFD700] neon-glow flex items-center gap-2">
-                    <i class="fa-solid fa-house"></i> NeonCord Home
-                </h2>
-            </div>
-            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">BÖLÜMLER</div>
-            <div class="space-y-1.5 flex-1">
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#161616] text-[#FFD700] font-semibold text-xs border border-[#333]"><i class="fa-solid fa-podcast text-xs"></i> Canlı yayınlar</a>
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-chart-bar text-xs"></i> Genel sayılar</a>
-                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors"><i class="fa-solid fa-fire text-xs"></i> En aktif sunucular</a>
-            </div>
+        <!-- Keep Signed In (Beni Hatırla) Eklendi -->
+        <div class="checkbox-container">
+            <input type="checkbox" id="keepSigned" name="keep_signed" value="1">
+            <label for="keepSigned" style="margin-bottom: 0; color: #b9bbbe; display: inline;">Oturumu açık tut (Beni Hatırla)</label>
         </div>
 
-        <!-- Sağ İçerik / Dashboard -->
-        <div class="flex-1 flex flex-col bg-[#0c0c0c] overflow-y-auto p-8 gap-6">
-            <div class="bg-[#121212] border border-[#222] rounded-3xl p-6 flex items-center justify-between shadow-xl relative">
-                <div>
-                    <p class="text-xs text-gray-400 mb-1">Hoş geldin,</p>
-                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
-                        <span id="welcome-username" class="text-[#FFD700] neon-glow">Kullanıcı</span> 👋
-                    </h2>
-                    <p class="text-xs text-gray-400 mt-2">NeonCord Home — tüm sunucuların nabzı, tek ekranda.</p>
-                </div>
-            </div>
+        <button type="submit" class="btn">Giriş Yap / Kayıt Ol</button>
+        <div id="error-message"></div>
+    </form>
+</div>
 
-            <div>
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-2"><i class="fa-solid fa-podcast text-[#FFD700]"></i><h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">AKTİF ETKİNLİKLER VE YAYINLAR (12 Saat Sınırlı)</h3></div>
-                    <button onclick="openEventModal()" class="text-xs btn-yellow px-3 py-1.5 rounded-xl"><i class="fa-solid fa-plus mr-1"></i> Etkinlik Oluştur</button>
-                </div>
-                <div id="events-grid" class="grid grid-cols-2 gap-4">
-                    <!-- Dinamik etkinlikler -->
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let currentMode = 'login';
-        function switchTab(mode) {
-            currentMode = mode;
-            const loginBtn = document.getElementById('tab-login-btn');
-            const regBtn = document.getElementById('tab-register-btn');
-            const btnText = document.getElementById('auth-btn-text');
-            const userField = document.getElementById('username-field-box');
-
-            if (mode === 'login') {
-                loginBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black";
-                regBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white";
-                btnText.textContent = "Sisteme Giriş Yap";
-                userField.style.display = 'none';
-                document.getElementById('auth-user').removeAttribute('required');
-            } else {
-                regBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black";
-                loginBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white";
-                btnText.textContent = "Hemen Kayıt Ol (Mail Onaylı)";
-                userField.style.display = 'block';
-                document.getElementById('auth-user').setAttribute('required', 'true');
-            }
-        }
-        switchTab('login');
-
-        function openEventModal() { document.getElementById('event-modal').classList.remove('hidden'); }
-        function closeEventModal() { document.getElementById('event-modal').classList.add('hidden'); }
-
-        // Doğru api.php yolu (index.html ile aynı dizinde olmalı)
-        const API_URL = 'api.php';
-
-        document.getElementById('auth-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value.trim();
-            const username = document.getElementById('auth-user').value.trim();
-            const password = document.getElementById('auth-pass').value;
-            const errorDiv = document.getElementById('auth-error');
-
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: currentMode, email, username, password })
-                });
-                const result = await res.json();
-
-                if (result.success) {
-                    const uname = result.user.username || email.split('@')[0];
-                    document.getElementById('welcome-username').textContent = uname;
-                    document.getElementById('user-initial-icon').textContent = uname.charAt(0).toUpperCase();
-
-                    document.getElementById('auth-overlay').classList.add('opacity-0', 'scale-105', 'transition-all', 'duration-500');
-                    setTimeout(() => {
-                        document.getElementById('auth-overlay').style.display = 'none';
-                        document.getElementById('app-container').style.pointerEvents = 'auto';
-                        document.getElementById('app-container').classList.remove('opacity-0');
-                        loadEvents();
-                    }, 500);
-                } else {
-                    errorDiv.textContent = result.message;
-                }
-            } catch (err) {
-                errorDiv.textContent = "Sunucu bağlantı hatası! api.php dosyasını kontrol et.";
-            }
-        };
-
-        document.getElementById('event-form').onsubmit = async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('ev-name').value.trim();
-            const description = document.getElementById('ev-desc').value.trim();
-            const is_private = document.getElementById('ev-private').checked ? 1 : 0;
-            const errDiv = document.getElementById('ev-error');
-
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'create_event', name, description, is_private })
-            });
-            const data = await res.json();
-
-            if (data.success) {
-                closeEventModal();
-                loadEvents();
-                alert("Etkinlik başarıyla oluşturuldu ve Discord Webhook'a iletildi!");
-            } else {
-                errDiv.textContent = data.message;
-            }
-        };
-
-        async function loadEvents() {
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'get_events' })
-            });
-            const data = await res.json();
-            if (data.success) {
-                const grid = document.getElementById('events-grid');
-                grid.innerHTML = '';
-                data.events.forEach(ev => {
-                    grid.innerHTML += `
-                        <div class="bg-[#121212] border border-[#222] hover:border-[#FFD700]/50 transition-all rounded-3xl p-5 flex flex-col justify-between h-44 shadow-lg">
-                            <div class="flex justify-between items-center">
-                                <span class="bg-red-600/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1">
-                                    <i class="fa-solid fa-circle text-[4px]"></i> ${ev.is_private == 1 ? 'Gizli (Private) Sunucu' : 'Aktif Etkinlik'}
-                                </span>
-                                <span class="text-gray-400 text-[10px]">Kalan: ${ev.remaining_hours} sa</span>
-                            </div>
-                            <div>
-                                <h4 class="font-bold text-sm text-white">${ev.name}</h4>
-                                <p class="text-[11px] text-gray-400 mt-1">${ev.description}</p>
-                            </div>
-                            <div class="text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-[#1a1a1a] pt-3">
-                                <i class="fa-solid fa-user-shield text-[#FFD700]"></i> Güvenli IP Doğrulandı
-                            </div>
-                        </div>
-                    `;
-                });
-            }
-        }
-    </script>
 </body>
 </html>
