@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NeonCord - PHP Entegreli</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        :root {
+            --bg-darker: #111111;
+            --accent-yellow: #FFD700;
+        }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
+        .neon-text { color: var(--accent-yellow); text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+        .btn-yellow { background-color: var(--accent-yellow); color: #000; font-weight: bold; transition: all 0.2s; }
+        .btn-yellow:hover { background-color: #ffe800; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); }
+        .view-hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <!-- GİRİŞ / KAYIT EKRANI -->
+    <div id="auth-overlay" class="fixed inset-0 bg-black z-50 flex items-center justify-center p-4">
+        <div class="bg-[#111] p-8 rounded-xl border border-[#333] w-full max-w-md text-center shadow-2xl">
+            <i class="fa-solid fa-bolt text-5xl mb-4 text-[#FFD700]"></i>
+            <h1 class="text-3xl font-bold neon-text mb-2">NeonCord</h1>
+            <p class="text-gray-400 text-sm mb-6">PHP API Destekli Güvenli Bağlantı</p>
+            
+            <form id="auth-form" class="space-y-4">
+                <input type="text" id="auth-user" required placeholder="Kullanıcı Adı" class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded focus:border-[#FFD700] outline-none">
+                <input type="password" id="auth-pass" required placeholder="Şifre" class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded focus:border-[#FFD700] outline-none">
+                <div id="auth-error" class="text-red-500 text-xs h-4"></div>
+                <button type="submit" class="w-full btn-yellow py-3 rounded-lg">Bağlan / Kayıt Ol</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ANA UYGULAMA (Giriş Sonrası) -->
+    <div class="flex-1 flex h-full w-full">
+        <div class="w-64 bg-[#0a0a0a] border-r border-[#222] flex flex-col p-4">
+            <h2 class="neon-text font-bold text-lg mb-6"><i class="fa-solid fa-bolt"></i> NeonCord</h2>
+            <div class="text-gray-400 text-sm">Hoş geldin, <span id="lbl-username" class="text-[#FFD700] font-bold"></span></div>
+        </div>
+        <div class="flex-1 bg-[#111] p-6 flex flex-col justify-center items-center">
+            <h1 class="text-2xl font-bold mb-4">API Bağlantısı Başarılı!</h1>
+            <p class="text-gray-400">Veriler ve hesap işlemleri aynı dizindeki <code class="text-[#FFD700]">api.php</code> dosyası üzerinden yürütülüyor.</p>
+        </div>
+    </div>
+
+    <script>
+        const authOverlay = document.getElementById('auth-overlay');
+        const authForm = document.getElementById('auth-form');
+        const authError = document.getElementById('auth-error');
+
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('auth-user').value.trim();
+            const password = document.getElementById('auth-pass').value;
+
+            authError.textContent = "API'ye bağlanılıyor...";
+
+            try {
+                // Aynı dizindeki api.php dosyasına istek atılıyor
+                const response = await fetch('api.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'login_or_register', username, password })
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    document.getElementById('lbl-username').textContent = username;
+                    authOverlay.style.display = 'none';
+                } else {
+                    authError.textContent = result.message || "İşlem başarısız.";
+                }
+            } catch (err) {
+                console.error("API Hatası:", err);
+                authError.textContent = "api.php dosyasına ulaşılamadı!";
+            }
+        });
+    </script>
+</body>
+</html>
