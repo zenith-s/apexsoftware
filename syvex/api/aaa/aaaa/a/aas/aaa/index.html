@@ -3,58 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonCord - Korunan & Full Animasyonlu</title>
+    <title>NeonCord - Güvenli Sohbet & Bot Yönetimi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         :root { --bg-darker: #0b0b0b; --accent-yellow: #FFD700; }
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; user-select: none; }
-        
-        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        
-        .neon-glow { text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
-        .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
-        
-        .btn-yellow { background-color: var(--accent-yellow); color: #000; font-weight: bold; transition: all 0.3s ease; }
-        .btn-yellow:hover { background-color: #ffe800; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); transform: translateY(-2px); }
-        
-        ::-webkit-scrollbar { width: 6px; }
+        .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .neon-glow { text-shadow: 0 0 12px rgba(255, 215, 0, 0.7); }
+        .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 20px rgba(255, 215, 0, 0.25); }
+        .btn-yellow { background-color: var(--accent-yellow); color: #000; font-weight: bold; transition: all 0.25s ease; }
+        .btn-yellow:hover { background-color: #ffe800; box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); transform: translateY(-2px); }
+        ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
-        ::-webkit-scrollbar-thumb:hover { background: var(--accent-yellow); }
     </style>
 </head>
 <body class="bg-[#0b0b0b] text-gray-200">
 
-    <!-- GİRİŞ / KAYIT MODALI -->
-    <div id="auth-overlay" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4">
+    <!-- ŞİFRE YÖNETİCİSİ UYARILARINI ENGELLEYEN GİRİŞ PENCERESİ -->
+    <div id="auth-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
         <div class="bg-[#121212] p-8 rounded-2xl border border-[#333] neon-border w-full max-w-md text-center fade-in shadow-2xl">
             <div class="inline-block p-4 rounded-full bg-black border border-[#FFD700] mb-4 shadow-[0_0_15px_rgba(255,215,0,0.3)]">
-                <i class="fa-solid fa-bolt text-4xl text-[#FFD700] animate-bounce"></i>
+                <i class="fa-solid fa-shield-halved text-4xl text-[#FFD700] animate-pulse"></i>
             </div>
             <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord</h1>
-            <p class="text-gray-400 text-xs mb-6">Güvenlik Korumalı & Full Animasyonlu Platform</p>
+            <p class="text-gray-400 text-xs mb-6">KVKK Koruma & Otomatik Bot Yönetim Sistemi</p>
             
-            <form id="auth-form" class="space-y-4 text-left">
+            <form id="auth-form" class="space-y-4 text-left" autocomplete="off" onsubmit="return false;">
+                <input type="text" name="fakeusernameremembered" style="display:none">
+                <input type="password" name="fakepasswordremembered" style="display:none">
                 <div>
-                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Benzersiz Kullanıcı Adı</label>
-                    <input type="text" id="auth-user" required placeholder="Örn: syvex" 
+                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Kullanıcı Adı</label>
+                    <input type="text" id="auth-user" required placeholder="Örn: syvex" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');"
                            class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Şifre</label>
-                    <input type="password" id="auth-pass" required placeholder="••••••••" 
+                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Güvenli Şifre</label>
+                    <input type="password" id="auth-pass" required placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');"
                            class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all">
-                </div>
-                <div>
-                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Avatar / GIF URL (Opsiyonel)</label>
-                    <input type="url" id="auth-avatar" placeholder="https://ornek.com/gif.gif" 
-                           class="w-full bg-black border border-[#333] text-white px-4 py-2 text-sm rounded-xl focus:outline-none focus:border-[#FFD700] transition-all">
                 </div>
                 <div id="auth-error" class="text-red-500 text-xs font-medium text-center h-4"></div>
-                <button type="submit" class="w-full btn-yellow py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer">
-                    <span>Giriş Yap / Kayıt Ol</span>
+                <button type="submit" id="auth-submit-btn" class="w-full btn-yellow py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer">
+                    <span>Güvenli Giriş Yap / Kayıt Ol</span>
                     <i class="fa-solid fa-arrow-right-to-bracket"></i>
                 </button>
             </form>
@@ -64,71 +56,108 @@
     <!-- SUNUCU OLUŞTURMA MODALI -->
     <div id="server-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
         <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-sm text-center fade-in">
-            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Yeni Sunucu / Oda Kur</h3>
-            <p class="text-xs text-gray-400 mb-4">Özel davet linkin otomatik olarak oluşturulacaktır.</p>
-            <input type="text" id="server-name-input" placeholder="Sunucu Adı (Örn: CS2 Topluluk)" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
-            <div id="invite-result" class="text-xs text-green-400 font-mono bg-black/50 p-2 rounded-lg mb-4 hidden"></div>
+            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Sunucu / Oda Kur</h3>
+            <input type="text" id="server-name-input" placeholder="Sunucu Adı" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-3 outline-none focus:border-[#FFD700]">
+            <div id="invite-result" class="text-xs text-green-400 font-mono bg-black/50 p-2 rounded-lg mb-3 hidden select-all"></div>
             <div class="flex gap-2">
-                <button type="button" id="close-server-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm font-bold hover:bg-[#333]">İptal</button>
+                <button type="button" id="close-server-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
                 <button type="button" id="submit-server-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Oluştur</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOT OLUŞTURMA MODALI -->
+    <div id="bot-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-md text-center fade-in">
+            <h3 class="text-xl font-bold text-[#FFD700] mb-2"><i class="fa-solid fa-robot"></i> Hazır Şablon Bot Ekle</h3>
+            <p class="text-xs text-gray-400 mb-4">Kod yazmadan hazır şablonlardan botunu aktif et!</p>
+            <input type="text" id="bot-name-input" placeholder="Bot Adı (Örn: GuardBot)" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-3 outline-none focus:border-[#FFD700]">
+            <select id="bot-template-select" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
+                <option value="moderator">Moderatör Botu (/ban, Küfür/KVKK Engelleyici)</option>
+                <option value="welcome">Karşılama Botu (Sunucu mesaj yöneticisi)</option>
+                <option value="economy">Ekonomi & Eğlence Botu</option>
+            </select>
+            <div class="flex gap-2">
+                <button type="button" id="close-bot-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
+                <button type="button" id="submit-bot-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Botu Kur</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ARKADAŞ EKLEME MODALI -->
+    <div id="friend-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-sm text-center fade-in">
+            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Arkadaş Ekle</h3>
+            <input type="text" id="friend-name-input" placeholder="Kullanıcı Adı" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
+            <div class="flex gap-2">
+                <button type="button" id="close-friend-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
+                <button type="button" id="submit-friend-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Ekle</button>
             </div>
         </div>
     </div>
 
     <!-- ANA UYGULAMA -->
     <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-500 pointer-events-none">
+        <!-- SOL MENÜ -->
         <div class="w-64 bg-[#070707] border-r border-[#222] flex flex-col justify-between p-4">
             <div>
-                <div class="flex items-center justify-between pb-4 mb-4 border-b border-[#222]">
+                <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#222]">
                     <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-bolt text-[#FFD700] text-xl"></i>
-                        <h2 class="text-lg font-bold text-[#FFD700] neon-glow">NeonCord</h2>
+                        <i class="fa-solid fa-shield-halved text-[#FFD700] text-lg"></i>
+                        <h2 class="text-md font-bold text-[#FFD700] neon-glow">NeonCord</h2>
                     </div>
-                    <button id="open-server-modal-btn" class="text-gray-400 hover:text-[#FFD700] transition-colors p-1" title="Sunucu Oluştur">
-                        <i class="fa-solid fa-plus text-sm"></i>
-                    </button>
+                    <div class="flex gap-1">
+                        <button id="open-server-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Sunucu Oluştur"><i class="fa-solid fa-plus text-xs"></i></button>
+                        <button id="open-friend-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Arkadaş Ekle"><i class="fa-solid fa-user-plus text-xs"></i></button>
+                        <button id="open-bot-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Bot Oluştur"><i class="fa-solid fa-robot text-xs"></i></button>
+                    </div>
                 </div>
-                <div class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">Kanallar & Sunucular</div>
-                <div id="channels-list" class="space-y-1">
-                    <div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#1a1a1a] text-[#FFD700] font-semibold cursor-pointer border border-[#333]">
+
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Sunucular & Kanallar</div>
+                <div id="servers-list" class="space-y-1 mb-4">
+                    <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#161616] text-[#FFD700] font-medium cursor-pointer border border-[#333] text-xs">
                         <i class="fa-solid fa-hashtag"></i> genel-sohbet
                     </div>
                 </div>
+
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Aktif Botlar</div>
+                <div id="bots-list" class="space-y-1 mb-4"></div>
+
+                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Arkadaşlar</div>
+                <div id="friends-list" class="space-y-1"></div>
             </div>
             
             <div class="bg-[#111] p-3 rounded-xl border border-[#222] flex items-center gap-3">
-                <div id="user-avatar-box" class="w-10 h-10 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center overflow-hidden border border-black">
-                    <span id="user-initial">?</span>
-                </div>
+                <div class="w-9 h-9 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center text-sm" id="user-initial">?</div>
                 <div class="overflow-hidden">
-                    <div id="display-username" class="text-sm font-bold text-white truncate">Misafir</div>
-                    <div class="text-[10px] text-green-400 flex items-center gap-1">
-                        <i class="fa-solid fa-circle text-[6px]"></i> Korumalı Bağlantı
-                    </div>
+                    <div id="display-username" class="text-xs font-bold text-white truncate">Misafir</div>
+                    <div class="text-[9px] text-green-400 flex items-center gap-1"><i class="fa-solid fa-circle text-[5px]"></i> KVKK & Mod Aktif</div>
                 </div>
             </div>
         </div>
 
+        <!-- SOHBET EKRANI -->
         <div class="flex-1 flex flex-col bg-[#111]">
-            <div class="h-16 border-b border-[#222] flex items-center px-6 bg-[#090909] justify-between">
-                <div class="flex items-center gap-2 font-bold text-white">
-                    <i class="fa-solid fa-hashtag text-[#FFD700]"></i> genel-sohbet
+            <div class="h-14 border-b border-[#222] flex items-center px-6 bg-[#090909] justify-between">
+                <div class="flex items-center gap-2 font-bold text-xs text-white">
+                    <i class="fa-solid fa-hashtag text-[#FFD700]"></i> genel-sohbet (Fotoğraf & Dosya Yükleme Engelli)
                 </div>
-                <div id="timeout-banner" class="hidden bg-red-900/60 border border-red-500 text-red-200 text-xs px-3 py-1.5 rounded-lg animate-pulse">
-                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> Oto-Mod: <span id="timeout-timer">10</span>s Zaman Aşımı!
+                <div id="timeout-banner" class="hidden bg-red-950 border border-red-600 text-red-200 text-xs px-3 py-1 rounded-lg animate-pulse">
+                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="timeout-text">Güvenlik Uyarısı!</span>
                 </div>
             </div>
 
             <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <div class="text-center text-gray-500 text-xs my-2">--- Hesap Geçmişi Yüklendi ---</div>
+                <div class="text-center text-gray-500 text-xs my-2">--- Güvenli Sohbet Geçmişi Yüklendi ---</div>
             </div>
 
+            <!-- MESAJ GÖNDERME (Dosya/Fotoğraf Butonu Kesinlikle Yok) -->
             <div class="p-4 bg-[#090909] border-t border-[#222]">
                 <form id="chat-form" class="flex items-center gap-3 bg-[#161616] border border-[#333] rounded-xl px-4 py-2 focus-within:border-[#FFD700] transition-all">
-                    <input type="text" id="chat-input" placeholder="Mesaj gönder... (+18 ve küfür yasaktır)" autocomplete="off"
-                           class="flex-1 bg-transparent border-none outline-none text-white text-sm placeholder-gray-500">
+                    <input type="text" id="chat-input" placeholder="Mesaj gönder... (/ban [kullanıcı] ve KVKK filtresi aktif)" autocomplete="off"
+                           class="flex-1 bg-transparent border-none outline-none text-white text-xs placeholder-gray-500">
                     <button type="submit" class="text-[#FFD700] hover:text-white transition-colors p-2 cursor-pointer">
-                        <i class="fa-solid fa-paper-plane text-lg"></i>
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
                     </button>
                 </form>
             </div>
@@ -136,14 +165,12 @@
     </div>
 
     <script>
-        // F12, Sağ Tık ve Ctrl+U Engelleme Koruması
+        // F12, Sağ Tık ve Kaynak Kod Engelleri
         document.addEventListener('contextmenu', e => e.preventDefault());
         document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || 
-                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
-                (e.ctrlKey && e.key === 'u')) {
+            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
                 e.preventDefault();
-                alert('Bu işlem güvenlik nedeniyle engellenmiştir!');
+                alert('Güvenlik nedeniyle bu eylem engellenmiştir!');
             }
         });
 
@@ -158,55 +185,45 @@
         const chatInput = document.getElementById('chat-input');
         const chatMessages = document.getElementById('chat-messages');
         const timeoutBanner = document.getElementById('timeout-banner');
-        const timeoutTimer = document.getElementById('timeout-timer');
-        
+        const timeoutText = document.getElementById('timeout-text');
+
         const serverModal = document.getElementById('server-modal');
-        const openServerModalBtn = document.getElementById('open-server-modal-btn');
-        const closeServerModal = document.getElementById('close-server-modal');
-        const submitServerBtn = document.getElementById('submit-server-btn');
-        const serverNameInput = document.getElementById('server-name-input');
-        const inviteResult = document.getElementById('invite-result');
-        const channelsList = document.getElementById('channels-list');
+        const botModal = document.getElementById('bot-modal');
+        const friendModal = document.getElementById('friend-modal');
+
+        document.getElementById('open-server-btn').onclick = () => serverModal.classList.remove('hidden');
+        document.getElementById('close-server-modal').onclick = () => serverModal.classList.add('hidden');
+        document.getElementById('open-bot-btn').onclick = () => botModal.classList.remove('hidden');
+        document.getElementById('close-bot-modal').onclick = () => botModal.classList.add('hidden');
+        document.getElementById('open-friend-btn').onclick = () => friendModal.classList.remove('hidden');
+        document.getElementById('close-friend-modal').onclick = () => friendModal.classList.add('hidden');
 
         let currentUser = null;
-        let isTimedOut = false;
 
-        authForm.addEventListener('submit', async (e) => {
+        document.getElementById('auth-submit-btn').onclick = async (e) => {
             e.preventDefault();
             const username = document.getElementById('auth-user').value.trim();
             const password = document.getElementById('auth-pass').value;
-            const avatar = document.getElementById('auth-avatar').value.trim();
 
-            authError.textContent = "Hesap verileri yükleniyor...";
+            if(!username || !password) {
+                authError.textContent = "Kullanıcı adı ve şifre zorunludur!";
+                return;
+            }
 
             try {
-                const response = await fetch(API_URL, {
+                const res = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'auth', username, password, avatar, token: CLIENT_TOKEN })
+                    body: JSON.stringify({ action: 'auth', username, password, token: CLIENT_TOKEN })
                 });
-
-                const result = await response.json();
+                const result = await res.json();
 
                 if (result.success) {
                     currentUser = result.user;
                     document.getElementById('display-username').textContent = currentUser.username;
                     document.getElementById('user-initial').textContent = currentUser.username.charAt(0).toUpperCase();
-                    if (currentUser.avatar) {
-                        document.getElementById('user-avatar-box').innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
-                    }
 
-                    if (currentUser.messages && currentUser.messages.length > 0) {
-                        currentUser.messages.forEach(m => {
-                            appendMessageHTML(currentUser.username, currentUser.avatar, m.text, m.time);
-                        });
-                    }
-
-                    if (currentUser.servers && currentUser.servers.length > 0) {
-                        currentUser.servers.forEach(s => {
-                            addServerToList(s.name);
-                        });
-                    }
+                    loadUserData();
 
                     authOverlay.classList.add('opacity-0', 'transition-opacity', 'duration-500');
                     setTimeout(() => {
@@ -218,118 +235,140 @@
                     authError.textContent = result.message;
                 }
             } catch (err) {
-                console.error(err);
                 authError.textContent = "Sunucu bağlantı hatası!";
             }
-        });
+        };
 
-        openServerModalBtn.addEventListener('click', () => serverModal.classList.remove('hidden'));
-        closeServerModal.addEventListener('click', () => { serverModal.classList.add('hidden'); inviteResult.classList.add('hidden'); serverNameInput.value = ''; });
-
-        submitServerBtn.addEventListener('click', async () => {
-            const serverName = serverNameInput.value.trim();
-            if (!serverName) return;
-
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'create_server', username: currentUser.username, server_name: serverName, token: CLIENT_TOKEN })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    inviteResult.textContent = "Davet Linki: " + data.invite;
-                    inviteResult.classList.remove('hidden');
-                    addServerToList(serverName);
-                }
-            } catch (err) {
-                console.error(err);
+        function loadUserData() {
+            chatMessages.innerHTML = '<div class="text-center text-gray-500 text-xs my-2">--- Güvenli Sohbet Geçmişi Yüklendi ---</div>';
+            if (currentUser.messages) {
+                currentUser.messages.forEach(m => appendMessageHTML(currentUser.username, m.text, m.time));
             }
-        });
-
-        function addServerToList(name) {
-            const html = `<div class="flex items-center gap-3 px-3 py-2.5 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-gray-300 font-semibold cursor-pointer border border-[#222]">
-                <i class="fa-solid fa-server text-[#FFD700]"></i> ${escapeHtml(name)}
-            </div>`;
-            channelsList.insertAdjacentHTML('beforeend', html);
+            refreshLists();
         }
+
+        function refreshLists() {
+            const serversList = document.getElementById('servers-list');
+            serversList.innerHTML = '';
+            if (currentUser.servers) {
+                currentUser.servers.forEach(s => {
+                    serversList.innerHTML += `<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-gray-300 font-medium cursor-pointer border border-[#222] text-xs"><i class="fa-solid fa-server text-[#FFD700]"></i> ${s.name}</div>`;
+                });
+            }
+
+            const botsList = document.getElementById('bots-list');
+            botsList.innerHTML = '';
+            if (currentUser.bots) {
+                currentUser.bots.forEach(b => {
+                    botsList.innerHTML += `<div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#111] border border-[#222] text-[11px] text-gray-300"><span class="flex items-center gap-1.5"><i class="fa-solid fa-robot text-[#FFD700]"></i> ${b.name}</span><span class="text-green-400 text-[9px]">${b.status}</span></div>`;
+                });
+            }
+
+            const friendsList = document.getElementById('friends-list');
+            friendsList.innerHTML = '';
+            if (currentUser.friends) {
+                currentUser.friends.forEach(f => {
+                    friendsList.innerHTML += `<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111] text-xs text-gray-300"><i class="fa-solid fa-user text-gray-500"></i> ${f}</div>`;
+                });
+            }
+        }
+
+        document.getElementById('submit-server-btn').onclick = async () => {
+            const name = document.getElementById('server-name-input').value.trim();
+            if (!name) return;
+            const res = await fetch(API_URL, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'create_server', username: currentUser.username, server_name: name, token: CLIENT_TOKEN})
+            });
+            const data = await res.json();
+            if(data.success) {
+                document.getElementById('invite-result').textContent = data.invite;
+                document.getElementById('invite-result').classList.remove('hidden');
+                currentUser.servers.push({name: name});
+                refreshLists();
+            }
+        };
+
+        document.getElementById('submit-bot-btn').onclick = async () => {
+            const name = document.getElementById('bot-name-input').value.trim();
+            const template = document.getElementById('bot-template-select').value;
+            if (!name) return;
+            const res = await fetch(API_URL, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'create_bot', username: currentUser.username, bot_name: name, template: template, token: CLIENT_TOKEN})
+            });
+            const data = await res.json();
+            if(data.success) {
+                currentUser.bots.push(data.bot);
+                refreshLists();
+                botModal.classList.add('hidden');
+            }
+        };
+
+        document.getElementById('submit-friend-btn').onclick = async () => {
+            const name = document.getElementById('friend-name-input').value.trim();
+            if (!name) return;
+            const res = await fetch(API_URL, {
+                method: 'POST', headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({action: 'add_friend', username: currentUser.username, friend_name: name, token: CLIENT_TOKEN})
+            });
+            const data = await res.json();
+            if(data.success) {
+                currentUser.friends.push(name);
+                refreshLists();
+                friendModal.classList.add('hidden');
+            }
+        };
 
         chatForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            if (isTimedOut) return;
-
             const text = chatInput.value.trim();
             if (!text) return;
 
-            try {
-                const res = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'save_message', username: currentUser.username, message: text, token: CLIENT_TOKEN })
-                });
-                const modResult = await res.json();
+            const res = await fetch(API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'save_message', username: currentUser.username, message: text, token: CLIENT_TOKEN })
+            });
+            const result = await res.json();
 
-                if (modResult.muted) {
-                    triggerTimeout();
-                    chatInput.value = '';
-                    return;
-                }
+            if (result.banned) {
+                alert(result.message);
+                window.location.reload();
+                return;
+            }
 
-                if (modResult.success) {
-                    const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                    appendMessageHTML(currentUser.username, currentUser.avatar, text, time);
-                    chatInput.value = '';
-                }
-            } catch (err) {
-                console.error(err);
+            if (result.muted) {
+                timeoutText.textContent = result.message;
+                timeoutBanner.classList.remove('hidden');
+                setTimeout(() => timeoutBanner.classList.add('hidden'), 5000);
+                chatInput.value = '';
+                return;
+            }
+
+            if (result.success) {
+                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                appendMessageHTML(currentUser.username, text, time);
+                chatInput.value = '';
             }
         });
 
-        function appendMessageHTML(username, avatar, text, time) {
+        function appendMessageHTML(username, text, time) {
             const initial = username.charAt(0).toUpperCase();
-            let avHTML = `<div class="w-9 h-9 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center overflow-hidden border border-[#333] flex-shrink-0">${initial}</div>`;
-            if (avatar) {
-                avHTML = `<div class="w-9 h-9 rounded-full overflow-hidden border border-[#333] flex-shrink-0"><img src="${avatar}" class="w-full h-full object-cover"></div>`;
-            }
-
             const html = `
                 <div class="flex items-start gap-3 fade-in">
-                    ${avHTML}
+                    <div class="w-8 h-8 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center text-xs flex-shrink-0">${initial}</div>
                     <div>
                         <div class="flex items-baseline gap-2">
-                            <span class="font-bold text-sm text-[#FFD700]">${username}</span>
-                            <span class="text-[10px] text-gray-500">${time}</span>
+                            <span class="font-bold text-xs text-[#FFD700]">${username}</span>
+                            <span class="text-[9px] text-gray-500">${time}</span>
                         </div>
-                        <p class="text-sm text-gray-200 mt-0.5 bg-[#161616] px-3 py-2 rounded-xl border border-[#252525] inline-block">${escapeHtml(text)}</p>
+                        <p class="text-xs text-gray-200 mt-0.5 bg-[#161616] px-3 py-2 rounded-xl border border-[#252525] inline-block">${escapeHtml(text)}</p>
                     </div>
                 </div>
             `;
             chatMessages.insertAdjacentHTML('beforeend', html);
             chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function triggerTimeout() {
-            isTimedOut = true;
-            timeoutBanner.classList.remove('hidden');
-            chatInput.disabled = true;
-            chatInput.placeholder = "Oto-Mod tarafından zaman aşımına uğratıldınız!";
-            chatInput.classList.add('bg-red-950/30');
-
-            let timeLeft = 10;
-            timeoutTimer.textContent = timeLeft;
-
-            const timerInterval = setInterval(() => {
-                timeLeft--;
-                timeoutTimer.textContent = timeLeft;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    isTimedOut = false;
-                    timeoutBanner.classList.add('hidden');
-                    chatInput.disabled = false;
-                    chatInput.placeholder = "Mesaj gönder... (+18 ve küfür yasaktır)";
-                    chatInput.classList.remove('bg-red-950/30');
-                }
-            }, 1000);
         }
 
         function escapeHtml(text) {
