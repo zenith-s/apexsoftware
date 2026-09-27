@@ -3,204 +3,223 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonCord - Güvenli Sohbet & Bot Yönetimi</title>
+    <title>NeonCord - Turkcord Tarzı Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         :root { --bg-darker: #0b0b0b; --accent-yellow: #FFD700; }
+        
+        /* Özel Sarı Fare İmleci */
+        body, button, input, select { cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24' fill='%23FFD700' stroke='%23000' stroke-width='1'%3E%3Cpolygon points='5 3 19 12 12 14 9 21 5 3'/%3E%3C/svg%3E"), auto; }
+
         body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; user-select: none; }
-        .fade-in { animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes fadeIn { from { opacity: 0; transform: scale(0.97) translateY(8px); } to { opacity: 1; transform: scale(1) translateY(0); } }
-        .neon-glow { text-shadow: 0 0 12px rgba(255, 215, 0, 0.7); }
-        .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 20px rgba(255, 215, 0, 0.25); }
-        .btn-yellow { background-color: var(--accent-yellow); color: #000; font-weight: bold; transition: all 0.25s ease; }
-        .btn-yellow:hover { background-color: #ffe800; box-shadow: 0 0 25px rgba(255, 215, 0, 0.6); transform: translateY(-2px); }
+        
+        .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+        .neon-glow { text-shadow: 0 0 15px rgba(255, 215, 0, 0.8); }
+        .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 25px rgba(255, 215, 0, 0.25); }
+        
+        .btn-yellow { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; font-weight: bold; transition: all 0.3s ease; }
+        .btn-yellow:hover { box-shadow: 0 0 25px rgba(255, 215, 0, 0.7); transform: translateY(-2px); }
+
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb { background: #FFD700; border-radius: 3px; }
     </style>
 </head>
-<body class="bg-[#0b0b0b] text-gray-200">
+<body class="bg-[#090909] text-gray-200">
 
-    <!-- ŞİFRE YÖNETİCİSİ UYARILARINI ENGELLEYEN GİRİŞ PENCERESİ -->
-    <div id="auth-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-md z-50 flex items-center justify-center p-4">
-        <div class="bg-[#121212] p-8 rounded-2xl border border-[#333] neon-border w-full max-w-md text-center fade-in shadow-2xl">
-            <div class="inline-block p-4 rounded-full bg-black border border-[#FFD700] mb-4 shadow-[0_0_15px_rgba(255,215,0,0.3)]">
-                <i class="fa-solid fa-shield-halved text-4xl text-[#FFD700] animate-pulse"></i>
+    <!-- GİRİŞ & KAYIT EKRANI -->
+    <div id="auth-overlay" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 flex items-center justify-center p-4">
+        <div class="bg-[#121212] p-8 rounded-3xl border border-[#262626] neon-border w-full max-w-md text-center fade-in shadow-2xl relative">
+            <div class="inline-block p-4 rounded-2xl bg-black border border-[#FFD700] mb-4 shadow-[0_0_20px_rgba(255,215,0,0.3)] animate-pulse">
+                <i class="fa-solid fa-house-laptop text-3xl text-[#FFD700]"></i>
             </div>
-            <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord</h1>
-            <p class="text-gray-400 text-xs mb-6">KVKK Koruma & Otomatik Bot Yönetim Sistemi</p>
+            <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord Home</h1>
+            <p class="text-gray-400 text-xs mb-6">Toplulukların Nabzı, Tek Ekran</p>
             
-            <form id="auth-form" class="space-y-4 text-left" autocomplete="off" onsubmit="return false;">
-                <input type="text" name="fakeusernameremembered" style="display:none">
-                <input type="password" name="fakepasswordremembered" style="display:none">
+            <div class="flex bg-black p-1.5 rounded-2xl border border-[#222] mb-6">
+                <button type="button" id="tab-login-btn" onclick="switchTab('login')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black shadow-lg">Giriş Yap</button>
+                <button type="button" id="tab-register-btn" onclick="switchTab('register')" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white">Kayıt Ol</button>
+            </div>
+
+            <form id="auth-form" class="space-y-4 text-left" onsubmit="return false;">
                 <div>
                     <label class="text-xs text-gray-400 font-semibold mb-1 block">Kullanıcı Adı</label>
-                    <input type="text" id="auth-user" required placeholder="Örn: syvex" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');"
-                           class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all">
+                    <input type="text" id="auth-user" required placeholder="Adınızı girin..." class="w-full bg-black border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all text-xs">
                 </div>
                 <div>
-                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Güvenli Şifre</label>
-                    <input type="password" id="auth-pass" required placeholder="••••••••" autocomplete="new-password" readonly onfocus="this.removeAttribute('readonly');"
-                           class="w-full bg-black border border-[#333] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all">
+                    <label class="text-xs text-gray-400 font-semibold mb-1 block">Şifre</label>
+                    <input type="password" id="auth-pass" required placeholder="••••••••" class="w-full bg-black border border-[#262626] text-white px-4 py-3 rounded-xl focus:outline-none focus:border-[#FFD700] transition-all text-xs">
                 </div>
                 <div id="auth-error" class="text-red-500 text-xs font-medium text-center h-4"></div>
-                <button type="submit" id="auth-submit-btn" class="w-full btn-yellow py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer">
-                    <span>Güvenli Giriş Yap / Kayıt Ol</span>
-                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <button type="submit" id="auth-submit-btn" class="w-full btn-yellow py-3.5 rounded-xl flex items-center justify-center gap-2 cursor-pointer text-xs">
+                    <span id="auth-btn-text">Sisteme Giriş Yap</span>
+                    <i class="fa-solid fa-arrow-right"></i>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- SUNUCU OLUŞTURMA MODALI -->
-    <div id="server-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-sm text-center fade-in">
-            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Sunucu / Oda Kur</h3>
-            <input type="text" id="server-name-input" placeholder="Sunucu Adı" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-3 outline-none focus:border-[#FFD700]">
-            <div id="invite-result" class="text-xs text-green-400 font-mono bg-black/50 p-2 rounded-lg mb-3 hidden select-all"></div>
-            <div class="flex gap-2">
-                <button type="button" id="close-server-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
-                <button type="button" id="submit-server-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Oluştur</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- BOT OLUŞTURMA MODALI -->
-    <div id="bot-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-md text-center fade-in">
-            <h3 class="text-xl font-bold text-[#FFD700] mb-2"><i class="fa-solid fa-robot"></i> Hazır Şablon Bot Ekle</h3>
-            <p class="text-xs text-gray-400 mb-4">Kod yazmadan hazır şablonlardan botunu aktif et!</p>
-            <input type="text" id="bot-name-input" placeholder="Bot Adı (Örn: GuardBot)" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-3 outline-none focus:border-[#FFD700]">
-            <select id="bot-template-select" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
-                <option value="moderator">Moderatör Botu (/ban, Küfür/KVKK Engelleyici)</option>
-                <option value="welcome">Karşılama Botu (Sunucu mesaj yöneticisi)</option>
-                <option value="economy">Ekonomi & Eğlence Botu</option>
-            </select>
-            <div class="flex gap-2">
-                <button type="button" id="close-bot-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
-                <button type="button" id="submit-bot-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Botu Kur</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ARKADAŞ EKLEME MODALI -->
-    <div id="friend-modal" class="hidden fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-        <div class="bg-[#141414] p-6 rounded-2xl border border-[#333] neon-border w-full max-w-sm text-center fade-in">
-            <h3 class="text-xl font-bold text-[#FFD700] mb-2">Arkadaş Ekle</h3>
-            <input type="text" id="friend-name-input" placeholder="Kullanıcı Adı" class="w-full bg-black border border-[#333] text-white px-3 py-2 rounded-xl text-sm mb-4 outline-none focus:border-[#FFD700]">
-            <div class="flex gap-2">
-                <button type="button" id="close-friend-modal" class="flex-1 bg-[#222] text-gray-300 py-2 rounded-xl text-sm">İptal</button>
-                <button type="button" id="submit-friend-btn" class="flex-1 btn-yellow py-2 rounded-xl text-sm">Ekle</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ANA UYGULAMA -->
-    <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-500 pointer-events-none">
-        <!-- SOL MENÜ -->
-        <div class="w-64 bg-[#070707] border-r border-[#222] flex flex-col justify-between p-4">
-            <div>
-                <div class="flex items-center justify-between pb-3 mb-3 border-b border-[#222]">
-                    <div class="flex items-center gap-2">
-                        <i class="fa-solid fa-shield-halved text-[#FFD700] text-lg"></i>
-                        <h2 class="text-md font-bold text-[#FFD700] neon-glow">NeonCord</h2>
-                    </div>
-                    <div class="flex gap-1">
-                        <button id="open-server-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Sunucu Oluştur"><i class="fa-solid fa-plus text-xs"></i></button>
-                        <button id="open-friend-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Arkadaş Ekle"><i class="fa-solid fa-user-plus text-xs"></i></button>
-                        <button id="open-bot-btn" class="text-gray-400 hover:text-[#FFD700] p-1.5 cursor-pointer" title="Bot Oluştur"><i class="fa-solid fa-robot text-xs"></i></button>
-                    </div>
+    <!-- ANA UYGULAMA (TURKCORD TARZI DASHBOARD) -->
+    <div id="app-container" class="flex-1 flex h-full w-full opacity-0 transition-opacity duration-700 pointer-events-none">
+        
+        <!-- 1. EN SOL: DISCORD / TURKCORD İKON MENÜSÜ -->
+        <div class="w-18 bg-[#050505] border-r border-[#1a1a1a] flex flex-col items-center py-4 gap-4 justify-between z-20">
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#FFD700] text-black font-black flex items-center justify-center text-lg shadow-[0_0_15px_rgba(255,215,0,0.5)] cursor-pointer hover:scale-105 transition-transform">
+                    <i class="fa-solid fa-bolt"></i>
                 </div>
-
-                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Sunucular & Kanallar</div>
-                <div id="servers-list" class="space-y-1 mb-4">
-                    <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#161616] text-[#FFD700] font-medium cursor-pointer border border-[#333] text-xs">
-                        <i class="fa-solid fa-hashtag"></i> genel-sohbet
-                    </div>
-                </div>
-
-                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Aktif Botlar</div>
-                <div id="bots-list" class="space-y-1 mb-4"></div>
-
-                <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-2">Arkadaşlar</div>
-                <div id="friends-list" class="space-y-1"></div>
+                <div class="w-8 h-[2px] bg-[#222] rounded-full"></div>
+                
+                <button class="w-12 h-12 rounded-2xl bg-[#141414] hover:bg-[#FFD700] hover:text-black text-gray-400 flex items-center justify-center transition-all cursor-pointer group relative" title="Canlı Yayınlar">
+                    <i class="fa-solid fa-podcast text-sm"></i>
+                </button>
+                <button class="w-12 h-12 rounded-2xl bg-[#141414] hover:bg-[#FFD700] hover:text-black text-gray-400 flex items-center justify-center transition-all cursor-pointer" title="Keşfet">
+                    <i class="fa-solid fa-compass text-sm"></i>
+                </button>
+                <button class="w-12 h-12 rounded-2xl bg-[#141414] hover:bg-[#FFD700] hover:text-black text-gray-400 flex items-center justify-center transition-all cursor-pointer" title="Sunucu Ekle">
+                    <i class="fa-solid fa-plus text-sm"></i>
+                </button>
             </div>
+
+            <div class="flex flex-col items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-[#FFD700] text-black font-bold flex items-center justify-center text-sm shadow-md border-2 border-[#FFD700]" id="user-initial-icon">?</div>
+            </div>
+        </div>
+
+        <!-- 2. SOL-ORTA: BÖLÜMLER MENÜSÜ -->
+        <div class="w-64 bg-[#0a0a0a] border-r border-[#1a1a1a] flex flex-col p-5">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-sm font-extrabold text-[#FFD700] neon-glow flex items-center gap-2">
+                    <i class="fa-solid fa-house"></i> Turkcord Home
+                </h2>
+            </div>
+
+            <div class="text-[10px] font-bold text-gray-500 uppercase tracking-wider mb-3">BÖLÜMLER</div>
+            <div class="space-y-1.5 flex-1">
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl bg-[#161616] text-[#FFD700] font-semibold text-xs border border-[#333] shadow-sm">
+                    <i class="fa-solid fa-podcast text-xs"></i> Canlı yayınlar
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors">
+                    <i class="fa-solid fa-chart-bar text-xs"></i> Genel sayılar
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors">
+                    <i class="fa-solid fa-fire text-xs"></i> En aktif sunucular
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors">
+                    <i class="fa-solid fa-users text-xs"></i> En aktif üyeler
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors">
+                    <i class="fa-solid fa-gamepad text-xs"></i> En çok oynananlar
+                </a>
+                <a href="#" class="flex items-center gap-3 px-3.5 py-2.5 rounded-xl hover:bg-[#121212] text-gray-400 hover:text-gray-200 font-medium text-xs transition-colors">
+                    <i class="fa-solid fa-radio text-xs"></i> Radyo
+                </a>
+            </div>
+        </div>
+
+        <!-- 3. SAĞ ANA İÇERİK ALANI (DASHBOARD) -->
+        <div class="flex-1 flex flex-col bg-[#0c0c0c] overflow-y-auto p-8 gap-6">
             
-            <div class="bg-[#111] p-3 rounded-xl border border-[#222] flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center text-sm" id="user-initial">?</div>
-                <div class="overflow-hidden">
-                    <div id="display-username" class="text-xs font-bold text-white truncate">Misafir</div>
-                    <div class="text-[9px] text-green-400 flex items-center gap-1"><i class="fa-solid fa-circle text-[5px]"></i> KVKK & Mod Aktif</div>
+            <!-- Karşılama Paneli -->
+            <div class="bg-[#121212] border border-[#222] rounded-3xl p-6 flex items-center justify-between shadow-xl relative overflow-hidden">
+                <div class="absolute -right-10 -bottom-10 w-48 h-48 bg-[#FFD700]/5 rounded-full blur-3xl pointer-events-none"></div>
+                <div>
+                    <p class="text-xs text-gray-400 mb-1">Günaydın,</p>
+                    <h2 class="text-2xl font-extrabold text-white flex items-center gap-2">
+                        <span id="welcome-username" class="text-[#FFD700] neon-glow">Batu</span> 👋
+                    </h2>
+                    <p class="text-xs text-gray-400 mt-2">NeonCord Home — tüm sunucuların nabzı, tek ekranda.</p>
                 </div>
-            </div>
-        </div>
-
-        <!-- SOHBET EKRANI -->
-        <div class="flex-1 flex flex-col bg-[#111]">
-            <div class="h-14 border-b border-[#222] flex items-center px-6 bg-[#090909] justify-between">
-                <div class="flex items-center gap-2 font-bold text-xs text-white">
-                    <i class="fa-solid fa-hashtag text-[#FFD700]"></i> genel-sohbet (Fotoğraf & Dosya Yükleme Engelli)
-                </div>
-                <div id="timeout-banner" class="hidden bg-red-950 border border-red-600 text-red-200 text-xs px-3 py-1 rounded-lg animate-pulse">
-                    <i class="fa-solid fa-triangle-exclamation mr-1"></i> <span id="timeout-text">Güvenlik Uyarısı!</span>
+                <div class="flex gap-4">
+                    <div class="bg-black/60 border border-[#262626] px-4 py-3 rounded-2xl text-center">
+                        <div class="text-xs text-green-400 font-bold flex items-center gap-1.5 justify-center"><i class="fa-solid fa-circle text-[6px] animate-ping"></i> <span id="online-count">6</span> kişi çevrimiçi</div>
+                    </div>
                 </div>
             </div>
 
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4">
-                <div class="text-center text-gray-500 text-xs my-2">--- Güvenli Sohbet Geçmişi Yüklendi ---</div>
+            <!-- Canlı Yayınlar Başlığı ve Kartlar -->
+            <div>
+                <div class="flex items-center gap-2 mb-4">
+                    <i class="fa-solid fa-podcast text-[#FFD700]"></i>
+                    <h3 class="text-xs font-bold text-gray-300 uppercase tracking-wider">CANLI YAYINLAR</h3>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Yayın Kartı 1 -->
+                    <div class="bg-[#121212] border border-[#222] hover:border-[#FFD700]/50 transition-all rounded-3xl p-5 flex flex-col justify-between h-44 shadow-lg group">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-red-600/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1">
+                                <i class="fa-solid fa-circle text-[4px]"></i> Canlı
+                            </span>
+                            <span class="text-gray-400 text-xs flex items-center gap-1"><i class="fa-solid fa-eye text-[10px]"></i> 7</span>
+                        </div>
+                        <div class="flex items-center gap-4 my-auto">
+                            <div class="w-14 h-14 rounded-full border-2 border-[#FFD700] bg-black text-[#FFD700] font-black flex items-center justify-center text-sm shadow-[0_0_15px_rgba(255,215,0,0.3)]">SE</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-[#FFD700] transition-colors">CS2 gecesi — rank atıyoruz</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">NeonCord • #Topluluğu Yönet</p>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-[#1a1a1a] pt-3">
+                            <i class="fa-solid fa-user-shield text-[#FFD700]"></i> Sercan
+                        </div>
+                    </div>
+
+                    <!-- Yayın Kartı 2 -->
+                    <div class="bg-[#121212] border border-[#222] hover:border-[#FFD700]/50 transition-all rounded-3xl p-5 flex flex-col justify-between h-44 shadow-lg group">
+                        <div class="flex justify-between items-center">
+                            <span class="bg-red-600/90 text-white text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse flex items-center gap-1">
+                                <i class="fa-solid fa-circle text-[4px]"></i> Canlı
+                            </span>
+                            <span class="text-gray-400 text-xs flex items-center gap-1"><i class="fa-solid fa-eye text-[10px]"></i> 12</span>
+                        </div>
+                        <div class="flex items-center gap-4 my-auto">
+                            <div class="w-14 h-14 rounded-full border-2 border-[#FFD700] bg-black text-[#FFD700] font-black flex items-center justify-center text-sm shadow-[0_0_15px_rgba(255,215,0,0.3)]">SL</div>
+                            <div>
+                                <h4 class="font-bold text-sm text-white group-hover:text-[#FFD700] transition-colors">Sly yayında</h4>
+                                <p class="text-[11px] text-gray-400 mt-0.5">Gece Vardiyası • #Sohbet</p>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-1.5 border-t border-[#1a1a1a] pt-3">
+                            <i class="fa-solid fa-user-shield text-[#FFD700]"></i> Sly
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- MESAJ GÖNDERME (Dosya/Fotoğraf Butonu Kesinlikle Yok) -->
-            <div class="p-4 bg-[#090909] border-t border-[#222]">
-                <form id="chat-form" class="flex items-center gap-3 bg-[#161616] border border-[#333] rounded-xl px-4 py-2 focus-within:border-[#FFD700] transition-all">
-                    <input type="text" id="chat-input" placeholder="Mesaj gönder... (/ban [kullanıcı] ve KVKK filtresi aktif)" autocomplete="off"
-                           class="flex-1 bg-transparent border-none outline-none text-white text-xs placeholder-gray-500">
-                    <button type="submit" class="text-[#FFD700] hover:text-white transition-colors p-2 cursor-pointer">
-                        <i class="fa-solid fa-paper-plane text-sm"></i>
-                    </button>
-                </form>
-            </div>
         </div>
     </div>
 
     <script>
-        // F12, Sağ Tık ve Kaynak Kod Engelleri
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', e => {
-            if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && ['I','J','C'].includes(e.key)) || (e.ctrlKey && e.key === 'u')) {
-                e.preventDefault();
-                alert('Güvenlik nedeniyle bu eylem engellenmiştir!');
+        let currentMode = 'login';
+        function switchTab(mode) {
+            currentMode = mode;
+            const loginBtn = document.getElementById('tab-login-btn');
+            const regBtn = document.getElementById('tab-register-btn');
+            const btnText = document.getElementById('auth-btn-text');
+
+            if (mode === 'login') {
+                loginBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black shadow-lg";
+                regBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white";
+                btnText.textContent = "Sisteme Giriş Yap";
+            } else {
+                regBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all bg-[#FFD700] text-black shadow-lg";
+                loginBtn.className = "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all text-gray-400 hover:text-white";
+                btnText.textContent = "Hemen Kayıt Ol";
             }
-        });
+        }
 
         const API_URL = 'api.php';
         const CLIENT_TOKEN = btoa('NeonCordValidClient');
 
         const authOverlay = document.getElementById('auth-overlay');
         const appContainer = document.getElementById('app-container');
-        const authForm = document.getElementById('auth-form');
         const authError = document.getElementById('auth-error');
-        const chatForm = document.getElementById('chat-form');
-        const chatInput = document.getElementById('chat-input');
-        const chatMessages = document.getElementById('chat-messages');
-        const timeoutBanner = document.getElementById('timeout-banner');
-        const timeoutText = document.getElementById('timeout-text');
 
-        const serverModal = document.getElementById('server-modal');
-        const botModal = document.getElementById('bot-modal');
-        const friendModal = document.getElementById('friend-modal');
-
-        document.getElementById('open-server-btn').onclick = () => serverModal.classList.remove('hidden');
-        document.getElementById('close-server-modal').onclick = () => serverModal.classList.add('hidden');
-        document.getElementById('open-bot-btn').onclick = () => botModal.classList.remove('hidden');
-        document.getElementById('close-bot-modal').onclick = () => botModal.classList.add('hidden');
-        document.getElementById('open-friend-btn').onclick = () => friendModal.classList.remove('hidden');
-        document.getElementById('close-friend-modal').onclick = () => friendModal.classList.add('hidden');
-
-        let currentUser = null;
-
-        document.getElementById('auth-submit-btn').onclick = async (e) => {
+        document.getElementById('auth-form').onsubmit = async (e) => {
             e.preventDefault();
             const username = document.getElementById('auth-user').value.trim();
             const password = document.getElementById('auth-pass').value;
@@ -219,163 +238,23 @@
                 const result = await res.json();
 
                 if (result.success) {
-                    currentUser = result.user;
-                    document.getElementById('display-username').textContent = currentUser.username;
-                    document.getElementById('user-initial').textContent = currentUser.username.charAt(0).toUpperCase();
+                    const uname = result.user.username;
+                    document.getElementById('welcome-username').textContent = uname;
+                    document.getElementById('user-initial-icon').textContent = uname.charAt(0).toUpperCase();
 
-                    loadUserData();
-
-                    authOverlay.classList.add('opacity-0', 'transition-opacity', 'duration-500');
+                    authOverlay.classList.add('opacity-0', 'scale-105', 'transition-all', 'duration-500');
                     setTimeout(() => {
                         authOverlay.style.display = 'none';
                         appContainer.style.pointerEvents = 'auto';
                         appContainer.classList.remove('opacity-0');
                     }, 500);
                 } else {
-                    authError.textContent = result.message;
+                    authError.textContent = result.message || "İşlem başarısız!";
                 }
             } catch (err) {
-                authError.textContent = "Sunucu bağlantı hatası!";
+                authError.textContent = "Sunucu bağlantı hatası! api.php dosyasını kontrol edin.";
             }
         };
-
-        function loadUserData() {
-            chatMessages.innerHTML = '<div class="text-center text-gray-500 text-xs my-2">--- Güvenli Sohbet Geçmişi Yüklendi ---</div>';
-            if (currentUser.messages) {
-                currentUser.messages.forEach(m => appendMessageHTML(currentUser.username, m.text, m.time));
-            }
-            refreshLists();
-        }
-
-        function refreshLists() {
-            const serversList = document.getElementById('servers-list');
-            serversList.innerHTML = '';
-            if (currentUser.servers) {
-                currentUser.servers.forEach(s => {
-                    serversList.innerHTML += `<div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-[#141414] hover:bg-[#1a1a1a] text-gray-300 font-medium cursor-pointer border border-[#222] text-xs"><i class="fa-solid fa-server text-[#FFD700]"></i> ${s.name}</div>`;
-                });
-            }
-
-            const botsList = document.getElementById('bots-list');
-            botsList.innerHTML = '';
-            if (currentUser.bots) {
-                currentUser.bots.forEach(b => {
-                    botsList.innerHTML += `<div class="flex items-center justify-between px-3 py-1.5 rounded-lg bg-[#111] border border-[#222] text-[11px] text-gray-300"><span class="flex items-center gap-1.5"><i class="fa-solid fa-robot text-[#FFD700]"></i> ${b.name}</span><span class="text-green-400 text-[9px]">${b.status}</span></div>`;
-                });
-            }
-
-            const friendsList = document.getElementById('friends-list');
-            friendsList.innerHTML = '';
-            if (currentUser.friends) {
-                currentUser.friends.forEach(f => {
-                    friendsList.innerHTML += `<div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#111] text-xs text-gray-300"><i class="fa-solid fa-user text-gray-500"></i> ${f}</div>`;
-                });
-            }
-        }
-
-        document.getElementById('submit-server-btn').onclick = async () => {
-            const name = document.getElementById('server-name-input').value.trim();
-            if (!name) return;
-            const res = await fetch(API_URL, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({action: 'create_server', username: currentUser.username, server_name: name, token: CLIENT_TOKEN})
-            });
-            const data = await res.json();
-            if(data.success) {
-                document.getElementById('invite-result').textContent = data.invite;
-                document.getElementById('invite-result').classList.remove('hidden');
-                currentUser.servers.push({name: name});
-                refreshLists();
-            }
-        };
-
-        document.getElementById('submit-bot-btn').onclick = async () => {
-            const name = document.getElementById('bot-name-input').value.trim();
-            const template = document.getElementById('bot-template-select').value;
-            if (!name) return;
-            const res = await fetch(API_URL, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({action: 'create_bot', username: currentUser.username, bot_name: name, template: template, token: CLIENT_TOKEN})
-            });
-            const data = await res.json();
-            if(data.success) {
-                currentUser.bots.push(data.bot);
-                refreshLists();
-                botModal.classList.add('hidden');
-            }
-        };
-
-        document.getElementById('submit-friend-btn').onclick = async () => {
-            const name = document.getElementById('friend-name-input').value.trim();
-            if (!name) return;
-            const res = await fetch(API_URL, {
-                method: 'POST', headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({action: 'add_friend', username: currentUser.username, friend_name: name, token: CLIENT_TOKEN})
-            });
-            const data = await res.json();
-            if(data.success) {
-                currentUser.friends.push(name);
-                refreshLists();
-                friendModal.classList.add('hidden');
-            }
-        };
-
-        chatForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const text = chatInput.value.trim();
-            if (!text) return;
-
-            const res = await fetch(API_URL, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ action: 'save_message', username: currentUser.username, message: text, token: CLIENT_TOKEN })
-            });
-            const result = await res.json();
-
-            if (result.banned) {
-                alert(result.message);
-                window.location.reload();
-                return;
-            }
-
-            if (result.muted) {
-                timeoutText.textContent = result.message;
-                timeoutBanner.classList.remove('hidden');
-                setTimeout(() => timeoutBanner.classList.add('hidden'), 5000);
-                chatInput.value = '';
-                return;
-            }
-
-            if (result.success) {
-                const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                appendMessageHTML(currentUser.username, text, time);
-                chatInput.value = '';
-            }
-        });
-
-        function appendMessageHTML(username, text, time) {
-            const initial = username.charAt(0).toUpperCase();
-            const html = `
-                <div class="flex items-start gap-3 fade-in">
-                    <div class="w-8 h-8 rounded-full bg-[#FFD700] text-black font-bold flex items-center justify-center text-xs flex-shrink-0">${initial}</div>
-                    <div>
-                        <div class="flex items-baseline gap-2">
-                            <span class="font-bold text-xs text-[#FFD700]">${username}</span>
-                            <span class="text-[9px] text-gray-500">${time}</span>
-                        </div>
-                        <p class="text-xs text-gray-200 mt-0.5 bg-[#161616] px-3 py-2 rounded-xl border border-[#252525] inline-block">${escapeHtml(text)}</p>
-                    </div>
-                </div>
-            `;
-            chatMessages.insertAdjacentHTML('beforeend', html);
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-
-        function escapeHtml(text) {
-            return text.replace(/[&<>'"]/g, tag => ({
-                '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
-            }[tag] || tag));
-        }
     </script>
 </body>
 </html>
