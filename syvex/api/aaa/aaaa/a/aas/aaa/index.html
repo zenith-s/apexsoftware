@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NeonCord - Sunucu & Hesap Yönetimi</title>
+    <title>NeonCord - Korunan & Full Animasyonlu</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         :root { --bg-darker: #0b0b0b; --accent-yellow: #FFD700; }
-        body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-darker); color: #e0e0e0; margin: 0; height: 100vh; display: flex; overflow: hidden; user-select: none; }
+        
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeIn { from { opacity: 0; transform: scale(0.96) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        
         .neon-glow { text-shadow: 0 0 10px rgba(255, 215, 0, 0.6); }
         .neon-border { border-color: var(--accent-yellow); box-shadow: 0 0 15px rgba(255, 215, 0, 0.2); }
+        
         .btn-yellow { background-color: var(--accent-yellow); color: #000; font-weight: bold; transition: all 0.3s ease; }
         .btn-yellow:hover { background-color: #ffe800; box-shadow: 0 0 20px rgba(255, 215, 0, 0.5); transform: translateY(-2px); }
+        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--accent-yellow); }
@@ -30,7 +34,7 @@
                 <i class="fa-solid fa-bolt text-4xl text-[#FFD700] animate-bounce"></i>
             </div>
             <h1 class="text-3xl font-extrabold text-[#FFD700] neon-glow mb-1">NeonCord</h1>
-            <p class="text-gray-400 text-xs mb-6">Hesap Geçmişi & Özel Sunucu Kurma Destekli</p>
+            <p class="text-gray-400 text-xs mb-6">Güvenlik Korumalı & Full Animasyonlu Platform</p>
             
             <form id="auth-form" class="space-y-4 text-left">
                 <div>
@@ -99,7 +103,7 @@
                 <div class="overflow-hidden">
                     <div id="display-username" class="text-sm font-bold text-white truncate">Misafir</div>
                     <div class="text-[10px] text-green-400 flex items-center gap-1">
-                        <i class="fa-solid fa-circle text-[6px]"></i> Sunucu Kayıtlı
+                        <i class="fa-solid fa-circle text-[6px]"></i> Korumalı Bağlantı
                     </div>
                 </div>
             </div>
@@ -132,6 +136,17 @@
     </div>
 
     <script>
+        // F12, Sağ Tık ve Ctrl+U Engelleme Koruması
+        document.addEventListener('contextmenu', e => e.preventDefault());
+        document.addEventListener('keydown', e => {
+            if (e.key === 'F12' || 
+                (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'J' || e.key === 'C')) || 
+                (e.ctrlKey && e.key === 'u')) {
+                e.preventDefault();
+                alert('Bu işlem güvenlik nedeniyle engellenmiştir!');
+            }
+        });
+
         const API_URL = 'api.php';
         const CLIENT_TOKEN = btoa('NeonCordValidClient');
 
@@ -181,14 +196,12 @@
                         document.getElementById('user-avatar-box').innerHTML = `<img src="${currentUser.avatar}" class="w-full h-full object-cover">`;
                     }
 
-                    // Hesap geçmişindeki mesajları ekrana bas
                     if (currentUser.messages && currentUser.messages.length > 0) {
                         currentUser.messages.forEach(m => {
                             appendMessageHTML(currentUser.username, currentUser.avatar, m.text, m.time);
                         });
                     }
 
-                    // Sunucuları listeye ekle
                     if (currentUser.servers && currentUser.servers.length > 0) {
                         currentUser.servers.forEach(s => {
                             addServerToList(s.name);
@@ -210,7 +223,6 @@
             }
         });
 
-        // Sunucu Kurma Modal Kontrolleri
         openServerModalBtn.addEventListener('click', () => serverModal.classList.remove('hidden'));
         closeServerModal.addEventListener('click', () => { serverModal.classList.add('hidden'); inviteResult.classList.add('hidden'); serverNameInput.value = ''; });
 
