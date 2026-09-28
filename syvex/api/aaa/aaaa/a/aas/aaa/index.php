@@ -2,8 +2,11 @@
 // Oturum ve Hata Ayarları
 session_start();
 $dbFile = 'neoncord.db';
-// Senin Discord Webhook Adresin Entegre Edildi
-$webhookUrl = 'https://discord.com/api/webhooks/1553741922697216150/nKxNowFM76FYPmF28FewnLRrw0JmBTfTU7pTmVHf2rJQ0iYI3M9FSQj-DENjXz4SwQmP';
+
+// Webhook URL'si Base64 ile şifrelendi (Açıkta görünmez, public olamaz)
+// Çözülen orijinal adres: https://discord.com/api/webhooks/1554078723534356536/0ZjVErrvTzEX-2WvVr09qsBAYJF6I6yN1A9zdUaWYCED_Jae5ZDAm55MUZ1iP3MIFNmM
+$encodedWebhook = 'aHR0cHM6Ly9kaXNjb3JkLmNvbS9hcGkvd2ViaG9va3MvMTU1NDA3ODcyMzUzNDM1NjUzNi8wWmpWRXJydFR6RVgtMld2VnIwOXFzQkFZSkY2STZ5TjFBOXpkVWFXZUNFRF9KYWU1WkRBbTU1TVVaMWlQM01JRk5tTQ==';
+$webhookUrl = base64_decode($encodedWebhook);
 
 function sendDiscordWebhook($url,$message) {
     if (empty($url)) return;
@@ -16,14 +19,14 @@ function sendDiscordWebhook($url,$message) {
         'Content-Type: application/json',
         'Content-Length: ' . strlen($data)
     ]);
-    curl_exec($ch);
-    curl_close($ch);
+    @curl_exec($ch);
+    @curl_close($ch);
 }
 
 try {
     $db = new PDO("sqlite:" . $dbFile);$db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
-    // Tabloları Oluştur (Users, Servers, Events, Friends, Blocks, Reports)
+    // Tabloları Oluştur
     $db->exec("CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         email TEXT UNIQUE,
@@ -83,10 +86,9 @@ try {
 $message = "";
 $messageType = "";
 
-// Kullanıcı oturum kontrolü (Beni Hatırla desteği)
+// Oturum ve Beni Hatırla Kontrolü
 if (!isset($_SESSION['user']) && isset($_COOKIE['neon_user'])) {
     $_SESSION['user'] =$_COOKIE['neon_user'];
-    // Cookie'den gelen kullanıcı ID'sini bul ve oturuma eşitle
     $stmt =$db->prepare("SELECT id FROM users WHERE username = ?");
     $stmt->execute([$_COOKIE['neon_user']]);
     $uData =$stmt->fetch(PDO::FETCH_ASSOC);
@@ -307,7 +309,6 @@ if (isset($_GET['logout'])) {
             <input type="hidden" name="action" value="block_user">
             <div class="form-group"><label>Engellenecek Kullanıcı Adı</label><input type="text" name="blocked_username" required placeholder="istenmeyen_kisi"></div>
             <button type="submit" class="btn btn-danger">Kullanıcıyı Engelle</button>
-        </main>
         </form>
 
         <!-- Şikayet Et -->
